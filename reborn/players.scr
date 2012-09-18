@@ -23,7 +23,7 @@ GetPlayerByClientNum local.id:
 		if(getclientnum $player[local.i] == local.id)
 			end $player[local.i]
 	
-end local.return //What should be returned here if player doesn't exist ?
+end local.return
 
 //Get Player with name
 //Example: local.player = waitexec level.players.getPlayerByName "<(CG)> ArMaGedDoN (MP)"
@@ -35,7 +35,7 @@ GetPlayerByName local.name:
 		if(netname $player[local.i] == local.name)
 			end $player[local.i]
 	
-end local.return  //What should be returned here if player doesn't exist ?
+end local.return
 
 //Get Player By IP
 //example: local.player = waitexec level.players.getPlayerByName "192.168.1.1"
@@ -50,7 +50,7 @@ GetPlayerByIP local.ip:
 			end $player[local.i]
 	}
 	
-end local.return  //What should be returned here if player doesn't exist ?
+end local.return
 
 //Get Player IP - Remove port
 //example : local.player.ip = waitthread level.players.getPlayerIP local.player
