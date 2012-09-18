@@ -3,13 +3,16 @@
 // 	Last Updated 09/17/2012
 
 main:
-	level.MATHS[avg] = global/func_maths.scr::calcAvg
-	level.nextHudID = reborn/hud.scr::NextHudID
-	level.nextIHudID = reborn/hud.scr::NextIHudID
 
+	//global accessors  ----- Is this the format you decided on?
+	level.hud = local CreateListener 
+	level.hud.nextHudID = reborn/hud.scr::NextHudID
+	level.hud.nextIHudID = reborn/hud.scr::NextIHudID 
+	
 end
 
 // Returns next avalable Hud ID, otherwise returns 0
+// Example local.id = waitthread level.hud.nextHudID
 NextHudID:
 
 	if(level.currentHud == NIL)
@@ -23,6 +26,7 @@ NextHudID:
 end level.currentHud
 
 // Returns next avalable iHud ID, otherwise returns 0
+// Example local.id = waitthread level.hud.nextIHudID
 NextIHudID:
 
 	if(level.currentIHud == NIL)
