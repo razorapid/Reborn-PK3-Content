@@ -20,12 +20,8 @@ GetPlayerByClientNum local.id:
 	
 	local.return = 0
 	for ( local.i = 1; local.i <= $player.size; local.i++ )
-	{
 		if(getclientnum $player[local.i] == local.id)
-		{
 			end $player[local.i]
-		}
-	}
 	
 end local.return //What should be returned here if player doesn't exist ?
 
@@ -36,12 +32,8 @@ GetPlayerByName local.name:
 
 	local.return = 0
 	for ( local.i = 1; local.i <= $player.size; local.i++ )
-	{
 		if(netname $player[local.i] == local.name)
-		{
 			end $player[local.i]
-		}
-	}
 	
 end local.return  //What should be returned here if player doesn't exist ?
 
@@ -55,9 +47,7 @@ GetPlayerByIP local.ip:
 	{
 		local.thisIP = waitthread GetPlayerIP $player[local.i]
 		if(local.thisIP == local.ip)
-		{
 			end $player[local.i]
-		}
 	}
 	
 end local.return  //What should be returned here if player doesn't exist ?
