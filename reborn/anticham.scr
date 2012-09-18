@@ -100,7 +100,6 @@ SendHuds local.player:
 			ihuddraw_alpha 			local.player  	level.hudIDs[local.i] 1
 			ihuddraw_rect 			local.player 	level.hudIDs[local.i] 0 0 640 481
 			ihuddraw_shader 		local.player 	level.hudIDs[local.i] level.textures[local.i]
-			local.player iprint level.hudIDs[local.i]
 		}
 	}
 	
