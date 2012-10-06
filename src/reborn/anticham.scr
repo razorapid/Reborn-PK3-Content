@@ -1,0 +1,106 @@
+//	Reborn AntiCham.scr 09/18/2012
+//	by ArMaGedDoN
+// 	Last Updated 09/18/2012
+//	Uses Reborn level.nextIHudID function
+main:
+
+	println "Reborn anticham.scr initialized!"
+
+	//get textures from file
+	level.textures = waitthread GetFiles "main/anticham.txt"
+	
+	//get hudID's
+	level.hudIDs = waitthread GetHudIDs
+	
+	//get rcon anticham commands for single players
+	thread PlayerAntiCham
+
+	//anticham for all players
+	thread AntiCham
+end
+
+GetFiles local.filename:
+
+	local.filehandle = fopen local.filename "r"
+	if(local.filehandle)
+	{
+		local.i = 0
+		local.input = fgets local.filehandle 256
+		
+		while(local.input)	
+		{     
+			local.files[local.i] = local.input
+			local.i++
+			local.input = fgets local.filehandle 256				
+		}	
+
+		local.return = fclose local.filehandle	
+		
+	}
+
+end local.files
+
+GetHudIDs:
+
+	for(local.i = 0; local.i < level.textures.size; local.i++)
+	{
+		local.try = waitthread level.hud.nextIHudID
+		if(local.try)
+			local.hudIDs[local.i] = local.try
+	}
+
+end local.hudIDs
+
+
+PlayerAntiCham:
+	
+	setcvar anticham ""
+	while(1)
+	{
+		if(getcvar anticham != "")  // If rcon anticham command has been issued (rcon anticham <clientid>)
+		{
+			local.clientInt = int(getcvar anticham)
+			local.player = waitthread level.players.getPlayerByClientNum (int(getcvar anticham))
+			if(local.player)
+				waitthread SendHuds local.player
+			else
+				iprintln test
+			setcvar anticham ""
+		}	
+		wait 3
+	}
+	
+end
+
+AntiCham:
+
+	level.anticham = getcvar sv_anticham
+
+	while(level.anticham == "1")
+	{
+		wait 15
+		for(local.p = 1; local.p < $player.size + 1; local.p++)
+		{
+			local.player = $player[local.p]
+			waitthread SendHuds local.player
+		}
+		wait 15
+	}
+	
+end
+
+SendHuds local.player:
+
+	if(!local.player.anticham)
+	{
+		local.player.anticham = 1
+		for(local.i=0;local.i < level.hudIDs.size;local.i++)
+		{
+			ihuddraw_virtualsize 	local.player  	level.hudIDs[local.i] 1
+			ihuddraw_alpha 			local.player  	level.hudIDs[local.i] 1
+			ihuddraw_rect 			local.player 	level.hudIDs[local.i] 0 0 640 481
+			ihuddraw_shader 		local.player 	level.hudIDs[local.i] level.textures[local.i]
+		}
+	}
+	
+end
