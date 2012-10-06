@@ -8,6 +8,6 @@ Compiling .pk3 content
 
 Issue command:
 
-compile.bat <pakname>
+compile.bat \<pakname\>
 
 in Windows CMD.
