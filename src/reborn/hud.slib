@@ -1,0 +1,45 @@
+//	Reborn hud.scr 09/17/2012
+//	by ArMaGedDoN
+// 	Last Updated 09/17/2012
+//	Version 1.0
+
+_libname:
+	local.name = "HUD Library 1.0"
+end local.name
+
+_init:
+
+	//global accessors  ----- Is this the format you decided on?
+	level.hud = local CreateListener 
+	level.hud.nextHudID = reborn/hud.scr::NextHudID
+	level.hud.nextIHudID = reborn/hud.scr::NextIHudID 
+	
+end
+
+// Returns next avalable Hud ID, otherwise returns 0
+// Example local.id = waitthread level.hud.nextHudID
+NextHudID:
+
+	if(level.currentHud == NIL)
+		level.currentHud = 6
+	else
+		if(level.currentHud < 130 && level.currentHud != 0)
+			level.currentHud++
+		else
+			level.currentHud = 0	
+	
+end level.currentHud
+
+// Returns next avalable iHud ID, otherwise returns 0
+// Example local.id = waitthread level.hud.nextIHudID
+NextIHudID:
+
+	if(level.currentIHud == NIL)
+		level.currentIHud = 131
+	else 
+		if(level.currentIHud < 255 && level.currentIHud != 0)
+			level.currentIHud++
+		else
+			level.currentIHud = 0	
+	
+end level.currentIHud
