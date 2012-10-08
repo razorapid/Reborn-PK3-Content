@@ -6,8 +6,8 @@
 _libinfo:
 	local.info["name"] = "Hud Library"
 	local.info["namespace"] = "hud"
-	local.info["title"] = "HUD Library 1.0"
-	local.info["version"] = 1.0
+	local.info["title"] = "HUD Library 1.1"
+	local.info["version"] = 1.1
 	local.info["author"] = "ArMaGedDoN"
 end local.info
 
@@ -15,13 +15,16 @@ _libinit local.libFilePath:
 	local.init["loaded"] = 0
 	local.init["lib"] = NIL
 	
-	//global accessors  ----- Is this the format you decided on?
-	level.hud = local CreateListener 
-	level.hud.nextHudID = local.libFilePath::NextHudID
-	level.hud.nextIHudID = local.libFilePath::NextIHudID
+	if(level.strings != NULL && level.strings != NIL) {
+		//global accessors  ----- Is this the format you decided on?
+		level.hud = local CreateListener 
+		level.hud.nextHudID = local.libFilePath::NextHudID
+		level.hud.nextIHudID = local.libFilePath::NextIHudID
+		
+		local.init["loaded"] = 1
+		local.init["lib"] = level.hud
+	}
 	
-	local.init["loaded"] = 1
-	local.init["lib"] = level.hud
 end local.init;
 
 // Returns next avalable Hud ID, otherwise returns 0

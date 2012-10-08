@@ -376,6 +376,36 @@
 
 
 */
+
+_libinfo:
+	local.info["name"] = "Files Library"
+	local.info["namespace"] = "files"
+	local.info["title"] = "Files Library 1.1"
+	local.info["version"] = 1.1
+	local.info["author"] = "Elgan"
+end local.info
+
+_libinit local.libFilePath:
+	local.init["loaded"] = 0
+	local.init["lib"] = NIL
+
+	level.files = local CreateListener
+	
+	if(level.files != NULL && level.files != NIL) {
+	
+		level.files.newFile = local.libFilePath::NewFile
+		level.files.fileExists = local.libFilePath::FileExists
+		level.files.isFileEmpty = local.libFilePath::IsFileEmpty
+		level.files.safeFilename = local.libFilePath::SafeFileName
+		level.files._totalfiles = 0
+		level.files._libPath = local.libFilePath
+	
+		local.init["loaded"] = 1
+		local.init["lib"] = level.hud
+	}
+	
+end local.init
+
 ////////////////////////////////////////////////////////////////////////
 // newfile
 //
@@ -414,25 +444,25 @@ newfile local.filename local.accesstype:
 	}
 	
 	//if we already have a file with this filename open
-	if(level.filepaths[local.filename] != NIL && level.filepaths[local.filename]  != NULL)
+	if(level.files._filePaths[local.filename] != NIL && level.files._filePaths[local.filename] != NULL)
 	{
 		//say that we are being accessed more..
-		level.filepaths[local.filename].beingaccessed++
-		end level.filepaths[local.filename] 
+		level.files._filePaths[local.filename].beingaccessed++
+		end level.files._filePaths[local.filename] 
 	}
 
 	//if we have not setup some files
-	if(!level.totalfiles)
+	if(!level.files._totalFiles)
 	{
-		level.totalfiles = 0
+		level.files._totalFiles = 0
 	}
 	
 	//have we reached max file count
-	if(level.totalfiles >= 10)
+	if(level.files._totalFiles >= 10)
 	{
 		println ("\n^~^~^ FILE ERROR: MAX REACHED\n")
 
-		while(level.totalfiles.size >= 8)
+		while(level.files._totalFiles.size >= 8)
 		{
 			println ("\n^~^~^ FILE ERROR: MAX REACHED : Waiting for free slots to create file object\n")
 			wait 1
@@ -442,14 +472,14 @@ newfile local.filename local.accesstype:
 	//get an id that is free
 	for(local.i = 0; local.i <= 10; local.i++)
 	{
-		if( level.files[local.i] == NIL || level.files[local.i] == NULL  )
+		if( level.files._filesArray[local.i] == NIL || level.files._filesArray[local.i] == NULL  )
 		{
-			level.fileid = local.i
+			local.fileid = local.i
 		}
 	}
 	
 	//got a real id?
-	if(!level.fileid)
+	if(!local.fileid)
 	{
 		println ("\n^~^~^ FILE ERROR: No free file id?\n")
 		end
@@ -462,7 +492,7 @@ newfile local.filename local.accesstype:
 	}
 
 	//add a file
-	level.totalfiles++
+	level.files._totalFiles++
 
 	// Build the file
 	local.file = local CreateListener
@@ -475,7 +505,7 @@ newfile local.filename local.accesstype:
 	local.file.keepopen = 0
 	local.file.dontflush = 0
 
-	local.file.id = level.fileid
+	local.file.id = local.fileid
 
 	local.file.autosave = 1
 	local.file.position = 0
@@ -484,37 +514,37 @@ newfile local.filename local.accesstype:
 	local.file.autoinitodata = 1
 
 	//build the threads
-	local.file.close = global/files.scr::("close" + local.file.id)
-	local.file.open = global/files.scr::("open" + local.file.id)
+	local.file.close = level.files._libPath::("close" + local.file.id)
+	local.file.open = level.files._libPath::("open" + local.file.id)
 
-	local.file.error = global/files.scr::("error" + local.file.id)
-	local.file.deletefile = global/files.scr::("deletefile" + local.file.id)
+	local.file.error = level.files._libPath::("error" + local.file.id)
+	local.file.deletefile = level.files._libPath::("deletefile" + local.file.id)
 
-	local.file.parseini = global/files.scr::("parseini" + local.file.id)
-	local.file.filedatafromini = global/files.scr::("filedatafromini" + local.file.id)
+	local.file.parseini = level.files._libPath::("parseini" + local.file.id)
+	local.file.filedatafromini = level.files._libPath::("filedatafromini" + local.file.id)
 
-	local.file.parsetext = global/files.scr::("parsetext" + local.file.id)
-	local.file.parselines = global/files.scr::("parselines" + local.file.id)
+	local.file.parsetext = level.files._libPath::("parsetext" + local.file.id)
+	local.file.parselines = level.files._libPath::("parselines" + local.file.id)
 
-	local.file.getlines = global/files.scr::("getlines" + local.file.id)
-	local.file.readfile = global/files.scr::("readfile" + local.file.id)
+	local.file.getlines = level.files._libPath::("getlines" + local.file.id)
+	local.file.readfile = level.files._libPath::("readfile" + local.file.id)
 
-	local.file.readline = global/files.scr::("readline" + local.file.id)
-	local.file.readkey = global/files.scr::("readkey" + local.file.id)
-	local.file.read = global/files.scr::("read" + local.file.id)
+	local.file.readline = level.files._libPath::("readline" + local.file.id)
+	local.file.readkey = level.files._libPath::("readkey" + local.file.id)
+	local.file.read = level.files._libPath::("read" + local.file.id)
 
-	local.file.overwrite = global/files.scr::("overwrite" + local.file.id)
-	local.file.write = global/files.scr::("write" + local.file.id)
-	local.file.writeline = global/files.scr::("writeline" + local.file.id)
-	local.file.addkey = global/files.scr::("addkey" + local.file.id)
-	local.file.save = global/files.scr::("save" + local.file.id)
+	local.file.overwrite = level.files._libPath::("overwrite" + local.file.id)
+	local.file.write = level.files._libPath::("write" + local.file.id)
+	local.file.writeline = level.files._libPath::("writeline" + local.file.id)
+	local.file.addkey = level.files._libPath::("addkey" + local.file.id)
+	local.file.save = level.files._libPath::("save" + local.file.id)
 
-	local.file.fread = global/files.scr::("fread" + local.file.id)
-	local.file.freadchar = global/files.scr::("freadchar" + local.file.id)
+	local.file.fread = level.files._libPath::("fread" + local.file.id)
+	local.file.freadchar = level.files._libPath::("freadchar" + local.file.id)
 
-	local.file.fwrite = global/files.scr::("fwrite" + local.file.id)
-	local.file.fwriteline = global/files.scr::("fwriteline" + local.file.id)
-	local.file.fwritechar = global/files.scr::("fwritechar" + local.file.id)
+	local.file.fwrite = level.files._libPath::("fwrite" + local.file.id)
+	local.file.fwriteline = level.files._libPath::("fwriteline" + local.file.id)
+	local.file.fwritechar = level.files._libPath::("fwritechar" + local.file.id)
 
 /*
 	local.file.resetposition = global/files.scr::("resetposition" + local.file.id)
@@ -523,24 +553,24 @@ newfile local.filename local.accesstype:
 	local.file.isendoffile = global/files.scr::("isendoffile" + local.file.id)
 */
 
-	local.file.flush = global/files.scr::("flush" + local.file.id)
-	local.file.error = global/files.scr::("error" + local.file.id)
-	local.file.delete = global/files.scr::("delete" + local.file.id)
+	local.file.flush = level.files._libPath::("flush" + local.file.id)
+	local.file.error = level.files._libPath::("error" + local.file.id)
+	local.file.delete = level.files._libPath::("delete" + local.file.id)
 
 	//assign this file as is
-	level.files[local.file.id] = local.file
+	level.files._filesArray[local.file.id] = local.file
 	//so we can check an object
-	level.filepaths[local.filename] = local.file
+	level.files._filePaths[local.filename] = local.file
 
 	//try and open the file
-	local.file waitthread open local.file.id
+	local.file waitthread Open local.file.id
 
 	if(local.file.isopen)
 	{
 		//close the file again, now we know it works.
 		//local.script = spawn scriptmaster "targetname" "filescript"
 		//local.script.name = "filescript"
-		thread close local.file.id
+		waitthread Close local.file.id
 		//local.script remove
 	}
 	else
@@ -556,21 +586,15 @@ end local.file
 // Check if a file exists
 // useage: local.answer = exec global/files.scr::file_exists "filename"
 ////////////////////////////////////////////////////////////////////////
-file_exists local.filename:
+FileExists local.filename:
 
-	if(!local.filename)
-	{
+	if(!local.filename) {
 		end 0
 	}
 
-	local.file = fopen local.filename "r"
-	if(local.file)
-	{
-		local.file = fclose local.file
-		end 1
-	}
+	local.result = fexists local.filename
 
-end 0
+end local.result
 
 ////////////////////////////////////////////////////////////////////////
 // file_empty
@@ -578,10 +602,9 @@ end 0
 // useage: local.answer = exec global/files.scr::file_empty "filename"
 // Returns: length of file, 0 if empty.
 ////////////////////////////////////////////////////////////////////////
-file_empty local.filename:
+IsFileEmpty local.filename:
 
-	if(!local.filename)
-	{
+	if(!local.filename) {
 		end 0
 	}
 
@@ -610,11 +633,54 @@ end 0
 // useage: local.name = waitexec global/files.scr::clean_filename "filename"
 // NOTE: REQUIRES GLOBAL/STRINGS.SCR
 ////////////////////////////////////////////////////////////////////////
-clean_filename local.filename:
+////////////////////////////////////////////////////////////////////////
+// clean_filename
+// Removes invalid chars from a string for save filesave
+// useage: local.name = waitexec global/strings.scr::clean_filename "filename"
+////////////////////////////////////////////////////////////////////////
+CleanFilename local.filename:
+	if(level.REBORN.isLibraryLoaded["strings"] == 0)
+		end
+		
+	//get safe data
+	local.chardata = level.strings.safeCharData
+	
+	//init new name
+	local.newname = ""
 
-	local.filename = waitexec global/strings.scr::clean_filename local.filename
+	//go through the name
+	for(local.i = 0; local.i < local.filename.size; local.i++)
+	{
+		local.letter = local.filename[local.i]
+	
+		//are we safe
+		local.issafe = 0
 
-end local.filename
+		//check if its in the alphabet
+		for(local.t = 1; local.t <= local.chardata.size; local.t++)
+		{
+			if(local.letter == local.chardata[local.t][1])
+			{
+				//issafe
+				local.issafe = 1
+				break
+			}
+		}
+
+		//if its safe
+		if(local.issafe)
+		{
+			local.newname += local.letter
+		}
+	}
+
+	//if its not long enough
+	if(local.newname.size <= 0)
+	{
+		end
+	}
+
+end local.newname
 
 ////////////////////////////////////////////////////////////////////////
 // open file
@@ -648,8 +714,8 @@ open local.id local.accesstype:
 		end
 	}
 	//get the file from the id
-	local.file = level.files[local.id]
-	if(local.id == NIL)
+	local.file = level.files._filesArray[local.id]
+	if(local.file == NIL)
 	{
 		println ("\n^~^~^ FILE ERROR: Failed to get file object with id: \"" + local.id + "\" in open\n")
 		end
@@ -711,6 +777,7 @@ checkclose9:
 checkclose10:
 	goto checkclose 10
 checkclose local.id:
+
 		////////println "checkclose"
 	if(local.id == NIL)
 	{
@@ -719,12 +786,12 @@ checkclose local.id:
 	}
 
 	//get the file from the id
-	local.file = level.files[local.id]
-if(local.id == NIL)
-{
-	println ("\n^~^~^ FILE ERROR: Failed to get file object with id: \"" + local.id + "\"\n")
-	end
-}
+	local.file = level.files._filesArray[local.id]
+	if(local.file == NIL)
+	{
+		println ("\n^~^~^ FILE ERROR: Failed to get file object with id: \"" + local.id + "\"\n")
+		end
+	}
 
 
 	//the close is from a thread opened by a user.
@@ -743,13 +810,13 @@ if(local.id == NIL)
 		if(!local.file.dontflush)
 		{
 			//flush the file instead
-			thread flush local.file.id
+			waitthread Flush local.file.id
 		}
 		end
 	}
 
 	//directly close the file
-	thread close local.file.id
+	thread Close local.file.id
 
 end
 
@@ -785,8 +852,8 @@ close local.id:
 	}
 
 	//get the file from the id
-	local.file = level.files[local.id]
-	if(local.id == NIL)
+	local.file = level.files._filesArray[local.id]
+	if(local.file == NIL)
 	{
 		println ("\n^~^~^ FILE ERROR: Failed to get file object with id: \"" + local.id + "\" in close\n")
 		end
@@ -841,8 +908,8 @@ readfile local.id:
 	}
 
 	//get the file from the id
-	local.file = level.files[local.id]
-	if(local.id == NIL)
+	local.file = level.files._filesArray[local.id]
+	if(local.file == NIL)
 	{
 		println ("\n^~^~^ FILE ERROR: Failed to get file object with id: \"" + local.id + "\" in readfile\n")
 		end
@@ -852,7 +919,7 @@ readfile local.id:
 	//open the file
 	if(!local.file.isopen)
 	{
-		local.open = waitthread local.file.open
+		local.open = waitthread local.file.open "rb"
 		if(!local.open)
 		{
 			println ("\n^~^~^ FILE ERROR: Could not open file with no id: \"NIL\"\n")
@@ -866,90 +933,14 @@ readfile local.id:
 
 	//fread the file
 	local.text = ""
-	local.line = ""
 
-	//rewind to the start
-	//local.return = fseek local.file.handle  1
-//!feof(local.file.handle)
-	//loop and fread the file
-
-	//set line count
-	local.i = 0
-//////////println "reading file"
-	
-	//if the file empty?
-	//set the pointer to the end
-	local.position = fseek local.file.handle 1 2
-	//get the file length
-	local.length = ftell local.file.handle 
-	//has extra 1 on length, ?
-	local.length--
-	
-	//now reset, close the file, repon it. as rewind does not work.
-	local.open = waitthread local.file.close
-	local.open = waitthread local.file.open
-	//if it'#s empty, exit
-
-//////////println ("LENGTH IS  " + local.length )
-	
-	//if the file was not empty
-	if(local.length > 0)
-	{
-		//fread the file
-		while(!feof local.file.handle )
-		{
-			//if this is not valid, dont read or CRASH
-			if(feof local.file.handle)
-			{
-				break
-			}
-
-			local.position = ftell local.file.handle
-//////////println ("position is : " + local.position )
-	
-			//if it got closed?
-			if(!local.file.isopen || (!local.file.handle))
-			{
-					println ("\n^~^~^ FILE ERROR: File closed while reading: \"" + local.file.filename"\"\n")
-					end
-			}
-
-			//try reading it.
-			local.line = fgets local.file.handle 1023
-			local.text += local.line
-//////////println ("LINE: " +  local.i + " " + local.line )
-			
-			//get the new position
-			local.position = ftell local.file.handle
-//	////////println ("new position is : " + local.position )
-			//if the line pointer position is the same or bigger than our file length, we need to exit.
-
-			//fill lines
-			//line count
-			local.i++
-			//strip the line
-			local.line = waitexec global/strings.scr::strip_newlines local.line
-			//trim the line
-			local.file.lines[local.i] = waitexec global/strings.scr::trim local.line
-			
-			//end if we are moving past the end of the file size
-			if(local.position >= local.length)
-			{
-				break
-			}
-
-		}
-	}
+	local.text = freadall local.file.handle
 
 	//close if it was open
 	if(local.file.isopen)
 	{
-		thread checkclose local.file.id
+		waitthread checkclose local.file.id
 	}
-
-////////println "FILE TEXT"
-////////println local.text
-////////println "FILE TEXT"
 
 	//self body
 	local.file.text = local.text
@@ -982,7 +973,9 @@ getlines9:
 getlines10:
 	goto getlines 10
 getlines local.id:
-	////////println "getlines"
+	if(level.REBORN.isLibraryLoaded["strings"] == 0)
+		end
+	
 	if(local.id == NIL)
 	{
 		println ("\n^~^~^ FILE ERROR: Failed to getlines file with no id: \"NIL\"\n")
@@ -990,17 +983,18 @@ getlines local.id:
 	}
 
 	//get the file from the id
-	local.file = level.files[local.id]
-	if(local.id == NIL)
+	local.file = level.files._filesArray[local.id]
+	if(local.file == NIL)
 	{
 		println ("\n^~^~^ FILE ERROR: Failed to get file object with id: \"" + local.id + "\" in getlines\n")
 		end
 	}
 
-
 	//first fread the file
 	local.text = waitthread readfile local.file.id
-
+	local.lines = waitexec level.strings.splitString local.text "\n"
+	local.file.lines = local.lines
+	
 end local.file.lines
 
 ////////////////////////////////////////////////////////////////////////
@@ -1034,8 +1028,8 @@ parseini local.id:
 		end
 	}
 	//get the file from the id
-	local.file = level.files[local.id]
-	if(local.id == NIL)
+	local.file = level.files._filesArray[local.id]
+	if(local.file == NIL)
 	{
 		println ("\n^~^~^ FILE ERROR: Failed to get file object with id: \"" + local.id + "\" in parseini\n")
 		end
@@ -1053,11 +1047,8 @@ parseini local.id:
 	//fread all the lines from the file
 	if( (local.file.lines == NIL || local.file.lines == NULL ) || local.file.lines== "")
 	{
-		local.text = waitthread readfile local.file.id
+		local.lines = waitthread GetLines local.file.id
 	}
-
-	//lines are now in the file
-	local.lines = local.file.lines
 
 	//reset keys found
 	local.keysfound = 0
@@ -1068,6 +1059,10 @@ parseini local.id:
 	//get all the sections
 	for(local.i=1;local.i<=local.lines.size;local.i++)
 	{
+		if(level.REBORN.isLibraryLoaded["strings"] == 0)
+			break
+		
+		local.lines[local.i] = waitexec level.strings.trim local.lines[local.i]
 
 		//if this line is blank
 		if(local.lines[local.i] == "" || local.lines[local.i] == NIL)
@@ -1082,7 +1077,7 @@ parseini local.id:
 			local.keysfound = 0
 			
 			//get the sectionname
-			local.sectionname = waitexec global/strings.scr::mid 1 local.lines[local.i] (local.lines[local.i].size - 2)
+			local.sectionname = waitexec level.strings.mid 1 local.lines[local.i] (local.lines[local.i].size - 2)
 			
 			//have we already got this section?
 			if(local.keynames[local.sectionname] != NIL)
@@ -1096,14 +1091,14 @@ parseini local.id:
 
 		//fread keys for that section
 		//do we have an = in the line
-		local.position = waitexec global/strings.scr::instr "=" local.lines[local.i]
+		local.position = waitexec level.strings.inStr "=" local.lines[local.i]
 	
 		//did we find an = sign
 		if(local.position != NIL)
 		{
 			//everything to the left of it will be a name, the right, a key
-			local.key = waitexec global/strings.scr::left (local.position) local.lines[local.i]
-			local.value = waitexec global/strings.scr::mid (local.position+1) local.lines[local.i] (local.lines[local.i].size - local.position )
+			local.key = waitexec level.strings.left (local.position) local.lines[local.i]
+			local.value = waitexec level.strings.mid (local.position+1) local.lines[local.i] (local.lines[local.i].size - local.position )
 
 			//have we alfready had this key in the global list
 			if(local.keyvalues[local.sectionname][local.key] != NIL)
@@ -1177,8 +1172,8 @@ readkey local.id local.key:
 	}
 
 	//get the file from the id
-	local.file = level.files[local.id]
-	if(local.id == NIL)
+	local.file = level.files._filesArray[local.id]
+	if(local.file == NIL)
 	{
 		println ("\n^~^~^ FILE ERROR: Failed to get file object with id: \"" + local.id + "\" in readkey\n")
 		end
@@ -1219,6 +1214,9 @@ read9 local.length local.position:
 read10 local.length local.position:
 	goto read 10 local.length local.position
 read local.id local.length local.position:
+
+	if(level.REBORN.isLibraryLoaded["strings"] == 0)
+		end
 	////////println "read"
 	if(local.id == NIL)
 	{
@@ -1227,8 +1225,8 @@ read local.id local.length local.position:
 	}
 
 	//get the file from the id
-	local.file = level.files[local.id]
-	if(local.id == NIL)
+	local.file = level.files._filesArray[local.id]
+	if(local.file == NIL)
 	{
 		println ("\n^~^~^ FILE ERROR: Failed to get file object with id: \"" + local.id + "\" in read\n")
 		end
@@ -1253,7 +1251,7 @@ read local.id local.length local.position:
 	}
 
 	//pretty much the same as read line
-	local.text = waitexec global/strings.scr::mid local.file.position local.file.text local.length
+	local.text = waitexec level.strings.mid local.file.position local.file.text local.length
 
 end local.text
 
@@ -1314,8 +1312,8 @@ addkey local.id local.key local.value local.sectionname:
 	local.value = string local.value
 
 	//get the file from the id
-	local.file = level.files[local.id]
-	if(local.id == NIL)
+	local.file = level.files._filesArray[local.id]
+	if(local.file == NIL)
 	{
 		println ("\n^~^~^ FILE ERROR: Failed to get file object with id: \"" + local.id + "\" in addkey\n")
 		end
@@ -1380,7 +1378,7 @@ addkey local.id local.key local.value local.sectionname:
 	if(local.file.autosave)
 	{
 		//save the file
-		thread local.file.save
+		waitthread local.file.save
 	}
 
 end
@@ -1417,8 +1415,8 @@ filedatafromini local.id:
 	}
 
 	//get the file from the id
-	local.file = level.files[local.id]
-	if(local.id == NIL)
+	local.file = level.files._filesArray[local.id]
+	if(local.file == NIL)
 	{
 		println ("\n^~^~^ FILE ERROR: Failed to get file object with id: \"" + local.id + "\" in filedatafromini\n")
 		end
@@ -1503,8 +1501,8 @@ readline local.id local.line local.length:
 	}
 
 	//get the file from the id
-	local.file = level.files[local.id]
-	if(local.id == NIL)
+	local.file = level.files._filesArray[local.id]
+	if(local.file == NIL)
 	{
 		println ("\n^~^~^ FILE ERROR: Failed to get file object with id: \"" + local.id + "\" in readline\n")
 		end
@@ -1525,7 +1523,8 @@ readline local.id local.line local.length:
 		//we only want a bit of this line
 		if(local.length != NIL && local.length > 0)
 		{
-			local.text = waitexec global/strings.scr::left local.length local.text
+			if(level.REBORN.isLibraryLoaded["strings"] != 0)
+				local.text = waitexec level.strings.left local.length local.text
 		}
 	}
 
@@ -1572,8 +1571,8 @@ writeline local.id local.string local.line:
 	}
 
 	//get the file from the id
-	local.file = level.files[local.id]
-	if(local.id == NIL)
+	local.file = level.files._filesArray[local.id]
+	if(local.file == NIL)
 	{
 		println ("\n^~^~^ FILE ERROR: Failed to get file object with id: \"" + local.id + "\" in writeline\n")
 		end
@@ -1635,7 +1634,7 @@ writeline local.id local.string local.line:
 	if(local.file.autosave == 1)
 	{
 		//save the file
-		thread local.file.save
+		waitthread local.file.save
 	}
 
 end 1
@@ -1672,8 +1671,8 @@ write local.id local.string local.position:
 	}
 
 	//get the file from the id
-	local.file = level.files[local.id]
-	if(local.id == NIL)
+	local.file = level.files._filesArray[local.id]
+	if(local.file == NIL)
 	{
 		println ("\n^~^~^ FILE ERROR: Failed to get file object with id: \"" + local.id + "\" in write\n")
 		end
@@ -1694,8 +1693,11 @@ write local.id local.string local.position:
 
 	//temp text
 	local.text = local.file.text
-	local.textleft = waitexec global/strings.scr::left local.file.position local.text
-	local.textright = waitexec global/strings.scr::right (local.file.text.size - local.file.position ) local.text
+	
+	if(level.REBORN.isLibraryLoaded["strings"] != 0) {
+		local.textleft = waitexec level.strings.left local.file.position local.text
+		local.textright = waitexec level.strings.right (local.file.text.size - local.file.position ) local.text
+	}
 	//local.textright = waitexec global/strings.scr::cut_right local.file.text local.file.position
 
 	//update the temp text
@@ -1748,8 +1750,8 @@ overwrite local.id local.string local.position:
 	}
 
 	//get the file from the id
-	local.file = level.files[local.id]
-	if(local.id == NIL)
+	local.file = level.files._filesArray[local.id]
+	if(local.file == NIL)
 	{
 		println ("\n^~^~^ FILE ERROR: Failed to get file object with id: \"" + local.id + "\" in overwrite\n")
 		end
@@ -1769,9 +1771,11 @@ overwrite local.id local.string local.position:
 
 	//temp text
 	local.text = local.file.text
-	local.textleft = waitexec global/strings.scr::left local.file.position local.text
-
-	local.textright = waitexec global/strings.scr::right ((local.file.text.size - local.file.position) - local.string.size) local.text
+	
+	if(level.REBORN.isLibraryLoaded["strings"] != 0) {
+		local.textleft = waitexec global/strings.scr::left local.file.position local.text
+		local.textright = waitexec global/strings.scr::right ((local.file.text.size - local.file.position) - local.string.size) local.text
+	}
 	//local.textright = waitexec global/strings.scr::cut_right local.file.text local.file.position
 
 	//update temp, and file text
@@ -1785,7 +1789,7 @@ overwrite local.id local.string local.position:
 	if(local.file.autosave == 1)
 	{
 		//save the file
-		thread local.file.save
+		waitthread local.file.save
 	}
 
 end local.file.text
@@ -1813,6 +1817,8 @@ parselines9:
 parselines10:
 	goto parselines 10
 parselines local.id:
+	if(level.REBORN.isLibraryLoaded["strings"] == 0)
+		end
 	////////println "parselines"
 	if(local.id == NIL)
 	{
@@ -1821,8 +1827,8 @@ parselines local.id:
 	}
 
 	//get the file from the id
-	local.file = level.files[local.id]
-	if(local.id == NIL)
+	local.file = level.files._filesArray[local.id]
+	if(local.file == NIL)
 	{
 		println ("\n^~^~^ FILE ERROR: Failed to get file object with id: \"" + local.id + "\" in parselines\n")
 		end
@@ -1840,7 +1846,7 @@ parselines local.id:
 	local.text = local.file.text
 
 	//path to strings
-	local.strings = global/strings.scr
+	local.strings = level.strings
 
 	//how many lines
 	local.lines = 0
@@ -1855,7 +1861,7 @@ parselines local.id:
 	while(!local.donelines)
 	{
 		//get the end of line
-		local.position = waitthread local.strings::instr "\n" local.text local.lastposition
+		local.position = waitthread local.strings.inStr "\n" local.text local.lastposition
 
 		//didnt find a new line
 		if(!local.position)
@@ -1872,10 +1878,10 @@ parselines local.id:
 		local.linelength = ( local.position - local.lastposition  )
 
 		//get the line
-		local.templine = waitthread local.strings::mid local.lastposition local.text local.linelength
+		local.templine = waitthread local.strings.mid local.lastposition local.text local.linelength
 
 		//strip new lines
-		local.templine = waitthread local.strings::strip_newlines local.templine
+		local.templine = waitthread local.strings.stripNewlines local.templine
 
 		//set the line
 		local.linearray[local.lines] = local.templine
@@ -1924,8 +1930,8 @@ parsetext local.id:
 	}
 
 	//get the file from the id
-	local.file = level.files[local.id]
-	if(local.id == NIL)
+	local.file = level.files._filesArray[local.id]
+	if(local.file == NIL)
 	{
 		println ("\n^~^~^ FILE ERROR: Failed to get file object with id: \"" + local.id + "\" in parsetext\n")
 		end
@@ -1997,8 +2003,8 @@ fread local.id local.length:
 	}
 
 	//get the file from the id
-	local.file = level.files[local.id]
-	if(local.id == NIL)
+	local.file = level.files._filesArray[local.id]
+	if(local.file == NIL)
 	{
 		println ("\n^~^~^ FILE ERROR: Failed to get file object with id: \"" + local.id + "\" in fread\n")
 		end
@@ -2027,7 +2033,7 @@ fread local.id local.length:
 	//open the file
 	if(!local.file.isopen)
 	{
-		thread local.file.open
+		waitthread local.file.open
 	}
 
 	//fread a line
@@ -2036,7 +2042,7 @@ fread local.id local.length:
 	//close if it was open
 	if(local.file.isopen)
 	{
-		thread checkclose local.file.id
+		waitthread checkclose local.file.id
 	}
 
 end local.line
@@ -2072,8 +2078,8 @@ freadchar local.id:
 	}
 
 	//get the file from the id
-	local.file = level.files[local.id]
-	if(local.id == NIL)
+	local.file = level.files._filesArray[local.id]
+	if(local.file == NIL)
 	{
 		println ("\n^~^~^ FILE ERROR: Failed to get file object with id: \"" + local.id + "\" in freadchar\n")
 		end
@@ -2085,7 +2091,7 @@ freadchar local.id:
 	//close if it was open
 	if(local.file.isopen)
 	{
-		thread checkclose local.file.id
+		waitthread checkclose local.file.id
 	}
 
 end local.text
@@ -2122,10 +2128,10 @@ fwritechar local.id local.string:
 	}
 
 	//get the file from the id
-	local.file = level.files[local.id]
-	if(local.id == NIL)
+	local.file = level.files._filesArray[local.id]
+	if(local.file == NIL)
 	{
-		println ("\n^~^~^ FILE ERROR: Failed to get file object with id: \"" + local.id + "\" in fwritechar\n")
+		println ("\n^~^~^ FILE ERROR: Failed to get file object with id: \"" + local.id + "\" in freadchar\n")
 		end
 	}
 
@@ -2147,7 +2153,7 @@ fwritechar local.id local.string:
 	//open the file
 	if(!local.file.isopen)
 	{
-		thread local.file.open
+		waitthread local.file.open
 	}
 
 	//fwrite a line
@@ -2156,7 +2162,7 @@ fwritechar local.id local.string:
 	//close if it was open
 	if(local.file.isopen)
 	{
-		thread checkclose local.file.id
+		waitthread checkclose local.file.id
 	}
 
 end local.return
@@ -2198,10 +2204,10 @@ fwrite local.id local.string:
 	}
 
 	//get the file from the id
-	local.file = level.files[local.id]
-	if(local.id == NIL)
+	local.file = level.files._filesArray[local.id]
+	if(local.file == NIL)
 	{
-		println ("\n^~^~^ FILE ERROR: Failed to get file object with id: \"" + local.id + "\" in fwrite\n")
+		println ("\n^~^~^ FILE ERROR: Failed to get file object with id: \"" + local.id + "\" in freadchar\n")
 		end
 	}
 
@@ -2221,7 +2227,7 @@ fwrite local.id local.string:
 	//close if it was open
 	if(local.file.isopen)
 	{
-		thread checkclose local.file.id
+		waitthread checkclose local.file.id
 	}
 
 end local.return
@@ -2257,10 +2263,10 @@ fwriteline local.id local.string:
 	}
 
 	//get the file from the id
-	local.file = level.files[local.id]
-	if(local.id == NIL)
+	local.file = level.files._filesArray[local.id]
+	if(local.file == NIL)
 	{
-		println ("\n^~^~^ FILE ERROR: Failed to get file object with id: \"" + local.id + "\" in fwriteline\n")
+		println ("\n^~^~^ FILE ERROR: Failed to get file object with id: \"" + local.id + "\" in freadchar\n")
 		end
 	}
 
@@ -2291,7 +2297,7 @@ fwriteline local.id local.string:
 	//close if it was open
 	if(local.file.isopen)
 	{
-		thread checkclose local.file.id
+		waitthread checkclose local.file.id
 	}
 
 end local.return
@@ -2327,10 +2333,10 @@ flush local.id:
 		end
 	}
 	//get the file from the id
-	local.file = level.files[local.id]
-	if(local.id == NIL)
+	local.file = level.files._filesArray[local.id]
+	if(local.file == NIL)
 	{
-		println ("\n^~^~^ FILE ERROR: Failed to get file object with id: \"" + local.id + "\" flush\n")
+		println ("\n^~^~^ FILE ERROR: Failed to get file object with id: \"" + local.id + "\" in freadchar\n")
 		end
 	}
 
@@ -2370,10 +2376,10 @@ deletefile local.id:
 	}
 
 	//get the file from the id
-	local.file = level.files[local.id]
-	if(local.id == NIL)
+	local.file = level.files._filesArray[local.id]
+	if(local.file == NIL)
 	{
-		println ("\n^~^~^ FILE ERROR: Failed to get file object with id: \"" + local.id + "\" deletefile\n")
+		println ("\n^~^~^ FILE ERROR: Failed to get file object with id: \"" + local.id + "\" in freadchar\n")
 		end
 	}
 	
@@ -2389,7 +2395,7 @@ deletefile local.id:
 	//close if it was open
 	if(local.file.isopen)
 	{
-		thread checkclose local.file.id
+		waitthread checkclose local.file.id
 	}
 	
 	//free mem
@@ -2433,10 +2439,10 @@ error local.id:
 		end
 	}
 	//get the file from the id
-	local.file = level.files[local.id]
-	if(local.id == NIL)
+	local.file = level.files._filesArray[local.id]
+	if(local.file == NIL)
 	{
-		println ("\n^~^~^ FILE ERROR: Failed to get file object with id: \"" + local.id + "\" in error\n")
+		println ("\n^~^~^ FILE ERROR: Failed to get file object with id: \"" + local.id + "\" in freadchar\n")
 		end
 	}
 
@@ -2479,10 +2485,10 @@ save local.id:
 	}
 
 	//get the file from the id
-	local.file = level.files[local.id]
-	if(local.id == NIL)
+	local.file = level.files._filesArray[local.id]
+	if(local.file == NIL)
 	{
-		println ("\n^~^~^ FILE ERROR: Failed to get file object with id: \"" + local.id + "\" in savelines\n")
+		println ("\n^~^~^ FILE ERROR: Failed to get file object with id: \"" + local.id + "\" in freadchar\n")
 		end
 	}
 
@@ -2519,19 +2525,19 @@ save local.id:
 	}
 
 	//save the file
-	local.return = fputs local.file.handle local.file.text
+	local.return = fsaveall local.file.handle local.file.text
 //	local.rreturn = fflush local.file.handle
 
 	//close if it was open so we can get back the open type in a bit
 	if(local.file.isopen)
 	{
-		thread close local.file.id
+		waitthread close local.file.id
 	}
 
 	//if we wanted the file open
 	if(local.file.keepopen && local.wasopen)
 	{
-		thread open local.file.id
+		waitthread open local.file.id
 	}
 
 

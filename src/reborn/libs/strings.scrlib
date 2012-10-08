@@ -52,7 +52,7 @@ safechardata
 _libinfo:
 	local.info["name"] = "Strings Library"
 	local.info["namespace"] = "strings"
-	local.info["title"] = "Strings Library 1.0"
+	local.info["title"] = "Strings Library 1.1"
 	local.info["version"] = 1.1
 	local.info["author"] = "Elgan"
 end local.info
@@ -62,37 +62,41 @@ _libinit local.libFilePath:
 	local.init["lib"] = NIL
 	
 	level.strings = local CreateListener
-	level.strings.safeCharData = local.libFilePath::SafeCharData
-	level.strings.stripNewLines = local.libFilePath::StripNewLines
-	level.strings.makeLine = local.libFilePath::MakeLine
-	level.strings.addQuotes = local.libFilePath::AddQuotes
-	level.strings.cutLeft = local.libFilePath::CutLeft
-	level.strings.cutRight = local.libFilePath::CutRight
-	level.strings.trim = local.libFilePath::Trim
-	level.strings.arrayToLower = local.libFilePath::ArrayToLower
-	level.strings.arrayToUpper = local.libFilePath::ArrayToUpper
-	level.strings.charData = local.libFilePath::CharData
-	level.strings.charDataUppercase = local.libFilePath::CharDataUppercase
-	level.strings.charDataLowercase = local.libFilePath::CharDataLowercase
-	level.strings.inStr = local.libFilePath::InStr
-	level.strings.left = local.libFilePath::Left
-	level.strings.right = local.libFilePath::Right
-	level.strings.mid = local.libFilePath::Mid
-	level.strings.reverse = local.libFilePath::Reverse
-	level.strings.toLower = local.libFilePath::ToLower
-	level.strings.toUpper = local.libFilePath::ToUpper
-	level.strings.splitString = local.libFilePath::SplitString
-	level.strings.splitLine = local.libFilePath::SplitLine
-	level.strings.replace = local.libFilePath::Replace
-	level.strings.remove = local.libFilePath::Remove
-	level.strings.formatReplace = local.libFilePath::FormatReplace
-	level.strings.combine = local.libFilePath::Combine
-	level.strings.arrayToInt = local.libFilePath::ArrayToInt
-	level.strings.arrayToString = local.libFilePath::ArrayToString
-	level.strings.arrayToFloat = local.libFilePath::ArrayToFloat
 	
-	local.init["loaded"] = 1
-	local.init["lib"] = level.strings
+	if(level.strings != NULL && level.strings != NIL) {
+		level.strings.safeCharData = waitthread SafeCharData
+		level.strings.stripNewLines = local.libFilePath::StripNewLines
+		level.strings.makeLine = local.libFilePath::MakeLine
+		level.strings.addQuotes = local.libFilePath::AddQuotes
+		level.strings.cutLeft = local.libFilePath::CutLeft
+		level.strings.cutRight = local.libFilePath::CutRight
+		level.strings.trim = local.libFilePath::Trim
+		level.strings.arrayToLower = local.libFilePath::ArrayToLower
+		level.strings.arrayToUpper = local.libFilePath::ArrayToUpper
+		level.strings.charData = waitthread CharData
+		level.strings.charDataUppercase = waitthread CharDataUppercase
+		level.strings.charDataLowercase = waitthread CharDataLowercase
+		level.strings.inStr = local.libFilePath::InStr
+		level.strings.left = local.libFilePath::Left
+		level.strings.right = local.libFilePath::Right
+		level.strings.mid = local.libFilePath::Mid
+		level.strings.reverse = local.libFilePath::Reverse
+		level.strings.toLower = local.libFilePath::ToLower
+		level.strings.toUpper = local.libFilePath::ToUpper
+		level.strings.splitString = local.libFilePath::SplitString
+		level.strings.splitLine = local.libFilePath::SplitLine
+		level.strings.replace = local.libFilePath::Replace
+		level.strings.remove = local.libFilePath::Remove
+		level.strings.formatReplace = local.libFilePath::FormatReplace
+		level.strings.combine = local.libFilePath::Combine
+		level.strings.arrayToInt = local.libFilePath::ArrayToInt
+		level.strings.arrayToString = local.libFilePath::ArrayToString
+		level.strings.arrayToFloat = local.libFilePath::ArrayToFloat
+		
+		local.init["loaded"] = 1
+		local.init["lib"] = level.strings
+	}
+	
 end local.init
 
 
@@ -177,52 +181,7 @@ StripNewlines local.string:
 	//strip new lines
 	local.string = waitthread Remove local.string "\n"
 end local.string
-////////////////////////////////////////////////////////////////////////
-// clean_filename
-// Removes invalid chars from a string for save filesave
-// useage: local.name = waitexec global/strings.scr::clean_filename "filename"
-////////////////////////////////////////////////////////////////////////
-CleanFilename local.filename:
 
-	//get safe data
-	local.chardata = waitthread SafeCharData
-	
-	//init new name
-	local.newname = ""
-
-	//go through the name
-	for(local.i = 0; local.i <= local.filename.size - 1; local.i++)
-	{
-		local.letter = local.filename[local.i]
-	
-		//are we safe
-		local.issafe = 0
-
-		//check if its in the alphabet
-		for(local.t = 1; local.t <= local.chardata.size; local.t++)
-		{
-			if(local.letter == local.chardata[local.t][1])
-			{
-				//issafe
-				local.issafe = 1
-				break
-			}
-		}
-
-		//if its safe
-		if(local.issafe)
-		{
-			local.newname += local.letter
-		}
-	}
-
-	//if its long enough
-	if(local.newname.size <= 0)
-	{
-		end
-	}
-
-end local.newname
 // RGB light from string
 // Will produce a light from a string
 // returns a array of the light as int
