@@ -3,43 +3,55 @@
 // 	Last Updated 09/17/2012
 //	Version 1.0
 
-_libname:
-	local.name = "HUD Library 1.0"
-end local.name
+_libinfo:
+	local.info["name"] = "Hud Library"
+	local.info["namespace"] = "hud"
+	local.info["title"] = "HUD Library 1.0"
+	local.info["version"] = 1.0
+	local.info["author"] = "ArMaGedDoN"
+end local.info
 
 _libinit local.libFilePath:
-
+	local.init["loaded"] = 0
+	local.init["lib"] = NIL
+	
 	//global accessors  ----- Is this the format you decided on?
 	level.hud = local CreateListener 
 	level.hud.nextHudID = local.libFilePath::NextHudID
-	level.hud.nextIHudID = local.libFilePath::NextIHudID 
+	level.hud.nextIHudID = local.libFilePath::NextIHudID
 	
-end
+	local.init["loaded"] = 1
+	local.init["lib"] = level.hud
+end local.init;
 
 // Returns next avalable Hud ID, otherwise returns 0
 // Example local.id = waitthread level.hud.nextHudID
 NextHudID:
+	if(level.hud == NULL || level.hud == NIL)
+		end -1
 
-	if(level.currentHud == NIL)
-		level.currentHud = 6
+	if(level.hud._currentHud == NIL)
+		level.hud._currentHud = 6
 	else
-		if(level.currentHud < 130 && level.currentHud != 0)
-			level.currentHud++
+		if(level.hud._currentHud < 130 && level.hud._currentHud != 0)
+			level.hud._currentHud++
 		else
-			level.currentHud = 0	
+			level.hud._currentHud = 0	
 	
-end level.currentHud
+end level.hud._currentHud
 
 // Returns next avalable iHud ID, otherwise returns 0
 // Example local.id = waitthread level.hud.nextIHudID
 NextIHudID:
-
-	if(level.currentIHud == NIL)
-		level.currentIHud = 131
-	else 
-		if(level.currentIHud < 255 && level.currentIHud != 0)
-			level.currentIHud++
-		else
-			level.currentIHud = 0	
+	if(level.hud == NULL || level.hud == NIL)
+		end -1
 	
-end level.currentIHud
+	if(level.hud._currentIHud == NIL)
+		level.hud._currentIHud = 131
+	else 
+		if(level.hud._currentIHud < 255 && level.hud._currentIHud != 0)
+			level.hud._currentIHud++
+		else
+			level.hud._currentIHud = 0	
+	
+end level.hud._currentIHud

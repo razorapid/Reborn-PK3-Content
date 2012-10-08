@@ -49,11 +49,18 @@ array_to_float
 safechardata
 */
 
-_libname:
-	local.name = "Strings Library 1.0"
-end local.name
+_libinfo:
+	local.info["name"] = "Strings Library"
+	local.info["namespace"] = "strings"
+	local.info["title"] = "Strings Library 1.0"
+	local.info["version"] = 1.1
+	local.info["author"] = "Elgan"
+end local.info
 
 _libinit local.libFilePath:
+	local.init["loaded"] = 0
+	local.init["lib"] = NIL
+	
 	level.strings = local CreateListener
 	level.strings.safeCharData = local.libFilePath::SafeCharData
 	level.strings.stripNewLines = local.libFilePath::StripNewLines
@@ -83,7 +90,10 @@ _libinit local.libFilePath:
 	level.strings.arrayToInt = local.libFilePath::ArrayToInt
 	level.strings.arrayToString = local.libFilePath::ArrayToString
 	level.strings.arrayToFloat = local.libFilePath::ArrayToFloat
-end
+	
+	local.init["loaded"] = 1
+	local.init["lib"] = level.strings
+end local.init
 
 
 ////////////////////////////////////////////////////////////////////////
