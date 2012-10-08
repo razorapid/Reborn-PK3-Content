@@ -3,78 +3,68 @@ main:
 	println "----------- Reborn Loader Init -----------"
 	
 	// Loading and initializing ScriptLibraries
-	waitexec InitializeRebornLibraries
+	waitthread InitializeRebornLibraries
 	
 	level.rebornLoader = local CreateListener
 	
 	if(rebornLoader != NIL && rebornLoader != NULL) {
 		local.modConfigFiles = waitthread GetModConfigFiles;
 		
-		println "--> " + local.modConfigFiles.size + " mods found"
+		println("--> "+local.modConfigFiles.size+" mods found")
 		for(local.i = 0; local.i < local.modConfigFiles.size; local.i++ ) {
-			println "--> Loading \"" + local.modConfigFiles[local.i] + "\" ..."
+			println("--> Loading \""+local.modConfigFiles[local.i]+"\" ...")
 			local.modConfigs[local.i] = waitthread LoadModConfigFile local.modConfigFiles[local.i]
 		}
 		
 		level.rebornLoader.modConfigs = local.modConfigs
 	}
 	else {
-		println "Reborn Loader ERROR: Could not initialize loader"
+		println("Reborn Loader ERROR: Could not initialize loader")
 	}
+	
+	println "----------- Reborn Loader Finish -----------"
 
 end
 
 InitializeRebornLibraries:
-
-	local.libsList = flist "/" ".slib" 1
+	local.libsList = flist "" ".scrlib" 1
 	
 	for(local.i = 0; local.i < local.libsList.size; local.i++) {
-		local.libNameFunction = local.libsList[local.i]+"::_libname"
-		local.libInitFunction = local.libsList[local.i]+"::_init"
+		local.libFile = local.libsList[local.i];
+		if(local.libFile == NULL || local.libFile == "" || local.libFile.size < 8 )
+			continue
 		
-		local.libName = waitexec local.libNameFunction
-		
-		if(local.libName == NULL || local.libName == "")
+		local.libName = waitexec local.libFile::_libname
+		if(local.libName == NULL || local.libName == NIL || local.libName == "")
 			continue
 			
-		println "--> Loading \""+local.libName+"\" ..."
+		println("--> Loading \""+local.libName+"\" ...")
 		
-		waitexec local.libInitFunction
+		waitexec local.libFile::_libinit local.libFile
 	}
 
 end
 
 GetModConfigFiles:
 
-	local.modConfigFiles = flist "/" ".mcfg" 1
+	local.modConfigFiles = flist "" ".mcfg" 1
 
 end local.modConfigFiles
 
 LoadModConfigFile local.modConfigFile:
-	local.file = fopen local.modConfigFile "rb"
+	local.content = freadpak local.modConfigFile
 	
-	if(local.file == NULL || local.file == 0) {
-		println "Reborn Loader WARNING: Could not open \"" + local.modConfigFile + "\" mod config file - skipping..."
+	if(local.content == NULL || local.content == NIL || local.content == "") {
+		println("Reborn Loader WARNING: Could not open \""+local.modConfigFile+"\" mod config file or file is empty - skipping...")
 		end
 	}
 	
-	local.content = freadall local.file
-	fclose local.file
-	
-	if(content == NULL || content == "") {
-		println "Reborn Loader WARNING: Mod config file content is empty!"
-		end
-	}
-	
-	local.content = level.strings.splitString local.content "\n"
+	local.content = waitexec level.strings.splitString local.content "\n"
 	waitthread ParseModConfigFile local.modConfig local.content
 	
 end local.modConfig
 
 ParseModConfigFile local.modConfig local.content:
-	
-	
-	
-	
-	
+	println("File lines: "+local.content.size)
+	println("TODO: ParseModConfigFile")
 end local.modConfig

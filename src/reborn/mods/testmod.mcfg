@@ -1,0 +1,6 @@
+[TESTSECTION]
+	[SUBSECTION]
+		key=value
+		key2=value2
+	[SUBSECTION2]
+	key=value
