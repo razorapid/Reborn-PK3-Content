@@ -1,0 +1,32 @@
+TIKI
+setup
+{
+	scale 0.52			// Set default scale to 16/30.5 since world is in 16 units per foot and model is in cm's
+	path models/vehicles/fockwulf
+	skelmodel fockwulffly.skd
+	surface prop shader prop
+	surface fockwulf3 shader fockwulffly
+	surface fockwindow shader fockwindowfly
+	surface fockwulf1 shader fockwulffly
+}
+
+init
+{
+	server
+	{
+	      	classname drivablevehicle
+	      	setsize "-32 -32 -32" "32 32 32"
+       		seatoffset "0 0 0""
+	      	gravity 1.0
+	      	vehiclespeed 800
+	}
+}
+
+animations
+{
+	idle     fockwulffly.skc
+}
+
+/*QUAKED vehicle_german_airplane-fockwulf-flying (0.0 0.0 0.0) (-65 -40 0) (65 40 120)
+Fockwulf Airplane
+*/

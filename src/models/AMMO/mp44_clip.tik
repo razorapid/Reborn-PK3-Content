@@ -1,0 +1,21 @@
+TIKI
+setup
+{
+	scale 0.52
+	path models/ammo/mp44_clip
+	skelmodel mp44_clip.skd
+	surface mp44clip shader mp44clip
+}
+
+animations
+{
+	idle mp44_clip_reload.skc	
+	{
+		server
+		{
+			0 surface mp44clip +nodraw
+			13 surface mp44clip -nodraw
+			42 surface mp44clip +nodraw
+		}
+	}
+}

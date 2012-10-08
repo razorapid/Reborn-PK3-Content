@@ -1,0 +1,60 @@
+TIKI
+setup
+{
+	scale 0.52
+   	path models/vehicles/bmwbike
+	skelmodel bmwbike.skd
+   	surface all shader bmwbike
+}
+
+init
+{
+   	server
+      	{
+      		classname drivablevehicle
+		//classname VehicleWheelsX2
+      		setsize "-45 -30 0" "45 15 50"
+      		seatoffset "-14 0 24"
+      		gravity 0.6
+      		canjump
+			vehiclespeed 750
+			vehiclemass 1500
+			vehicletread 10
+			vehicleradius 0.33
+			vehiclerollingresistance 0.5
+			vehicledrag 0.00001
+			turnrate 40
+			vehiclebouncy 0.2
+			vehiclespringy 0.8
+
+			AnimationSet "bmwbike_"
+			SoundSet "bmwbike_"
+
+			
+			//////////////////////////////////////////
+			// Pitch-Mod Sound for vehicles by speed
+			//
+			// Linearly Interpolates from the minimum pitch when the vehicle is at the minimum speed to 
+			// the maximum pitch when the vehicle is at the maximum speed.
+			//
+			// Speed is in World Units.
+			//
+			//
+			//                 +--------------- Minimum Speed
+			//                 |  +------------ Minimum Pitch
+			//                 |  |
+			//                 |  |      +----- Maximum Speed
+			//                 |  |      |  +-- Maximum Pitch
+			//                 V  V      V  V
+			setsoundparameters 0 0.95   200 1		
+      	}
+}
+
+animations
+{
+   	idle bmwbike.skc
+}
+
+/*QUAKED vehicle_german_bmwbike (0 0 0) (-40 -20 0) (40 20 50)
+BMW
+*/

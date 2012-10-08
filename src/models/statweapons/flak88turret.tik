@@ -1,0 +1,227 @@
+
+TIKI
+setup
+{
+	scale 0.52			// Set default scale to 16/30.5 since world 
+						// is in 16 units per foot and model is in cm's
+	//scale 1.55				// Seems to work better than 0.52
+	path models/statweapons/88mmflak
+	skelmodel 88turret.skd
+	surface all shader flak88
+}
+
+init
+{
+   	server
+      {
+		classname 		VehicleTurretGun
+		weapontype		cannon
+		name			"TigerCannon"
+
+		// turret settings
+		idleCheckOffset	"-56 0 0"
+
+		// Primary fire type info
+		projectile		models/projectiles/tigercannonshell.tik
+		firetype		heavy
+		//bulletcount		1
+		usenoammo		1
+		firedelay		7
+		//bulletrange		4000
+		bulletdamage		200
+		//bulletspread		40 40
+		tracerfrequency 	3
+		turnspeed		38
+		pitchcaps		"-30 15 0"
+
+		SoundSet	"flak_"
+      }
+	client
+	{
+		cache muzsprite.spr
+		cache models/fx/muzflash.tik
+		cache models/ammo/rifleshell.tik
+	}
+}
+
+
+animations
+{
+	idle     		88turret.skc
+	wheel_left		88turret_wheel_left.skc	
+	wheel_right		88turret_wheel_right.skc
+	fire_scripted	  		88turret_fire.skc
+	{
+		client
+		{
+			first stopaliaschannel flak_snd_fire
+			first sound flak_snd_fire weapon 1.0 -1 0.95 0.1
+
+			// muzzle flash
+			first tagdlight tag_barrel 0.25 0.2 0.05 110 0.11
+			first tagspawnlinked tag_barrel
+			(
+				spawnrate 1.00
+				model muzsprite.spr
+				alpha 0.50
+				color 1.00 1.00 1.00
+				varycolor
+				scale 1.70
+				life 0.05
+				scalerate 1.00
+				velocity 4.00
+				friction 3.00
+				fade
+				alignstretch 1.00
+			)
+
+			first tagspawnlinked tag_barrel
+			(
+				spawnrate 1.00
+				model muzsprite.spr
+				alpha 0.50
+				color 1.00 1.00 1.00
+				scale 1.60
+				life 0.05
+				scalerate 0.70
+				velocity 17.00
+				offsetalongaxis 9 0 0
+				fade
+				alignstretch 0.40
+			)
+
+			first tagspawnlinked tag_barrel
+			(
+				spawnrate 1.00
+				model muzsprite.spr
+				alpha 0.50
+				color 1.00 1.00 1.00
+				scale 1.60
+				life 0.05
+				velocity 18.00
+				fade
+			)
+
+			first tagspawnlinked tag_barrel
+			(
+				spawnrate 1.00
+				model models/fx/muzflash.tik
+				color 1.00 1.00 1.00
+				scale 1.09
+				life 0.01
+				velocity 2009.00
+				accel 0.00 20.00 30.00
+				friction 2.00
+				offsetalongaxis range -10 4 0 0
+				fade
+				alignstretch 0.02
+			)
+
+			first tagspawn tag_barrel
+			(
+				spawnrate 1.00
+				model models/fx/snipesmoke.tik
+				color 1.00 1.00 1.00
+				scale 3.00
+				life 1.00
+				velocity 220.00
+				friction 10.00
+				angles 0 0 random 270
+				avelocity 0 0 10
+				align
+			)
+
+		}
+	}
+	fire	  		88turret_fire.skc
+	{
+		server
+		{
+			first shoot
+		}
+		client
+		{
+			first stopaliaschannel flak_snd_fire
+			first sound flak_snd_fire weapon 1.0 -1 0.95 0.1
+
+			// muzzle flash
+			first tagdlight tag_barrel 0.25 0.2 0.05 110 0.11
+			first tagspawnlinked tag_barrel
+			(
+				spawnrate 1.00
+				model muzsprite.spr
+				alpha 0.50
+				color 1.00 1.00 1.00
+				varycolor
+				scale 1.70
+				life 0.05
+				scalerate 1.00
+				velocity 4.00
+				friction 3.00
+				fade
+				alignstretch 1.00
+			)
+
+			first tagspawnlinked tag_barrel
+			(
+				spawnrate 1.00
+				model muzsprite.spr
+				alpha 0.50
+				color 1.00 1.00 1.00
+				scale 1.60
+				life 0.05
+				scalerate 0.70
+				velocity 17.00
+				offsetalongaxis 9 0 0
+				fade
+				alignstretch 0.40
+			)
+
+			first tagspawnlinked tag_barrel
+			(
+				spawnrate 1.00
+				model muzsprite.spr
+				alpha 0.50
+				color 1.00 1.00 1.00
+				scale 1.60
+				life 0.05
+				velocity 18.00
+				fade
+			)
+
+			first tagspawnlinked tag_barrel
+			(
+				spawnrate 1.00
+				model models/fx/muzflash.tik
+				color 1.00 1.00 1.00
+				scale 1.09
+				life 0.01
+				velocity 2009.00
+				accel 0.00 20.00 30.00
+				friction 2.00
+				offsetalongaxis range -10 4 0 0
+				fade
+				alignstretch 0.02
+			)
+
+			first tagspawn tag_barrel
+			(
+				spawnrate 1.00
+				model models/fx/snipesmoke.tik
+				color 1.00 1.00 1.00
+				scale 3.00
+				life 1.00
+				velocity 220.00
+				friction 10.00
+				angles 0 0 random 270
+				avelocity 0 0 10
+				align
+			)
+
+		}
+	}
+}
+
+/*QUAKED turretweapon_german_88mmflakturret (0.5 .25 0.25) (-32 -32 0) (32 32 128)
+Big gun - Boom boom.
+*/

@@ -1,0 +1,26 @@
+TIKI
+setup
+{
+	scale 0.52			// Set default scale to 16/30.5 since world is in 16 units per foot and model is in cm's
+	path models/statweapons/mg42
+	skelmodel mg42_02.skd
+	surface mg421 shader static_mg42
+//	surface mg422 shader static_mg42
+}
+
+init
+{
+	server
+	{
+		classname object
+	}
+}
+
+animations
+{
+	idle     mg42_02.skc
+}
+
+/*QUAKED static_weapon_mg42bipod (0.5 0.0 0.5) (0 0 0) (0 0 0)
+MG42 bipod
+*/

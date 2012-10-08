@@ -1,0 +1,13 @@
+// The is the M2 grenade used for secondary fire & by AIs
+TIKI
+
+$include models/projectiles/m2fgrenade_base.txt
+
+init
+{
+	server
+	{
+		speed			700
+		minspeed		100
+	}
+}

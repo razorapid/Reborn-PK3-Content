@@ -1,0 +1,27 @@
+TIKI
+setup
+{
+	scale 0.52
+	path models/ammo/kar98
+	skelmodel kar98_clip.skd
+	surface material1 shader m1clip
+	surface material2 shader m1clip
+	
+}
+
+animations
+{
+	idle kar98_clip_reload.skc
+	{	
+		server
+		{
+			0 surface all +nodraw
+			27 surface all -nodraw
+			45 surface all +nodraw
+			61 surface material1 -nodraw
+			
+		}
+			
+	}
+
+}

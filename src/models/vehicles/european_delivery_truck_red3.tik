@@ -1,0 +1,28 @@
+TIKI
+setup
+{
+	scale 0.52				// Set default scale to 16/30.5 since world is in 16 units per foot and model is in cm's
+	path models/vehicles/dtruck
+	skelmodel dtruck.skd
+	surface dtruckwindow shader dtruckwindow
+	surface dtruck3 shader dtruck3
+	surface dtruck2 shader dtruck3
+}
+
+init
+{
+	server
+	{
+		classname drivablevehicle
+		setsize "-60 -40 0" "60 40 128"
+	}
+}
+
+animations
+{
+	idle     dtruck.skc
+}
+
+/*QUAKED vehicle_europe_deliverytruck-red (0.5 .25 0.25) (-32 -32 0) (32 32 128)
+Red European Delivery Truck
+*/

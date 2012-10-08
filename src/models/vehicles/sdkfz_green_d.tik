@@ -1,0 +1,152 @@
+TIKI
+setup
+{
+	scale 0.52				// Set default scale to 16/30.5 since world is in 16 units per foot and model is in cm's
+	path models/vehicles/sdkfz_desert_d
+	skelmodel sdkfz_desert_d.skd
+	surface sdkfz_tredz_d2 shader sdkfz_tredz_d3
+     	surface sdkfz_i_cog_d2 shader sdkfz_i_cog_d3
+ 	surface sdkfz_rims_d2 shader sdkfz_rims_d3
+	surface sdkfz_f_cog_d2 shader sdkfz_f_cog_d3
+	surface sdkfz_o_cog_d2 shader sdkfz_o_cog_d3
+	surface sdkfz_w_tred_d2 shader sdkfz_w_tred_d3
+	surface sdkfz_wheel_d2 shader sdkfz_wheel_d3
+	surface sdkfz_d2 shader sdkfz_green_d3
+}
+
+init
+{
+	server
+	{
+		classname animate
+        	setsize "-140 -80 0" "140 80 120"
+	}
+	client
+	{
+	
+		tagemitter tag_barrel sparks1a
+		(
+				spawnrate 4.00
+				model vsssource.spr
+				alpha 0.50
+				color 0.10 0.10 0.10
+				scale 0.20
+				life 6.50
+				scalerate 2.30
+				randvel crandom -15 crandom -15 crandom -15
+				accel 0.00 0.00 50.00
+				friction 0.70
+				angles crandom 20 crandom 30 crandom -20
+				scalemin 1.00
+				scalemax 0.50
+				fade
+		)
+
+		tagemitter tag_barrel sparks1a
+		(
+				spawnrate 3.00
+				model vsssource.spr
+				alpha 0.70
+				color 0.30 0.30 0.30
+				life 3.00
+				scalerate 5.00
+				randvel range -14 7 range -14 7 range -14 7
+				accel 0.00 0.00 36.00
+				scalemin 0.50
+				scalemax 1.00
+				fade
+		)
+	
+		tagemitter tag_barrel sparks1a
+		(
+			spawnrate 7.00
+			model fire_ring2.spr
+			alpha 0.80
+			color 1.00 1.00 1.00
+			scale 0.10
+			life 3.00
+			scalerate 1.00
+			accel 0.00 0.00 30.00
+			friction 1.00
+			offsetalongaxis crandom -10 crandom -10 crandom -10
+			scalemin 0.05
+			scalemax 0.12
+			fade
+			fadein 0.000000
+		)
+ 
+		tagemitter tag_barrel sparks1a
+		(
+			spawnrate 5.00
+			model fire_ring2.spr
+			color 1.00 1.00 1.00
+			scale 0.30
+			life 2.00
+			scalerate 2.00
+			velocity 2.00
+			randvel range -1 10 range 30 -15 range -1 10
+			accel 0.00 0.00 33.00
+			friction 1.00
+			offsetalongaxis range 7 -1 range 7 -1 range 1 -7
+			angles 110 10 110
+			avelocity random 110 110 110
+			scalemin 0.03
+			scalemax 0.09
+			fade
+			fadein 0.000000
+			randomroll
+		)
+
+
+	
+	}
+
+}
+
+
+animations
+{
+	idle     sdkfz_desert_d.skc
+	{
+		client
+		{
+			entry loopsound fire_med
+		}
+	}	
+}
+
+
+//TIKI
+//setup
+//{
+//	scale 0.52				// Set default scale to 16/30.5 since world is in 16 units per foot and model is in cm's
+//	path models/vehicles/sdkfz_desert_d
+//	skelmodel sdkfz_desert_d.skd
+//	surface sdkfz_tredz_d2 shader static_sdkfz_tredz_d3
+//     	surface sdkfz_i_cog_d2 shader static_sdkfz_i_cog_d3
+// 	surface sdkfz_rims_d2 shader static_sdkfz_rims_d3
+//	surface sdkfz_f_cog_d2 shader static_sdkfz_f_cog_d3
+//	surface sdkfz_o_cog_d2 shader static_sdkfz_o_cog_d3
+//	surface sdkfz_w_tred_d2 shader static_sdkfz_w_tred_d3
+//	surface sdkfz_wheel_d2 shader static_sdkfz_wheel_d3
+//	surface sdkfz_d2 shader static_sdkfz_green_d3
+//}
+//
+//init
+//{
+//	server
+//	{
+//		classname animate
+//        setsize "-140 -80 0" "140 80 120"
+//
+//    }
+//}
+//
+//animations
+//{
+//	idle     sdkfz_desert_d.skc
+//}
+
+/*QUAKED vehicle_german_sdkfz_green_d (0.0 .0 0.0) (-168 -64 0) (184 72 112)
+SDKFZ Halftrack
+*/

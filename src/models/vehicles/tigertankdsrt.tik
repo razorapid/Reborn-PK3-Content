@@ -1,0 +1,78 @@
+TIKI
+setup
+{
+	scale 0.52				// Set default scale to 16/30.5 since world is in 16 units per foot and model is in cm's
+	path models/vehicles/tigertank
+	skelmodel tigertank.skd
+	surface treads shader tiger_treads
+	surface wheelfront shader frontwheel_d
+     	surface innerwheel shader innerwheel_d
+ 	surface outerwheel shader outerwheel_d
+	surface wheelback shader backwheel_d
+	surface tigertank1 shader tigertank_d
+	surface tigercull shader tigercull_d
+
+	path models/vehicles/tigertank
+	skelmodel tigersmgun.skd
+	surface mg shader tankmg
+
+}
+
+init
+{
+	server
+	{
+		//classname drivablevehicle
+		classname VehicleTank
+		setsize "-134 -74 0" "134 74 78"
+		vehicleWheelCorners "148 148 78" "0 0 -1.5"
+		vehiclespeed 200
+		vehiclemass 1500
+		vehicletread 10
+		vehicleradius 0.33
+		vehiclerollingresistance 0.5
+		vehicledrag 0.00001
+                turnrate 25	
+		mass 1000
+		
+		// Spawn and attach the parts
+		spawnturret 0 "vehicles/tigercannon.tik"
+//		spawnturret 1 "vehicles/tigersmgun.tik"
+
+		// Set the Animation Set to use
+		AnimationSet "tank_"
+		SoundSet "tank_"
+
+			//////////////////////////////////////////
+			// Pitch-Mod Sound for vehicles by speed
+			//
+			// Linearly Interpolates from the minimum pitch when the vehicle is at the minimum speed to 
+			// the maximum pitch when the vehicle is at the maximum speed.
+			//
+			// Speed is in World Units.
+			//
+			//
+			//                 +--------------- Minimum Speed
+			//                 |  +------------ Minimum Pitch
+			//                 |  |
+			//                 |  |      +----- Maximum Speed
+			//                 |  |      |  +-- Maximum Pitch
+			//                 V  V      V  V
+			setsoundparameters 0 0.95   200 1		
+
+	}
+	client
+	{
+		cache vehicles/tigercannon.tik
+//		cache vehicles/tigersmgun.tik
+	}
+}
+
+animations
+{
+	idle     tigertank.skc
+}
+
+/*QUAKED vehicle_german_tank-tiger-desert (0.0 0.0 0.0) (-60 -40 0) (60 40 128)
+Desert Camo Tiger Tank
+*/

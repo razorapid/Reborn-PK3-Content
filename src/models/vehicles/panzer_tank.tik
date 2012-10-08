@@ -1,0 +1,81 @@
+TIKI
+setup
+{
+	scale 0.52				// Set default scale to 16/30.5 since world is in 16 units per foot and model is in cm's
+	path models/vehicles/panzer_iv
+	skelmodel panzer_tank.skd
+	surface tread shader panzer_iv_tread
+	surface frontwheel shader panzer_iv_frontwheel
+     	surface frontwheelband shader panzer_iv_frontwheelband
+ 	surface backwheel shader panzer_iv_backwheel
+	surface backwheelband shader panzer_iv_backwheelband
+	surface smallwheel shader panzer_iv_smallwheel
+      surface smallwheelband shader panzer_iv_smallwheelband
+      surface verysmallwheel shader panzer_iv_verysmallwheel
+      surface backwheelaxel shader panzer_iv_backwheelaxel
+      surface turret shader panzer_iv_turret
+      surface boxes shader panzer_iv_boxes
+      surface undercarriage shader panzer_iv_undercarriage
+
+	path models/vehicles/panzer_iv
+	skelmodel panzer_smgun.skd
+	surface undercarriage shader panzer_iv_undercarriage
+}
+init
+{
+	server
+	{
+		classname VehicleTank
+		setsize "-134 -74 0" "134 74 78"
+		vehicleWheelCorners "148 148 78" "0 0 -1.5" //these are copied from the regular tiger values
+		vehiclespeed 200
+		vehiclemass 1500
+		vehicletread 10
+		vehicleradius 0.33
+		vehiclerollingresistance 0.5
+		vehicledrag 0.00001
+		turnrate 25
+		mass 1000
+
+		// Spawn and attach the parts
+		spawnturret 0 "vehicles/panzer_cannon.tik"
+		//spawnturret 1 "vehicles/panzer_smgun.tik"
+
+		// Set the Animation Set to use
+		AnimationSet "tank_"
+		SoundSet "tank_"
+
+			//////////////////////////////////////////
+			// Pitch-Mod Sound for vehicles by speed
+			//
+			// Linearly Interpolates from the minimum pitch when the vehicle is at the minimum speed to 
+			// the maximum pitch when the vehicle is at the maximum speed.
+			//
+			// Speed is in World Units.
+			//
+			//
+			//                 +--------------- Minimum Speed
+			//                 |  +------------ Minimum Pitch
+			//                 |  |
+			//                 |  |      +----- Maximum Speed
+			//                 |  |      |  +-- Maximum Pitch
+			//                 V  V      V  V
+			setsoundparameters 0 0.95   200 1
+      }
+}
+
+animations
+{
+	idle     		panzer_tank.skc
+	lean_back		panzer_lean_back.skc
+	high			panzer_high.skc
+	level			panzer_level.skc
+	low			panzer_low.skc
+	lean_forward	panzer_lean_forward.skc
+	lean_right		panzer_lean_right.skc
+	lean_left		panzer_lean_left.skc
+}
+
+/*QUAKED vehicle_german_panzer-tank (0.0 .0 0.0) (-60 -40 0) (60 40 128)
+panzer_iv
+*/

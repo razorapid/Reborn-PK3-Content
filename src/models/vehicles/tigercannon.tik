@@ -1,0 +1,91 @@
+TIKI
+setup
+{
+	scale 0.52
+				// Set default scale to 16/30.5 since world is in 16 units per foot and model is in cm's
+	path models/vehicles/tigertank
+	skelmodel tigercannon.skd
+	surface material1 shader tigertank
+}
+
+init
+{
+	server
+	{
+		classname 		VehicleTurretGun
+		weapontype		cannon
+		name			"TigerCannon"
+
+		// turret settings
+		idleCheckOffset	"-56 0 0"
+
+		// Primary fire type info
+		projectile		models/projectiles/tigercannonshell.tik
+		firetype		heavy
+		meansofdeath		rocket
+		//bulletcount		1
+		usenoammo		1
+		firedelay		5
+		tracerfrequency 	3
+		turnspeed		38
+		pitchcaps		"-30 15 0"
+
+		// DM Attributes
+		dmfiredelay		5
+
+		SoundSet "tank_"
+	}
+	client
+	{
+		
+		cache muzsprite.spr
+		cache models/fx/muzflash.tik
+		cache models/ammo/rifleshell.tik
+	}
+}
+
+animations
+{
+	exit	  	tigercannon_exit.skc
+	idle_open	tigercannon_open.skc
+	idle    	tigercannon.skc
+	fire		tigercannon_fire.skc
+	{
+		server
+		{
+			first shoot
+		}
+		client
+		{
+			entry stopaliaschannel tank_snd_fire
+			first sound tank_snd_fire weapon 1.0 -1 0.95 0.1
+
+			// muzzle flash
+			first tagdlight tag_barrel 0.25 0.2 0.05 110 0.11
+			first tagspawn tag_barrel
+			(
+				scale 0.6
+				offsetalongaxis 3 0 0
+				count 1
+				model muzsprite.spr
+				angles 0 0 crandom 25
+				life 0.06
+			)
+
+			first tagspawn tag_barrel
+			(
+				count 1
+				scalemin 1.0
+				scalemax 1.5
+				model models/fx/muzflash.tik
+				randomroll
+				life 0.04
+			)
+
+		}
+	}
+}
+
+/*QUAKED vehicle_german_tigertank_cannon (0.0 .0 0.0) (-60 -40 0) (60 40 128)
+Tiger Tank Cannon
+*/

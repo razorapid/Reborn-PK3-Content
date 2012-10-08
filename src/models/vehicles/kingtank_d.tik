@@ -1,0 +1,29 @@
+TIKI
+setup
+{
+	scale 0.52				// Set default scale to 16/30.5 since world is in 16 units per foot and model is in cm's
+	path models/vehicles/ktigertank_d
+	skelmodel ktigertank_d.skd
+	surface tank1 shader ktank_d
+	surface tank2 shader ktank_d
+	surface tank3 shader ktank_d
+	surface tank4 shader ktank_d
+	surface treadwheel shader ktreadwheel_d
+	surface twheel_in shader ktwheel_in_d
+	surface treadwheel_b shader ktreadwheel_b_d
+	surface back_wheel shader kback_wheel_d
+	surface frontwheel shader kfrontwheel_d
+	surface treads shader ktreads_d
+	surface treadrims shader ktreadrims_d
+	surface smallwheel shader ksmallwheel_d
+	surface innerwheel shader kinnerwheel_d
+}	
+
+animations
+{
+	idle	ktigertank_d.skc
+}
+
+/*QUAKED vehicle_german_kingtigertank-d (0.0 .0 0.0) (-60 -40 0) (60 40 128)
+Tiger Tank
+*/

@@ -1,0 +1,48 @@
+TIKI
+setup
+{
+	scale 0.52				// Set default scale to 16/30.5 since world is in 16 units per foot and model is in cm's
+	path models/vehicles/panzer_iv
+	skelmodel panzer_smgun.skd
+//	surface tread shader panzer_iv_tread_eu
+//	surface frontwheel shader panzer_iv_frontwheel_eu
+//     	surface frontwheelband shader panzer_iv_frontwheelband_eu
+// 	surface backwheel shader panzer_iv_backwheel_eu
+//	surface backwheelband shader panzer_iv_backwheelband_eu
+//	surface smallwheel shader panzer_iv_smallwheel_eu
+//      surface smallwheelband shader panzer_iv_smallwheelband_eu
+//      surface verysmallwheel shader panzer_iv_verysmallwheel_eu
+//      surface backwheelaxel shader panzer_iv_backwheelaxel_eu
+//      surface turret shader panzer_iv_turret_eu
+//      surface boxes shader panzer_iv_boxes_eu
+      surface undercarriage shader panzer_iv_undercarriage_eu
+}
+init
+{
+	server
+	{
+		classname VehicleTank
+          setsize "-140 -80 0" "140 80 120"
+	    	vehicleWheelCorners "148 148 78" "0 0 -1.5"
+	    gravity 1.0
+		vehiclespeed 750
+		vehiclemass 8000
+		vehicletread 10
+		vehicleradius 0.33
+		vehiclerollingresistance 0.5
+		vehicledrag 0.00001
+		mass 8000
+	      
+         // Set the Animation Set to use
+		AnimationSet "tank_"
+      }
+}
+
+animations
+{
+	idle     panzer_smgun.skc
+}
+
+/*QUAKED vehicle_german_panzer-smgun-europe (0.0 .0 0.0) (-60 -40 0) (60 40 128)
+panzer_iv
+*/

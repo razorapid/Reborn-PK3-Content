@@ -1,0 +1,7 @@
+TIKI
+
+$include models/weapons/steilhandgranate_base.txt
+
+/*QUAKED playerweapon_german_steilhandgranate (0.0 0.0 1.0) (-8 -8 -8) (8 8 8)
+American grenade - M2 Fragmentation Grenade.
+*/

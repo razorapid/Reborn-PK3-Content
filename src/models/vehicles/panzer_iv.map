@@ -1,0 +1,159 @@
+{
+"classname" "worldspawn"
+// brush 0
+{
+( -58 18 151 ) ( -86 18 151 ) ( -86 -12 151 ) common/metalclip -13 -47 0.00 1 1 983040 34976 0 +surfaceparm detail 
+( -85 -12 167 ) ( -85 18 167 ) ( -57 18 167 ) common/metalclip -13 -47 0.00 1 1 983040 34976 0 +surfaceparm detail 
+( -85 -17 143 ) ( -57 -17 143 ) ( -57 -17 15 ) common/metalclip -13 -32 0.00 1 1 983040 34976 0 +surfaceparm detail 
+( -55 -12 143 ) ( -55 18 143 ) ( -55 18 15 ) common/metalclip -13 -32 0.00 1 1 983040 34976 0 +surfaceparm detail 
+( -57 15 143 ) ( -85 15 143 ) ( -85 15 15 ) common/metalclip -13 -32 0.00 1 1 983040 34976 0 +surfaceparm detail 
+( -86 17 143 ) ( -86 -13 143 ) ( -86 -13 15 ) common/metalclip -13 -32 0.00 1 1 983040 34976 0 +surfaceparm detail 
+}
+// brush 1
+{
+( 44 -5 125 ) ( 44 5 125 ) ( 44 5 136 ) common/metalclip 8 -3 0.00 1 1 983040 34976 0 +surfaceparm detail 
+( 179 4 126 ) ( 179 4 135 ) ( 44 5 136 ) common/metalclip 23 -3 0.00 1 1 983040 34976 0 +surfaceparm detail 
+( 179 -4 126 ) ( 179 -4 135 ) ( 179 4 135 ) common/metalclip 8 -3 0.00 1 1 983040 34976 0 +surfaceparm detail 
+( 179 -4 135 ) ( 179 -4 126 ) ( 44 -5 125 ) common/metalclip 23 -3 0.00 1 1 983040 34976 0 +surfaceparm detail 
+( 179 4 135 ) ( 179 -4 135 ) ( 44 -5 136 ) common/metalclip 23 -8 0.00 1 1 983040 34976 0 +surfaceparm detail 
+( 179 -4 126 ) ( 179 4 126 ) ( 44 5 125 ) common/metalclip 23 -8 0.00 1 1 983040 34976 0 +surfaceparm detail 
+}
+// brush 2
+{
+( 8 -30 117 ) ( 8 23 117 ) ( 8 23 144 ) common/metalclip 14 -1 0.00 1 1 983040 34976 0 +surfaceparm detail 
+( 8 23 117 ) ( 44 12 125 ) ( 44 12 136 ) common/metalclip 28 -1 0.00 1 1 983040 34976 0 +surfaceparm detail 
+( 44 12 125 ) ( 44 -11 125 ) ( 44 -11 136 ) common/metalclip 14 -1 0.00 1 1 983040 34976 0 +surfaceparm detail 
+( 44 -11 125 ) ( 8 -30 117 ) ( 8 -30 144 ) common/metalclip 28 -1 0.00 1 1 983040 34976 0 +surfaceparm detail 
+( 8 23 144 ) ( 44 12 136 ) ( 44 -11 136 ) common/metalclip 28 -14 0.00 1 1 983040 34976 0 +surfaceparm detail 
+( 8 -30 117 ) ( 44 -11 125 ) ( 44 12 125 ) common/metalclip 28 -14 0.00 1 1 983040 34976 0 +surfaceparm detail 
+}
+// brush 3
+{
+( -90 59 109 ) ( -90 -61 109 ) ( 12 -61 109 ) common/metalclip -14 -47 0.00 1 1 983040 34976 0 +surfaceparm detail 
+( -77 -42 152 ) ( -77 40 152 ) ( 7 40 152 ) common/metalclip -14 -47 0.00 1 1 983040 34976 0 +surfaceparm detail 
+( 10 61 129.500000 ) ( 12 -63 113 ) ( 8 -63 146 ) common/metalclip -13 25 0.00 1 1 983040 34976 0 +surfaceparm detail 
+( -71 -61 113 ) ( -71 -42 152 ) ( 13.000282 -51.500000 132.500000 ) common/metalclip -13 25 0.00 1 1 983040 34976 0 +surfaceparm detail 
+( -72 40 152 ) ( -72 59 113 ) ( 12.000282 49.500000 132.500000 ) common/metalclip -13 25 0.00 1 1 983040 34976 0 +surfaceparm detail 
+( -36 38 109 ) ( -36 40 109 ) ( -36 39 152 ) common/metalclip -13 25 0.00 1 1 983040 34976 0 +surfaceparm detail 
+}
+// brush 4
+{
+( -36 -62.948830 109 ) ( -91 -49 109 ) ( -77 -33 152 ) common/metalclip -13 25 0.00 1 1 983040 34976 0 +surfaceparm detail 
+( -77 31 152 ) ( -91 48 109 ) ( -36 61.000011 109 ) common/metalclip -13 25 0.00 1 1 983040 34976 0 +surfaceparm detail 
+( -90 59 109 ) ( -90 -61 109 ) ( 12 -61 109 ) common/metalclip -14 -47 0.00 1 1 983040 34976 0 +surfaceparm detail 
+( -77 -42 152 ) ( -77 40 152 ) ( 7 40 152 ) common/metalclip -14 -47 0.00 1 1 983040 34976 0 +surfaceparm detail 
+( -91 61 109 ) ( -77 40 152 ) ( -77 -42 152 ) common/metalclip -13 25 0.00 1 1 983040 34976 0 +surfaceparm detail 
+( -36 -62.948830 109 ) ( -91 -50.875511 109 ) ( -36 -42.000111 152 ) common/metalclip -13 25 0.00 1 1 983040 34976 0 +surfaceparm detail 
+( -36 61.000011 109 ) ( -36 40.000011 152 ) ( -77 31 152 ) common/metalclip -13 25 0.00 1 1 983040 34976 0 +surfaceparm detail 
+( -36 40 109 ) ( -36 38 109 ) ( -36 39 152 ) common/metalclip -13 25 0.00 1 1 983040 34976 0 +surfaceparm detail 
+}
+// brush 5
+{
+( 8 37 116 ) ( -92 37 116 ) ( -92 -17 116 ) common/metalclip -9 -47 0.00 1 1 983040 34976 0 +surfaceparm detail 
+( -141 -26 148 ) ( -141 25 148 ) ( -77 25 152 ) common/metalclip -9 -47 0.00 1 1 983040 34976 0 +surfaceparm detail 
+( -92 -26 153 ) ( 8 -26 153 ) ( 8 -26 134 ) common/metalclip -9 25 0.00 1 1 983040 34976 0 +surfaceparm detail 
+( -77 -19 156 ) ( -77 35 156 ) ( -77 35 137 ) common/metalclip -13 25 0.00 1 1 983040 34976 0 +surfaceparm detail 
+( 8 25 152 ) ( -92 25 152 ) ( -92 25 133 ) common/metalclip -9 25 0.00 1 1 983040 34976 0 +surfaceparm detail 
+( -141 25 148 ) ( -141 -26 148 ) ( -141 -26 116 ) common/metalclip -13 25 0.00 1 1 983040 34976 0 +surfaceparm detail 
+}
+// brush 6
+{
+( -181 22 61 ) ( -203 22 61 ) ( -203 -57 61 ) common/metalclip -13 -47 0.00 1 1 983040 34976 0 +surfaceparm detail 
+( -205 -57 80 ) ( -205 22 80 ) ( -183 22 80 ) common/metalclip -13 -47 0.00 1 1 983040 34976 0 +surfaceparm detail 
+( -205 -57 103 ) ( -183 -57 103 ) ( -183 -57 90 ) common/metalclip -13 -47 0.00 1 1 983040 34976 0 +surfaceparm detail 
+( -183 -57 103 ) ( -183 22 103 ) ( -183 22 90 ) common/metalclip -13 -47 0.00 1 1 983040 34976 0 +surfaceparm detail 
+( -183 22 103 ) ( -205 22 103 ) ( -205 22 90 ) common/metalclip -13 -47 0.00 1 1 983040 34976 0 +surfaceparm detail 
+( -203 22 103 ) ( -203 -57 103 ) ( -203 -57 90 ) common/metalclip -13 -47 0.00 1 1 983040 34976 0 +surfaceparm detail 
+}
+// brush 7
+{
+( -72 73 82 ) ( -8 73 82 ) ( -8 87 82 ) common/metalclip 45 51 0.00 1 1 983040 34976 0 +surfaceparm detail 
+( -8 73 103 ) ( -72 73 103 ) ( -72 87 94 ) common/nodraw 35 0 0.00 1 1 536870912 2224 0 +surfaceparm detail 
+( -72 73 103 ) ( -8 73 103 ) ( -8 73 82 ) common/nodraw 35 0 0.00 1 1 536870912 2224 0 +surfaceparm detail 
+( -8 73 82 ) ( -8 73 102.999695 ) ( -8 87 93.999695 ) common/metalclip -20 -1 0.00 1 1 983040 34976 0 +surfaceparm detail 
+( -8 87 94 ) ( -72 87 94 ) ( -72 87 82 ) common/nodraw 35 0 0.00 1 1 536870912 2224 0 +surfaceparm detail 
+( -72 73 102.999695 ) ( -72 73 82 ) ( -72 87 82 ) common/metalclip -20 -1 0.00 1 1 983040 34976 0 +surfaceparm detail 
+}
+// brush 8
+{
+( 58 87 90 ) ( 29 87 90 ) ( 29 68 90 ) common/metalclip 10 51 0.00 1 1 983040 34976 0 +surfaceparm detail 
+( 28 65 103 ) ( 28 84 103 ) ( 57 84 103 ) common/nodraw 0 0 0.00 1 1 536870912 2224 0 +surfaceparm detail 
+( 29 73 118 ) ( 58 73 118 ) ( 58 73 91 ) common/nodraw 0 0 0.00 1 1 536870912 2224 0 +surfaceparm detail 
+( 27 69 118 ) ( 27 88 118 ) ( 27 88 91 ) common/metalclip -20 -1 0.00 1 1 983040 34976 0 +surfaceparm detail 
+( 59 87 118 ) ( 30 87 118 ) ( 30 87 91 ) common/nodraw 0 0 0.00 1 1 536870912 2224 0 +surfaceparm detail 
+( 15 84 110 ) ( 15 65 110 ) ( 15 65 83 ) common/metalclip -20 -1 0.00 1 1 983040 34976 0 +surfaceparm detail 
+}
+// brush 9
+{
+( 110 81 82 ) ( 81 81 82 ) ( 81 62 82 ) common/metalclip -42 45 0.00 1 1 983040 34976 0 +surfaceparm detail 
+( 80 59 94 ) ( 80 78 94 ) ( 109 78 94 ) common/metalclip -42 45 0.00 1 1 983040 34976 0 +surfaceparm detail 
+( 81 66 109 ) ( 110 66 109 ) ( 110 66 82 ) common/metalclip -42 -10 0.00 1 1 983040 34976 0 +surfaceparm detail 
+( 104 62 109 ) ( 104 81 109 ) ( 104 81 82 ) common/metalclip -14 -10 0.00 1 1 983040 34976 0 +surfaceparm detail 
+( 111 87 109 ) ( 82 87 109 ) ( 82 87 82 ) common/metalclip -42 -10 0.00 1 1 983040 34976 0 +surfaceparm detail 
+( 67 78 101 ) ( 67 59 101 ) ( 67 59 74 ) common/metalclip -14 -10 0.00 1 1 983040 34976 0 +surfaceparm detail 
+}
+// brush 10
+{
+( 6 -69 82 ) ( -23 -69 82 ) ( -23 -88 82 ) common/metalclip -2 -41 0.00 1 1 983040 34976 0 +surfaceparm detail 
+( -24 -88 102 ) ( -24 -69 102 ) ( 5 -69 102 ) common/metalclip -2 -41 0.00 1 1 983040 34976 0 +surfaceparm detail 
+( -23 -88 109 ) ( 6 -88 109 ) ( 6 -88 82 ) common/metalclip -2 -10 0.00 1 1 983040 34976 0 +surfaceparm detail 
+( 0 -88 109 ) ( 0 -69 109 ) ( 0 -69 82 ) common/metalclip 8 -10 0.00 1 1 983040 34976 0 +surfaceparm detail 
+( 6 -75 109 ) ( -23 -75 109 ) ( -23 -75 82 ) common/metalclip -2 -10 0.00 1 1 983040 34976 0 +surfaceparm detail 
+( -37 -69 109 ) ( -37 -88 109 ) ( -37 -88 82 ) common/metalclip 8 -10 0.00 1 1 983040 34976 0 +surfaceparm detail 
+}
+// brush 11
+{
+( 85 -75 82 ) ( 85 73 82 ) ( -182 73 82 ) common/metalclip -13 -47 0.00 1 1 983040 34976 0 +surfaceparm detail 
+( 77 73 109 ) ( 77 -75 109 ) ( -178 -75 109 ) common/metalclip -13 -47 0.00 1 1 983040 34976 0 +surfaceparm detail 
+( -178 -75 107 ) ( -76 -75 107 ) ( -80 -75 83 ) common/metalclip -13 13 0.00 1 1 983040 34976 0 +surfaceparm detail 
+( 77 -75 109 ) ( 77 73 109 ) ( 85 73 82 ) common/metalclip 14 13 0.00 1 1 983040 34976 0 +surfaceparm detail 
+( -76 73 109 ) ( -178 73 109 ) ( -182 73 85 ) common/metalclip -13 13 0.00 1 1 983040 34976 0 +surfaceparm detail 
+( -178 62 106 ) ( -178 -64 106 ) ( -182 -64 82 ) common/metalclip 14 13 0.00 1 1 983040 34976 0 +surfaceparm detail 
+( 30 73 82 ) ( 85 62 82 ) ( 57.500000 67.500000 109 ) common/metalclip 14 13 0.00 1 1 983040 34976 0 +surfaceparm detail 
+( 85 -64 82 ) ( 30 -75 82 ) ( 57.500000 -69.500000 109 ) common/metalclip 14 13 0.00 1 1 983040 34976 0 +surfaceparm detail 
+}
+// brush 12
+{
+( -110 62 20 ) ( -180 62 20 ) ( -180 -18 20 ) common/metalclip -23 -10 0.00 1 1 983040 34976 0 +surfaceparm detail 
+( 85 62 82 ) ( 85 -64 82 ) ( -182 -64 82 ) common/metalclip -23 -10 0.00 1 1 983040 34976 0 +surfaceparm detail 
+( -179 -64 80 ) ( -109 -64 80 ) ( -109 -64 -2 ) common/metalclip -23 -10 0.00 1 1 983040 34976 0 +surfaceparm detail 
+( 140 -64 64 ) ( 140 62 64 ) ( 129 62 39 ) common/metalclip -23 -10 0.00 1 1 983040 34976 0 +surfaceparm detail 
+( -109 62 82 ) ( -179 62 82 ) ( -179 62 0 ) common/metalclip -23 -10 0.00 1 1 983040 34976 0 +surfaceparm detail 
+( -182 -18 35 ) ( -182 62 35 ) ( -182 62 82 ) common/metalclip -23 -10 0.00 1 1 983040 34976 0 +surfaceparm detail 
+( -182 62 35 ) ( -182 -18 35 ) ( -155 -18 20 ) common/metalclip -23 -10 0.00 1 1 983040 34976 0 +surfaceparm detail 
+( 129 -64 39 ) ( 129 62 39 ) ( 82 62 20 ) common/metalclip -23 -10 0.00 1 1 983040 34976 0 +surfaceparm detail 
+( 85 -64 82 ) ( 85 62 82 ) ( 140 62 64 ) common/metalclip -23 -10 0.00 1 1 983040 34976 0 +surfaceparm detail 
+}
+// brush 13
+{
+( 136 66 30 ) ( 136 104 30 ) ( 84 104 0 ) common/metalclip -4 -42 0.00 1 -1 983040 34976 0 +surfaceparm detail 
+( -142 104 0 ) ( -142 66 0 ) ( 84 66 0 ) common/metalclip -23 -42 0.00 1 -1 983040 34976 0 +surfaceparm detail 
+( -192 103 13 ) ( -192 66 13 ) ( -142 66 0 ) common/metalclip 16 -42 -180.00 1 1 983040 34976 0 +surfaceparm detail 
+( -203 66 22 ) ( -203 103 22 ) ( -208 103 37 ) common/metalclip 8 -42 90.00 1 1 983040 34976 0 +surfaceparm detail 
+( -192 66 13 ) ( -192 103 13 ) ( -203 103 22 ) common/metalclip -14 -56 0.00 1 -1 983040 34976 0 +surfaceparm detail 
+( 120 104 82 ) ( 120 66 82 ) ( -182 66 82 ) common/metalclip -23 -42 0.00 1 -1 983040 34976 0 +surfaceparm detail 
+( 140 66 73 ) ( 140 103 73 ) ( 142 103 46 ) common/metalclip 52 -24 -180.00 1 1 983040 34976 0 +surfaceparm detail 
+( 142 66 46 ) ( 142 104 46 ) ( 136 104 30 ) common/metalclip 8 -42 90.00 1 1 983040 34976 0 +surfaceparm detail 
+( -223 86 -12 ) ( -59 86 -12 ) ( -59 86 68 ) common/metalclip -23 -10 0.00 1 1 983040 34976 0 +surfaceparm detail 
+( -180 62 18 ) ( -182 62 34 ) ( -170 62 52 ) common/metalclip -23 -10 0.00 1 1 983040 34976 0 +surfaceparm detail 
+( -208 66 37 ) ( -208 103 37 ) ( -200 103 69 ) common/metalclip -33 -10 0.00 1 1 983040 34976 0 +surfaceparm detail 
+( 140 103 73 ) ( 140 66 73 ) ( 120 66 82 ) common/metalclip -23 20 0.00 1 1 983040 34976 0 +surfaceparm detail 
+( -200 66 69 ) ( -200 103 69 ) ( -182 103 82 ) common/metalclip -23 20 0.00 1 1 983040 34976 0 +surfaceparm detail 
+}
+// brush 14
+{
+( 136 -84 30 ) ( 136 -46 30 ) ( 84 -46 0 ) common/metalclip -4 -20 0.00 1 -1 983040 34976 0 +surfaceparm detail 
+( -142 -46 0 ) ( -142 -84 0 ) ( 84 -84 0 ) common/metalclip -23 -20 0.00 1 -1 983040 34976 0 +surfaceparm detail 
+( -192 -47 13 ) ( -192 -84 13 ) ( -142 -84 0 ) common/metalclip 17 -20 -180.00 1 1 983040 34976 0 +surfaceparm detail 
+( -203 -84 22 ) ( -203 -47 22 ) ( -208 -47 37 ) common/metalclip 8 -20 90.00 1 1 983040 34976 0 +surfaceparm detail 
+( -192 -84 13 ) ( -192 -47 13 ) ( -203 -47 22 ) common/metalclip -14 -34 0.00 1 -1 983040 34976 0 +surfaceparm detail 
+( 120 -46 82 ) ( 120 -84 82 ) ( -182 -84 82 ) common/metalclip -23 -20 0.00 1 -1 983040 34976 0 +surfaceparm detail 
+( 140 -84 73 ) ( 140 -47 73 ) ( 142 -47 46 ) common/metalclip 30 -24 -180.00 1 1 983040 34976 0 +surfaceparm detail 
+( 142 -84 46 ) ( 142 -46 46 ) ( 136 -46 30 ) common/metalclip 8 -20 90.00 1 1 983040 34976 0 +surfaceparm detail 
+( -223 -64 -12 ) ( -59 -64 -12 ) ( -59 -64 68 ) common/metalclip -23 -10 0.00 1 1 983040 34976 0 +surfaceparm detail 
+( -180 -88 18 ) ( -182 -88 34 ) ( -170 -88 52 ) common/metalclip -23 -10 0.00 1 1 983040 34976 0 +surfaceparm detail 
+( -208 -84 37 ) ( -208 -47 37 ) ( -200 -47 69 ) common/metalclip -11 -10 0.00 1 1 983040 34976 0 +surfaceparm detail 
+( 140 -47 73 ) ( 140 -84 73 ) ( 120 -84 82 ) common/metalclip -23 -2 0.00 1 1 983040 34976 0 +surfaceparm detail 
+( -200 -84 69 ) ( -200 -47 69 ) ( -182 -47 82 ) common/metalclip -23 -2 0.00 1 1 983040 34976 0 +surfaceparm detail 
+}
+}

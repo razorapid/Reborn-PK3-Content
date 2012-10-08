@@ -1,0 +1,21 @@
+TIKI
+setup
+{
+	scale 0.52			// Set default scale to 16/30.5 since world is in 16 units per foot and model is in cm's
+	path models/items/papers
+	skelmodel papers_o.skd
+	surface wehrpass shader wehrpass_l2_pulsating
+}
+
+init
+{
+	server
+	{
+		classname object
+	}
+}
+
+animations
+{
+	idle     papers_o.skc
+}

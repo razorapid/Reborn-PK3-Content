@@ -1,0 +1,151 @@
+TIKI
+setup
+{
+	scale 0.52				// Set default scale to 16/30.5 since world is in 16 units per foot and model is in cm's
+	path models/vehicles/opeltruck
+	skelmodel opel.skd
+	surface opel1 shader opelgreen
+	surface opel2 shader opel_cullgreen
+	surface opel3 shader opelgreen
+	surface opel4 shader opelgreen
+	surface opel5 shader opelgreen
+	surface opelhub shader opelhubgreen
+	surface opeltread shader opeltread
+	surface opelhubstill shader opelhub_norotate
+	surface opeltreadstill shader opeltread_norotate
+	surface opelwindows shader opelwindows
+	surface opellights shader opellights
+
+}
+
+init
+{
+	server
+      	{
+      		classname drivablevehicle
+      		//setsize "-60 -40 0" "60 40 120"
+			setsize "-50 -40 0" "50 40 60"
+			vehicleWheelCorners "140 140 78" "-8 -8 -1.5"
+			vehicleinit jeep.tik
+			vehiclespeed 1000
+			vehiclemass 1500 // not used
+			vehicletread 10 // not used
+			vehicleradius 0.33
+			vehiclerollingresistance 0.5 // not used
+			vehicledrag 0.00001
+			vehiclebouncy 0.2
+			vehiclespringy 0.8
+			//vehicleYaw -10 10
+			//vehicleRoll -10 10
+			//vehicleZ -5 10
+			mass 1000
+
+			AnimationSet "opeltruck_"
+			SoundSet "opeltruck_"
+
+			//////////////////////////////////////////
+			// Pitch-Mod Sound for vehicles by speed
+			//
+			// Linearly Interpolates from the minimum pitch when the vehicle is at the minimum speed to 
+			// the maximum pitch when the vehicle is at the maximum speed.
+			//
+			// Speed is in World Units.
+			//
+			//
+			//                 +--------------- Minimum Speed
+			//                 |  +------------ Minimum Pitch
+			//                 |  |
+			//                 |  |      +----- Maximum Speed
+			//                 |  |      |  +-- Maximum Pitch
+			//                 V  V      V  V
+			setsoundparameters 0 0.95   200 1	
+			
+			surface opelhubstill +nodraw	
+			surface opeltreadstill +nodraw	
+	}
+}
+
+animations
+{
+	idle		opel.skc
+	{
+		server
+		{
+			entry surface opellights +nodraw
+		}
+	}
+	idlelights	opel.skc
+	{
+		server
+		{
+			entry surface opellights -nodraw
+		}
+	}
+	idlenolights	opel.skc
+	{
+		server
+		{
+			entry surface opellights +nodraw
+		}
+	}
+	skidding opel.skc
+	{
+		client
+		{
+			entry stopaliaschannel snd_skid_stone
+			entry sound snd_skid_stone
+
+			first tagspawn "tire_spew_back_left"
+			(
+				count 1
+				scale .7
+				model models/fx/snipesmoke.tik
+			)
+
+			first tagspawn "tire_spew_back_right"
+			(
+				count 1
+				scale .7
+				model models/fx/snipesmoke.tik
+			)
+
+			first tagspawn "tire_spew_front_left"
+			(
+				count 1
+				scale .25
+				model models/fx/snipesmoke.tik
+			)
+
+			first tagspawn "tire_spew_front_right"
+			(
+				count 1
+				scale .25
+				model models/fx/snipesmoke.tik
+			)
+		}
+	}
+	stop_wheels		opel.skc
+	{
+		server
+		{
+			entry surface opelhub			+nodraw	
+			entry surface opeltread			+nodraw	
+			entry surface opelhubstill		-nodraw	
+			entry surface opeltreadstill	-nodraw	
+		}
+	}
+	start_wheels	opel.skc
+	{
+		server
+		{
+			entry surface opelhub			-nodraw	
+			entry surface opeltread			-nodraw	
+			entry surface opelhubstill		+nodraw	
+			entry surface opeltreadstill	+nodraw	
+		}
+	}
+}
+
+/*QUAKED vehicle_german_opeltruckgreen (0.0 0.0 0.0) (-65 -40 0) (65 40 120)
+Opel Truck
+*/

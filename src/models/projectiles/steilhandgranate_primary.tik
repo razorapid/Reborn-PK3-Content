@@ -1,0 +1,14 @@
+// The is the steilhandgranate used for primary fire
+TIKI
+
+$include models/projectiles/steilhandgranate_base.txt
+
+init
+{
+	server
+	{
+		speed			900
+		minspeed		600
+		addvelocity		0 0 250
+	}
+}

@@ -1,0 +1,111 @@
+TIKI
+setup
+{
+	scale 0.52				// Set default scale to 16/30.5 since world is in 16 units per foot and model is in cm's
+	path models/vehicles/sdkfz
+	skelmodel sdkfz.skd
+	surface sdkfz_tredz shader sdkfz_tredz
+     	surface sdkfz_i_cog shader sdkfz_i_cog
+ 	surface sdkfz_rims shader sdkfz_rims
+	surface sdkfz_f_cog shader sdkfz_f_cog
+	surface sdkfz_o_cog shader sdkfz_o_cog
+	surface sdkfz_w_tred shader sdkfz_w_tred
+	surface sdkfz_wheel shader sdkfz_wheel
+	surface sdkfz shader sdkfz
+}
+
+init
+{
+	server
+	{
+		classname drivablevehicle
+		setsize "-168 -64 0" "184 72 112"
+		vehicleWheelCorners "300 112 112" "0 0 -1.5``"
+		vehiclespeed 200
+		vehiclemass 1500
+		vehicletread 10
+		vehicleradius 0.33
+		vehiclerollingresistance 0.5
+		vehicledrag 0.00001
+		mass 1500
+		turnrate 40
+		health 500
+
+		AnimationSet "sdkfz_"
+		SoundSet "sdkfz_"
+
+		spawnturret 0 "vehicles/sdkfz_mg42.tik"
+
+
+		//////////////////////////////////////////
+		// Pitch-Mod Sound for vehicles by speed
+		//
+		// Linearly Interpolates from the minimum pitch when the vehicle is at the minimum speed to 
+		// the maximum pitch when the vehicle is at the maximum speed.
+		//
+		// Speed is in World Units.
+		//
+		//
+		//                 +--------------- Minimum Speed
+		//                 |  +------------ Minimum Pitch
+		//                 |  |
+		//                 |  |      +----- Maximum Speed
+		//                 |  |      |  +-- Maximum Pitch
+		//                 V  V      V  V
+		setsoundparameters 0 0.95   200 1		
+
+	}
+}
+
+animations
+{
+	idle     		sdkfz.skc
+	high			sdkfz_high.skc
+	lean_back		sdkfz_lean_back.skc
+	lean_forward		sdkfz_lean_forward.skc
+	lean_left		sdkfz_lean_left.skc
+	lean_right		sdkfz_lean_right.skc
+	level			sdkfz_level.skc
+	low			sdkfz_low.skc
+
+	skidding 		sdkfz.skc
+	{
+		client
+		{
+			entry stopaliaschannel snd_skid_stone
+			entry sound snd_skid_stone
+
+			first tagspawn "tire_spew_back_left"
+			(
+				count 1
+				scale .7
+				model models/fx/snipesmoke.tik
+			)
+
+			first tagspawn "tire_spew_back_right"
+			(
+				count 1
+				scale .7
+				model models/fx/snipesmoke.tik
+			)
+
+			first tagspawn "tire_spew_front_left"
+			(
+				count 1
+				scale .25
+				model models/fx/snipesmoke.tik
+			)
+
+			first tagspawn "tire_spew_front_right"
+			(
+				count 1
+				scale .25
+				model models/fx/snipesmoke.tik
+			)
+		}
+	}
+}
+
+/*QUAKED vehicle_german_sdkfz (0.0 .0 0.0) (-168 -64 0) (184 72 112)
+SDKFZ Halftrack
+*/

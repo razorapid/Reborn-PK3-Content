@@ -1,0 +1,24 @@
+TIKI
+setup
+{
+	scale 0.52			// Set default scale to 16/30.5 since world is in 16 units per foot and model is in cm's
+	path models/items/wirecutters
+	skelmodel wirecutters.skb
+	surface wirecutters shader wirecutters
+}
+
+init
+{
+	server
+	{
+		classname object
+	}
+}
+         
+animations
+{
+	idle     wirecutters.skc
+}
+
+/*QUAKED static_item_wirecutters (0.5 0.5 1.0) (-8 -8 0) (8 8 16)
+*/

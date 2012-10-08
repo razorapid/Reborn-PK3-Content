@@ -1,0 +1,13 @@
+TIKI
+setup
+{
+	scale 0.52
+	path models/ammo/shell
+	skelmodel rifle_shell.skd
+	surface all shader shellmetal
+}
+
+animations
+{
+	idle rifle_shell.skc
+}

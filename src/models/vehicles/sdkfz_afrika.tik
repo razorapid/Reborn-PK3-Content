@@ -1,0 +1,81 @@
+TIKI
+setup
+{
+	scale 0.52				// Set default scale to 16/30.5 since world is in 16 units per foot and model is in cm's
+	path models/vehicles/sdkfz
+	skelmodel sdkfz.skd
+	surface sdkfz_tredz shader sdkfz_tredz_a
+     	surface sdkfz_i_cog shader sdkfz_i_cog_a
+ 	surface sdkfz_rims shader sdkfz_rims_a
+	surface sdkfz_f_cog shader sdkfz_f_cog_a
+	surface sdkfz_o_cog shader sdkfz_o_cog_a
+	surface sdkfz_w_tred shader sdkfz_w_tred_a
+	surface sdkfz_wheel shader sdkfz_wheel_a
+	surface sdkfz shader sdkfz_a
+}
+
+init
+{
+	server
+	{
+		classname drivablevehicle
+		vehicleWheelCorners "300 112 112" "0 0 -1.5``"
+		vehiclespeed 200
+		vehiclemass 1500
+		vehicletread 10
+		vehicleradius 0.33
+		vehiclerollingresistance 0.5
+		vehicledrag 0.00001
+		mass 1500
+		turnrate 40
+		health 500
+
+		AnimationSet "sdkfz_"
+		SoundSet "sdkfz_"
+	}
+}
+
+animations
+{
+	idle     sdkfz.skc
+	skidding sdkfz.skc
+	{
+		client
+		{
+			entry stopaliaschannel snd_skid_stone
+			entry sound snd_skid_stone
+
+			first tagspawn "tire_spew_back_left"
+			(
+				count 1
+				scale .7
+				model models/fx/snipesmoke.tik
+			)
+
+			first tagspawn "tire_spew_back_right"
+			(
+				count 1
+				scale .7
+				model models/fx/snipesmoke.tik
+			)
+
+			first tagspawn "tire_spew_front_left"
+			(
+				count 1
+				scale .25
+				model models/fx/snipesmoke.tik
+			)
+
+			first tagspawn "tire_spew_front_right"
+			(
+				count 1
+				scale .25
+				model models/fx/snipesmoke.tik
+			)
+		}
+	}
+}
+
+/*QUAKED vehicle_german_sdkfzafrika (0.0 .0 0.0) (-168 -64 0) (184 72 112)
+SDKFZ Halftrack
+*/

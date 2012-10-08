@@ -1,0 +1,93 @@
+TIKI
+setup
+{
+	scale 1.33				// Set default scale to 16/30.5 since world is in 16 units per foot and model is in cm's
+	path models/vehicles/jeep
+	skelmodel jeep_30cal.skd
+	surface weapon shader 30cal
+	surface mount shader 30calmount
+}
+
+init
+{
+	server
+	{
+		classname 		VehicleTurretGun
+		weapontype		mg
+		name			"Jeep .30 Cal"
+
+		// turret settings
+		idleCheckOffset	"-56 0 0"
+
+		// Primary fire type info
+		firetype		bullet
+//		ammotype		"MG"
+		meansofdeath		bullet
+		bulletcount		2
+//		clipsize		20
+//		startammo		20
+//		ammorequired		1
+//		ammorequired		0
+		usenoammo		1
+		firedelay		0.06
+		bulletrange		4000
+		bulletdamage		45
+		bulletspread		50 50
+		tracerfrequency 	3
+		turnspeed		1001
+
+		// DM Attributes
+		dmbulletcount		2
+		dmfiredelay		0.065
+		dmbulletrange		4000
+		dmbulletdamage		45
+		dmbulletspread		50 50
+
+		SoundSet "jeep_"
+
+	}
+}
+
+animations
+{
+	idle    jeep_30cal.skc
+	fire	jeep_30cal.skc
+	{
+		server
+		{
+			entry shoot
+		}
+		client
+		{
+			entry stopaliaschannel snd_fire
+			entry sound snd_fire weapon 1.0 -1 0.95 0.1
+
+			// muzzle flash
+			entry tagdlight tag_barrel 0.25 0.2 0.05 110 0.11
+			entry tagspawnlinked tag_barrel
+			(
+				scale 0.6
+				offsetalongaxis 3 0 0
+				count 1
+				model muzsprite.spr
+				angles 0 0 crandom 25
+				life 0.04
+			)
+			entry tagspawnlinked tag_barrel
+			(
+				count 1
+				scalemin 1.0
+				scalemax 1.5
+				model models/fx/muzflash.tik
+				randomroll
+				life 0.03
+//				flicker
+			)
+
+		}
+	}
+}
+
+/*QUAKED vehicle_allied_jeep_30cal (0.0 .0 0.0) (-60 -40 0) (60 40 128)
+Jeep 30cal
+*/

@@ -1,0 +1,114 @@
+
+TIKI
+setup
+{
+	scale 0.52			// Set default scale to 16/30.5 since world 
+						// is in 16 units per foot and model is in cm's
+	path models/statweapons/88mmflak
+	skelmodel 88_d.skd
+	surface all shader flak88_d
+}
+
+init
+{
+	server
+	{
+		classname animate
+		setsize "-46 -26 0" "46 26 96"
+		seatoffset "-14 0 24"
+	}
+	client
+	{
+		cache vsssource.spr
+		cache fire_ring2.spr
+		
+		tagemitter tag_barrel sparks1a
+		(
+			spawnrate 4.00
+			model vsssource.spr
+			alpha 0.50
+			color 0.10 0.10 0.10
+			scale 0.20
+			life 6.50
+			scalerate 2.30
+			randvel crandom -15 crandom -15 crandom -15
+			accel 0.00 0.00 50.00
+			friction 0.70
+			angles crandom 20 crandom 30 crandom -20
+			scalemin 1.00
+			scalemax 0.50
+			fade
+		)
+
+		tagemitter tag_barrel sparks1a
+		(
+			spawnrate 3.00
+			model vsssource.spr
+			alpha 0.70
+			color 0.30 0.30 0.30
+			life 3.00
+			scalerate 5.00
+			randvel range -14 7 range -14 7 range -14 7
+			accel 0.00 0.00 36.00
+			scalemin 0.50
+			scalemax 1.00
+			fade
+		)
+
+		tagemitter tag_barrel sparks1a
+		(
+			spawnrate 7.00
+			model fire_ring2.spr
+			alpha 0.80
+			color 1.00 1.00 1.00
+			scale 0.10
+			life 3.00
+			scalerate 1.00
+			accel 0.00 0.00 30.00
+			friction 1.00
+			offsetalongaxis crandom -10 crandom -10 crandom -10
+			scalemin 0.04
+			scalemax 0.10
+			fade
+			fadein 0.000000
+		)
+ 
+		tagemitter tag_barrel sparks1a
+		(
+			spawnrate 5.00
+			model fire_ring2.spr
+			color 1.00 1.00 1.00
+			scale 0.30
+			life 2.00
+			scalerate 2.00
+			velocity 2.00
+			randvel range -1 10 range 30 -15 range -1 10
+			accel 0.00 0.00 33.00
+			friction 1.00
+			offsetalongaxis range 7 -1 range 7 -1 range 1 -7
+			angles 110 10 110
+			avelocity random 110 110 110
+			scalemin 0.01
+			scalemax 0.07
+			fade
+			fadein 0.000000
+			randomroll
+		)
+	}
+}
+
+
+animations
+{
+	idle	88_d.skc
+	{
+		client
+		{
+			entry loopsound fire_med
+		}
+	}	
+}
+
+/*QUAKED turretweapon_german_88mmflak-destroyed (0.5 .25 0.25) (-32 -32 0) (32 32 128)
+Big gun - Boom boom.
+*/

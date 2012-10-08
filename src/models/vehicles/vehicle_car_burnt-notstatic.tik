@@ -1,0 +1,18 @@
+TIKI
+setup
+{
+	scale 0.52			// Set default scale to 16/30.5 since world is in 16 units per foot and model is in cm's
+	path models/vehicles/car
+	skelmodel cardamaged_ns.skd
+	surface carwindow shader carwindowb
+	surface car3 shader carburnt
+	surface car2 shader carburnt
+}
+
+animations
+{
+	idle     cardamaged_ns.skc
+}
+
+/*QUAKED static_vehicle_europe_car-burnt-nonstatic (0.5 .25 0.25) (-128 -56 0) (128 48 96)
+*/

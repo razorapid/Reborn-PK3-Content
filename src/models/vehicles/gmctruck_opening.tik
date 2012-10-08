@@ -1,0 +1,77 @@
+TIKI
+setup
+{
+	scale 0.52	// Set default scale to 16/30.5 since world is in 16 units per foot and model is in cm's
+
+	path models/vehicles/opeltruck
+	skelmodel opel_opening.skd
+	surface opel1 shader opel
+	surface opel2 shader opel_cull
+	surface opel_inside shader opel
+	surface opel4 shader opel
+	surface opel4_cullnone shader opel_cull
+	surface opelwindows shader opelwindows_d2
+	surface opelhub shader opelhub_norotate
+	surface opeltread shader opeltread_norotate
+	surface opellights shader opellights
+	surface canopyout shader gmctruck
+	surface canopyin shader gmcinside
+	surface crate shader heat_crate
+	surface tailgate shader opel
+}
+
+init
+{
+	server
+	{
+		// This truck doesn't need lights at all
+		surface opellights +nodraw
+
+		// The player starts off inside the truck so start with these surfaces removed.
+		surface opel1 +nodraw
+		surface opel2 +nodraw
+		surface opel4 +nodraw
+		surface opel4_cullnone +nodraw
+		surface opelwindows +nodraw
+		surface opelhub +nodraw
+		surface opeltread +nodraw
+		surface canopyout +nodraw
+	}
+}
+
+
+animations
+{
+	idle			opel_opening.skc
+	open_gate		opel_opening_opengate.skc
+	{
+		server
+		{
+			entry surface opel1 -nodraw
+			entry surface opel2 -nodraw
+			entry surface opel4 -nodraw
+			entry surface opel4_cullnone -nodraw
+			entry surface opelwindows -nodraw
+			entry surface opelhub -nodraw
+			entry surface opeltread -nodraw
+			entry surface canopyout -nodraw
+		}
+	}
+//	remove_surfaces	opel_opening.skc
+//	{
+//		server
+//		{
+//			entry surface opel1 +nodraw
+//			entry surface opel2 +nodraw
+//			entry surface opel4 +nodraw
+//			entry surface opelwindows +nodraw
+//			entry surface opelhub +nodraw
+//			entry surface opeltread +nodraw
+//			entry surface canopyout +nodraw
+//		}
+//	}
+}
+
+/*QUAKED vehicle_allied_opeltruck-opening-sequence (0.5 .25 0.25) (-32 -32 0) (32 32 128)
+Opel Truck for the opening sequence in M1L1
+*/

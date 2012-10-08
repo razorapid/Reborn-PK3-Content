@@ -1,0 +1,32 @@
+TIKI
+setup
+{
+	scale 0.52				// Set default scale to 16/30.5 since world is in 16 units per foot and model is in cm's
+	path models/vehicles/c47
+	skelmodel c47fly.skd
+	surface c473 shader c47fly
+	surface c472 shader c47fly
+	surface c471 shader c47fly
+	surface c47prop shader c47prop
+}
+
+init
+{
+	server
+	{
+      		classname drivablevehicle
+     		setsize "-32 -32 -32" "32 32 32"
+       		seatoffset "0 0 0"
+    	  	gravity 1.0
+    	  	vehiclespeed 800
+	}
+}
+
+animations
+{
+	idle     c47fly.skc
+}
+
+/*QUAKED vehicle_allied_airplane-c47-flying (0.0 0.0 0.0) (-696 -776 0) (344 776 272)
+C47 Skytrain
+*/

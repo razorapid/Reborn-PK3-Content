@@ -1,0 +1,25 @@
+TIKI
+setup
+{
+	scale 0.52
+				// Set default scale to 16/30.5 since world is in 16 units per foot and model is in cm's
+	path models/vehicles/tigertank_wot_d
+	skelmodel tigertank_wot_d.skd
+	surface treads shader tiger_treads_d2
+	surface wheelfront shader frontwheel_d2
+     	surface innerwheel shader innerwheel_d2
+ 	surface outerwheel shader outerwheel_d2
+	surface wheelback shader backwheel_d2
+	surface tigertank1 shader tigertank_d2
+	surface tigertank2 shader tigertank_d2s
+}
+
+
+animations
+{
+	idle		tigertank_wot_d.skc
+}
+
+/*QUAKED vehicle_german_tigertank-wot-d (0.0 .0 0.0) (-60 -40 0) (60 40 128)
+Tiger Tank
+*/

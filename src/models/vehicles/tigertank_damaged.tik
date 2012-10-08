@@ -1,0 +1,46 @@
+TIKI
+setup
+{
+	scale 0.52				// Set default scale to 16/30.5 since world is in 16 units per foot and model is in cm's
+	path models/vehicles/tigertank
+	skelmodel tigertank_damaged.skd
+	surface treads shader tiger_treads
+	surface wheelfront shader frontwheel
+     	surface innerwheel shader innerwheel
+ 	surface outerwheel shader outerwheel
+	surface wheelback shader backwheel
+	surface tigertank1 shader tigertank_damaged
+
+}
+
+init
+{
+	server
+	{
+		//classname drivablevehicle
+		classname VehicleTank
+		//setsize "-114 -74 0" "134 74 78"
+		setsize "-12 -12 0" "12 12 78"
+		vehicleWheelCorners "148 148 78" "0 0 -1.5"
+		vehiclespeed 750
+		vehiclemass 1500
+		vehicletread 10
+		vehicleradius 0.33
+		vehiclerollingresistance 0.5
+		vehicledrag 0.00001
+		mass 1000
+
+		// Spawn and attach the parts
+		spawnturret 0 "vehicles/tigercannondead.tik"
+		spawnturret 1 "vehicles/tigersmgun.tik"
+	}
+}
+
+animations
+{
+	idle	tigertank_damaged.skc
+}
+
+/*QUAKED vehicle_german_tigertank-damaged (0.0 .0 0.0) (-60 -40 0) (60 40 128)
+Damaged Tiger Tank
+*/

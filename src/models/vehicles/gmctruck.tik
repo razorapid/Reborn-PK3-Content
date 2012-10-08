@@ -1,0 +1,54 @@
+TIKI
+setup
+{
+	scale 0.52			// Set default scale to 16/30.5 since world is in 16 units per foot and model is in cm's
+	path models/vehicles/gmc/
+	skelmodel gmctruck.skd
+	surface gmcwindow shader gmcwindow
+	surface gmc_tred shader gmc_tred
+	surface gmc_hub1 shader gmc_hub
+	surface gmc_hub7 shader gmc_hub
+	surface gmc_hub8 shader gmc_hub
+	surface gmctruck4 shader gmctruck
+	surface gmctruck5 shader gmctruck
+	surface gmctruck6 shader gmctruck
+}
+
+init
+{
+	server
+	{
+		classname Animate
+		setsize "-60 -40 0" "60 40 128"
+
+
+
+
+			//////////////////////////////////////////
+			// Pitch-Mod Sound for vehicles by speed
+			//
+			// Linearly Interpolates from the minimum pitch when the vehicle is at the minimum speed to 
+			// the maximum pitch when the vehicle is at the maximum speed.
+			//
+			// Speed is in World Units.
+			//
+			//
+			//                 +--------------- Minimum Speed
+			//                 |  +------------ Minimum Pitch
+			//                 |  |
+			//                 |  |      +----- Maximum Speed
+			//                 |  |      |  +-- Maximum Pitch
+			//                 V  V      V  V
+			setsoundparameters 0 0.95   200 1		
+
+	}
+}
+
+animations
+{
+	idle     gmctruck.skc
+}
+
+/*QUAKED vehicle_allied_gmctruck (0.5 .25 0.25) (-32 -32 0) (32 32 128)
+GMC Truck
+*/

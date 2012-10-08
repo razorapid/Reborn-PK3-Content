@@ -1,0 +1,34 @@
+TIKI
+setup
+{
+	scale 0.52			// Set default scale to 16/30.5 since world 
+					// is in 16 units per foot and model is in cm's
+	path models/statweapons/15cmcannon
+	skelmodel 15cmcannon.skd
+	surface 15cannon2 shader 15cannon	
+	surface 15cannon3 shader 15cannon	
+	surface 15cannon4 shader 15cannon
+	surface shield shader 15cannon_shield	
+}
+
+init
+{
+   	server
+      {
+      	classname animate
+      	setsize "-46 -26 0" "46 26 96"
+      	seatoffset "-14 0 24"
+      	gravity 0.6
+      	vehiclespeed 1200
+      	canjump
+      }
+}
+
+animations
+{
+	idle     15cmcannon.skc
+}
+
+/*QUAKED turretweapon_german_15cmcannon (0.5 .25 0.25) (-32 -32 0) (32 32 128)
+Big gun - Boom boom.
+*/

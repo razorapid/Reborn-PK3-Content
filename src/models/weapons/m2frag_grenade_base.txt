@@ -1,0 +1,158 @@
+setup
+{
+	scale 0.52			// Set default scale to 16/30.5 since world is in 16 units per foot and model is in cm's
+//	scale 0.55			// Seems to work better than 0.52
+	path models/weapons/M2FragGrenade
+	skelmodel grenade.skd
+//	surface origin shader blank
+//	surface tag_barrel shader blank
+	surface grenade shader M2FragGrenade
+}
+
+init
+{
+	server
+	{
+		classname		Weapon
+		weapontype		grenade
+		name			"Frag Grenade"
+		rank			510 510
+
+		pickupsound		m2frag_snd_pickup
+		ammopickupsound	m2frag_snd_pickup_ammo
+		noammosound		m2frag_snd_noammo
+
+		// Holstering info
+//		holstertag		"Bip01 Spine1"
+//		holsteroffset	"3.12 10.5 3.64"
+//		holsterangles	"20 -40 0"
+//		holsterScale	1.0
+
+		// Primary fire type info (fast, arcing throw)
+		firetype		projectile
+		ammotype		"grenade"
+		projectile		models/projectiles/M2FGrenade_primary.tik
+		semiauto
+		clipsize		1
+		startammo		1
+		ammorequired	1
+		firedelay		0.75
+		maxchargetime	4.0
+		minchargetime	0.6
+		crosshair		0
+		quiet // don't notify AI of it being fired
+		autoputaway 	1 // automatically put the weapon away when out of ammo
+		usenoammo		0 // don't allow it to be used when it has no ammo
+		movementspeed	1.0
+
+		// Secondary fire type info (more controllable, straight throw)
+		shareclip
+		secondary firetype		projectile
+		secondary ammotype		"grenade"
+		secondary projectile	models/projectiles/M2FGrenade.tik
+		secondary clipsize		1
+		secondary ammorequired	1
+		secondary firedelay		0.75
+		secondary maxchargetime	1.5
+		secondary minchargetime	0.5
+
+		// AI animation group info
+		weapongroup		grenade
+
+		// DM Attributes
+		dmprojectile		models/projectiles/M2FGrenade_primary.tik
+		dmstartammo			6
+		dmammorequired		1
+		dmfiredelay			0.75
+		dmcrosshair			0
+		dmmovementspeed 	1.0
+		secondary dmprojectile	models/projectiles/M2FGrenade.tik
+		secondary dmammorequired	1
+		secondary dmfiredelay		0.75
+
+		cache models/projectiles/M2FGrenade_primary.tik
+		cache models/projectiles/M2FGrenade.tik
+	}
+	client
+	{
+	}
+}
+
+animations
+{
+	raise grenade.skc
+	{
+		// if we're pulling out grenades, we've definatly got 'em
+		server
+		{
+			enter surface grenade -nodraw
+		}
+	}
+	idle grenade.skc
+	{
+		server
+		{
+			enter surface grenade -nodraw
+		}
+	}
+
+	// this should make sure that it doesn't look like there's a grenade in hand when you don't have one
+	idle_empty grenade.skc
+	{
+		server
+		{
+			enter surface grenade +nodraw
+		}
+	}
+
+	charge grenade.skc
+	{
+		client
+		{
+			enter sound m2frag_snd_grenade_pull weapon
+		}
+	}
+	secondarycharge grenade.skc
+	{
+		client
+		{
+			enter sound m2frag_snd_grenade_pull weapon
+		}
+	}
+	
+//	fire grenade_fire.skc
+	fire grenade.skc
+	{
+		server
+		{
+			first shoot
+			first surface grenade +nodraw
+//			15 surface grenade -nodraw
+		}
+		client
+		{
+			first sound m2frag_snd_grenade_throw weapon
+		}
+	}
+	secondaryfire grenade.skc
+	{
+		server
+		{
+			first shoot secondary
+			first surface grenade +nodraw
+//			15 surface grenade -nodraw
+		}
+		client
+		{
+			first sound m2frag_snd_grenade_throw weapon
+		}
+	}
+
+	reload grenade.skc
+	{
+		server
+		{
+			first surface grenade -nodraw
+		}
+	}
+}

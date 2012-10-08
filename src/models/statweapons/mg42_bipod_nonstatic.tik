@@ -1,0 +1,26 @@
+TIKI
+setup
+{
+	scale 0.52			// Set default scale to 16/30.5 since world is in 16 units per foot and model is in cm's
+	path models/statweapons/mg42
+	skelmodel mg42_02.skd
+	surface mg421 shader mg42
+//	surface mg422 shader mg42
+}
+
+init
+{
+	server
+	{
+		classname animate
+	}
+}
+
+animations
+{
+	idle     mg42_02.skc
+}
+
+/*QUAKED turretweapon_german_mg42bipod (0.5 0.0 0.5) (0 0 0) (0 0 0)
+MG42 bipod non static. made by Z for places where the entire MG42 is destroyed.
+*/

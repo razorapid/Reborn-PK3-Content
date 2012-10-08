@@ -1,0 +1,17 @@
+TIKI
+setup
+{
+	scale 0.52
+	path models/ammo/us_bomb
+	skelmodel us_bomb.skd
+	surface all shader us_bomb
+}
+
+animations
+{
+	idle us_bomb.skc
+}
+
+/*QUAKED ammo_special_us-bomb (0 0 0) (0 0 0) (0 0 0)
+power.
+*/

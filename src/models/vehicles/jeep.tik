@@ -1,0 +1,144 @@
+TIKI
+setup
+{
+	//scale 0.52				// Set default scale to 16/30.5 since world is in 16 units per foot and model is in cm's
+	scale 1.33				// Convert from inches to game units
+	path models/vehicles/jeep
+	skelmodel jeep.skd
+	surface window shader jeepwindow 
+	surface jeep2 shader jeep
+ 	surface jeep3 shader jeep
+	surface jeep4 shader jeep
+ 	surface jeep5 shader jeep 
+	surface jeep8 shader jeep 
+	surface tredz shader jeeptredz 
+	surface wheelz shader jeepwheelz 
+}
+
+init
+{
+	server
+	{
+		//classname VehicleWheelsX4
+		classname drivableVehicle
+		//classname VehicleTank
+		setsize "-50 -40 0" "50 40 60"
+		vehicleWheelCorners "136 80 78" "-12 0 -1.5"
+		vehicleinit jeep.tik
+		vehiclespeed 1000
+		vehiclemass 1500 // not used
+		vehicletread 10 // not used
+		vehicleradius 0.33
+		vehiclerollingresistance 0.5 // not used
+		vehicledrag 0.00001
+		vehiclebouncy 0.2
+		vehiclespringy 0.8
+		//vehicleYaw -10 10
+		//vehicleRoll -10 10
+		//vehicleZ -5 10
+		mass 1000
+
+		spawnturret 0 "vehicles/jeep_30cal.tik"
+
+		AnimationSet "jeep_"
+		SoundSet "jeep_"
+
+
+			//////////////////////////////////////////
+			// Pitch-Mod Sound for vehicles by speed
+			//
+			// Linearly Interpolates from the minimum pitch when the vehicle is at the minimum speed to 
+			// the maximum pitch when the vehicle is at the maximum speed.
+			//
+			// Speed is in World Units.
+			//
+			//
+			//                  +--------------- Minimum Speed
+			//                  |  +------------ Minimum Pitch
+			//                  |  |
+			//                  |  |      +----- Maximum Speed
+			//                  |  |      |  +-- Maximum Pitch
+			//                  V  V      V  V
+			setsoundparameters  0  0.2   200 1.2
+			setvolumeparameters 0  1     200 1.5
+
+	}
+	client
+	{
+	}
+}
+
+animations
+{
+	idle     			jeep.skc
+	high				jeep_high.skc
+	low					jeep_low.skc
+	level				jeep_level.skc
+	lean_right			jeep_lean_right.skc
+	lean_left			jeep_lean_left.skc
+	lean_forward		jeep_lean_forward.skc
+	lean_back			jeep_lean_back.skc
+	skidding 			jeep.skc
+	{
+		client
+		{
+			entry stopaliaschannel snd_skid_stone
+			entry sound snd_skid_stone
+
+			first tagspawn "tire_spew_back_left"
+			(
+				count 1
+				scale .7
+				model models/fx/snipesmoke.tik
+			)
+
+			first tagspawn "tire_spew_back_right"
+			(
+				count 1
+				scale .7
+				model models/fx/snipesmoke.tik
+			)
+
+			first tagspawn "tire_spew_front_left"
+			(
+				count 1
+				scale .25
+				model models/fx/snipesmoke.tik
+			)
+
+			first tagspawn "tire_spew_front_right"
+			(
+				count 1
+				scale .25
+				model models/fx/snipesmoke.tik
+			)
+		}
+		server
+		{
+		}
+	}
+	remove_surfaces		jeep_level.skc
+	{
+		server
+		{
+			entry surface jeep2 +nodraw
+			entry surface jeep3 +nodraw
+			entry surface tredz +nodraw 
+			entry surface wheelz +nodraw 
+		}
+	}
+	add_surfaces		jeep_level.skc
+	{
+		server
+		{
+			entry surface jeep2 -nodraw
+			entry surface jeep3 -nodraw
+			entry surface tredz -nodraw 
+			entry surface wheelz -nodraw 
+		}
+	}
+}
+
+/*QUAKED vehicle_allied_jeep (0.0 0.0 0.0) (-50 -40 0) (50 40 60)
+Jeep
+*/

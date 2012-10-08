@@ -1,0 +1,58 @@
+TIKI
+setup
+{
+	scale 1.33				// Set default scale to 16/30.5 since world is in 16 units per foot and model is in cm's
+	path models/vehicles/jeep
+	skelmodel 30cal_viewmodel.skd
+	surface material1 shader 30cal
+	surface material3 shader 30cal
+	surface material2 shader 30calmount
+}
+
+init
+{
+	server
+	{
+		classname 		Animate
+
+		surface material2 +nodraw
+		surface material3 +nodraw
+	}
+}
+
+animations
+{
+	idle    30cal_viewmodel.skc
+	fire	30cal_viewmodel_fire.skc
+	{
+		client
+		{
+			entry stopaliaschannel jeep_snd_fire
+			entry sound jeep_snd_fire
+
+			// muzzle flash
+			entry tagdlight tag_barrel 0.25 0.2 0.05 110 0.11
+			entry tagspawnlinked tag_barrel
+			(
+				scale 0.6
+				offsetalongaxis 3 0 0
+				count 1
+				model muzsprite.spr
+				angles 0 0 crandom 25
+				life 0.06
+			)
+			entry tagspawnlinked tag_barrel
+			(
+				count 1
+				scalemin 1.0
+				scalemax 1.5
+				model models/fx/muzflash.tik
+//				model muzsprite.spr
+				randomroll
+				life 0.04
+////				flicker
+			)
+
+		}
+	}
+}

@@ -1,0 +1,32 @@
+TIKI
+setup
+{
+	//scale 0.52			// Set default scale to 16/30.5 since world is in 16 units per foot and model is in cm's
+	scale 0.52			// Convert from inches to game units
+	path models/vehicles/mercedes
+	skelmodel mercedes.skd
+	surface windows shader mercedes_window
+	surface mercedes2 shader mercedes
+	surface mercedes3 shader mercedes
+	surface mercedes4 shader mercedes
+	surface hub shader mercedeshub
+	surface tread shader mercedestread
+}
+
+init
+{
+	server
+	{
+		classname Animate
+		setsize "-50 -25 0" "50 25 90"
+	}
+}
+
+animations
+{
+	idle     mercedes.skc
+}
+
+/*QUAKED vehicle_german_mercedes (0.0 0.0 0.0) (-50 -25 0) (50 25 90)
+Mercedes
+*/

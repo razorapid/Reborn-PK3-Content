@@ -1,0 +1,17 @@
+TIKI
+setup
+{
+	scale 0.52
+	path models/ammo/ammo_boxes
+	skelmodel mg_box.skd
+	surface mg_box shader mg_box
+}
+
+animations
+{
+	idle mg_box.skc
+}
+
+/*QUAKED ammo_box_mg (0 0 0) (0 0 0) (0 0 0)
+power.
+*/

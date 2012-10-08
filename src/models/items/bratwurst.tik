@@ -1,0 +1,24 @@
+TIKI
+setup
+{
+	scale 0.52			// Set default scale to 16/30.5 since world is in 16 units per foot and model is in cm's
+	path models/items/bratwurst
+	skelmodel bratwurst.skb
+	surface bratwurst shader bratwurst
+}
+
+init
+{
+	server
+	{
+		classname object
+	}
+}
+
+animations
+{
+	idle     bratwurst.skc
+}
+
+/*QUAKED static_item_bratwurst (0.5 0.5 1.0) (-8 -8 0) (8 8 8)
+*/

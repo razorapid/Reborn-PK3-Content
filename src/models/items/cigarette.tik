@@ -1,0 +1,50 @@
+TIKI
+setup
+{
+	scale 0.52			// Set default scale to 16/30.5 since world is in 16 units per foot and model is in cm's
+	path models/items/cigarette
+	skelmodel cigaretteburn.skd
+	surface cigarette shader cigarette
+	surface cherry shader cherry_c
+}
+
+init
+{
+	server
+	{
+		classname object
+	}
+
+	client
+	{
+		tagemitter tag_barrel firesmoke
+		(
+			spawnrate 10.00
+			model vsssource.spr
+			alpha 0.09
+			color .70 .70 .70
+			scale 0.09
+			life 2.00
+			scalerate 0.60
+			velocity 10.00
+			randvel range -1 3 range -15 23 range 0.09 10
+			accel 0.00 0.00 1.00
+		//	friction 2.00
+			fade
+		)
+	}
+}
+
+animations
+{
+	idle    cigaretteburn.skc
+	{
+		client
+		{
+			enter emitteron firesmoke
+		}
+	}
+}
+
+/*QUAKED static_items_cigarette (0.5 0.0 0.5) (-8 -8 0) (8 8 16)
+*/

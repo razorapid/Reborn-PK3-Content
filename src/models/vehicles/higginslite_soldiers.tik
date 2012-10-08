@@ -1,0 +1,96 @@
+TIKI
+setup
+{
+	scale 0.52
+   	path models/vehicles/higgins
+	skelmodel higginslite.skd
+   	surface higgins shader higgins
+	
+	skelmodel soldiergroup1.skd
+   	
+	skelmodel soldiergroup2.skd
+   	
+
+	skelmodel soldiergroup3.skd
+   	surface gasmask shader m5bag
+	surface haversack shader usequip
+	surface head shader slick
+	surface helmet shader us-helmet_private
+	surface jacket shader hbt_jacket
+
+
+	skelmodel coxswain.skd
+   	surface pants shader ranger_pants
+	surface jacket2 shader us_top
+	surface hand shader handsnew
+	surface vest shader lifevest
+	surface head shader slick
+	surface helmet shader us-helmet_private
+
+}
+
+animations
+{
+   	idle		higginswithsoldiers_skc.skc
+	removeguys	higginswithsoldiers_skc.skc
+	{
+		server
+		{
+			// Remove the cox
+			entry surface pants* +nodraw 
+			entry surface jacket2* +nodraw 
+			entry surface hand* +nodraw 
+			entry surface vest* +nodraw 
+			entry surface head* +nodraw 
+			entry surface helmet* +nodraw
+			// Remove the soldiers
+			entry surface gasmask* +nodraw 
+			entry surface haversack* +nodraw 
+			entry surface head* +nodraw 
+			entry surface helmet* +nodraw 
+			entry surface jacket* +nodraw
+		}
+	}
+	removesoldiers	higginswithsoldiers_skc.skc
+	{
+		server
+		{
+			// Remove the cox
+			//entry surface pants* +nodraw 
+			//entry surface jacket2* +nodraw 
+			//entry surface hand* +nodraw 
+			//entry surface vest* +nodraw 
+			//entry surface head* +nodraw 
+			//entry surface helmet* +nodraw
+			// Remove the soldiers
+			entry surface gasmask* +nodraw 
+			entry surface haversack* +nodraw 
+			entry surface head* +nodraw 
+			entry surface helmet* +nodraw 
+			entry surface jacket* +nodraw
+		}
+	}
+	addguys	higginswithsoldiers_skc.skc
+	{
+		server
+		{
+			// Add the cox
+			entry surface pants -nodraw 
+			entry surface jacket2 -nodraw 
+			entry surface hand -nodraw 
+			entry surface vest -nodraw 
+			entry surface head -nodraw 
+			entry surface helmet -nodraw
+			// Add the soldiers
+			entry surface gasmask -nodraw 
+			entry surface haversack -nodraw 
+			entry surface head -nodraw 
+			entry surface helmet -nodraw 
+			entry surface jacket -nodraw
+		}
+	}
+}
+
+/*QUAKED vehicle_allied_higgins-boat-lesspoly-soldiers (0 0 0) (-32 -32 0) (32 32 64)
+Higgins Boat - lower poly higgins boats along side the players
+*/

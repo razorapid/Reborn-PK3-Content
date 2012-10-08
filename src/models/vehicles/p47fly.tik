@@ -1,0 +1,32 @@
+TIKI
+setup
+{
+	scale 0.52				// Set default scale to 16/30.5 since world is in 16 units per foot and model is in cm's
+	path models/vehicles/p47
+	skelmodel p47fly.skd
+	surface p472 shader p47fly
+	surface p473 shader p47fly
+	surface prop shader prop
+	surface p47window shader p47flywindow
+}
+
+init
+{
+	server
+	{
+      		classname drivablevehicle
+      		setsize "-32 -32 -32" "32 32 32"
+       		seatoffset "0 0 0"
+      		gravity 1.0
+      		vehiclespeed 800
+	}
+}
+
+animations
+{
+	idle     p47fly.skc
+}
+
+/*QUAKED vehicle_allied_airplane-p47-flying (0.0 0.0 0.0) (-65 -40 0) (65 40 120)
+P-47 Thunderbolt Airplane
+*/

@@ -1,0 +1,14 @@
+TIKI
+setup
+{
+	scale 0.52
+	path models/ammo/barclip
+	skelmodel barclip.skd
+	surface bar4 shader barclip
+}
+
+animations
+{
+	idle barclip.skc	
+	
+}

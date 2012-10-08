@@ -1,0 +1,13 @@
+TIKI
+setup
+{
+	scale 0.52
+	path models/ammo/mp40clip
+	skelmodel mp40_clip.skd
+	surface all shader MP40
+}
+
+animations
+{
+	idle mp40_clip.skc
+}

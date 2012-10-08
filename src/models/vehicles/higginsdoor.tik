@@ -1,0 +1,17 @@
+TIKI
+setup
+{
+	scale 0.52
+   	path models/vehicles/higgins
+	skelmodel higginsdoor.skd
+   	surface all shader higgins
+}
+
+animations
+{
+   	idle higginsdoor.skc
+}
+
+/*QUAKED vehicle_allied_higgins-boat-door (0 0 0) (32 32 0) (64 64 64)
+Higgins Boat - door to higgins boat
+*/

@@ -1,0 +1,56 @@
+TIKI
+setup
+{
+	scale 0.52			// Set default scale to 16/30.5 since world is in 16 units per foot and model is in cm's
+	path models/items/binoculars
+	skelmodel binoculars.skd
+	surface binoculars shader binoculars
+}
+
+init
+{
+	server
+	{
+		setsize	"-4 -4 0" "4 4 4"
+		classname InventoryItem
+		name "Binoculars"
+		rank 1 1
+//		mainattachtotag "eyes bone"
+		firetype clickitem
+		semiauto
+		ammorequired 0		// unlimited usage
+		usenoammo 1
+		firedelay 0.75		// delay between uses
+		bulletrange 8000
+		crosshair 0
+		zoom 20 1
+	}
+	client
+	{
+	}
+}
+
+animations
+{
+	idle	binoculars.skc
+	{
+		server
+		{
+			first surface all +nodraw
+		}
+	}
+	fire	binoculars.skc
+	{
+		server
+		{
+			entry activateitem
+		}
+		client
+		{
+			entry sound snd_binoculars
+		}
+	}
+}
+
+/*QUAKED item_binoculars (0.5 0.5 1.0) (-8 -8 0) (8 8 8)
+*/

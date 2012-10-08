@@ -1,0 +1,27 @@
+TIKI
+setup
+{
+	scale 0.52
+   	path models/vehicles/bp44train
+	skelmodel bp44train.skd
+   	surface levers1 shader levers
+	surface train shader train 
+	surface ladders shader ladders 
+	surface wheels shader wheels 
+	surface inside shader inside 
+	surface floor shader floor 
+	surface levers7 shader levers
+	surface levers8 shader levers
+	surface levers9 shader levers
+	surface levers10 shader levers
+	surface valves shader valves
+}
+
+animations
+{
+   	idle bp44train.skc
+}
+
+/*QUAKED vehicle_german_armored-train (0 0 0) (-576 -104 0) (448 104 248)
+BP44 Locomotive - original
+*/

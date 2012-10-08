@@ -1,0 +1,48 @@
+TIKI
+setup
+{
+	scale 0.52				// Set default scale to 16/30.5 since world is in 16 units per foot and model is in cm's
+	path models/vehicles/panzer_iv_d
+	skelmodel panzer_iv_d.skd
+	surface tread shader panzer_iv_tread_eud
+	surface frontwheel shader panzer_iv_frontwheel_eud
+     	surface frontwheelband shader panzer_iv_frontwheelband_eud
+ 	surface backwheel shader panzer_iv_backwheel_eud
+	surface backwheelband shader panzer_iv_backwheelband_eud
+	surface smallwheel shader panzer_iv_smallwheel_eud
+      surface smallwheelband shader panzer_iv_smallwheelband_eud
+      surface verysmallwheel shader panzer_iv_verysmallwheel_eud
+      surface backwheelaxel shader panzer_iv_backwheelaxel_eud
+      surface turret shader panzer_iv_turret_eud
+      surface boxes shader panzer_iv_boxes_eud
+      surface undercarriage shader panzer_iv_undercarriage_eud
+      surface turret2s shader panzer_iv_t_eud2
+
+}
+init
+{
+	server
+	{
+		classname animate
+        setsize "-140 -80 0" "140 80 120"
+
+    }
+}
+
+animations
+{
+	idle_silent panzer_iv_d.skc
+	idle     	panzer_iv_d.skc
+	{
+		client
+		{
+			entry sound fire_med
+		}
+	}	
+	open		panzer_iv_d_open.skc
+	open_idle	panzer_iv_d_open_idle.skc
+}
+
+/*QUAKED vehicle_german_panzer_iv_european_destroyed (0.0 .0 0.0) (-60 -40 0) (60 40 128)
+panzer_iv
+*/

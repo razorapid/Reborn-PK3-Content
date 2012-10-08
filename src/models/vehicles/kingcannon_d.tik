@@ -1,0 +1,24 @@
+TIKI
+setup
+{
+	scale 0.52				// Set default scale to 16/30.5 since world is in 16 units per foot and model is in cm's
+	path models/vehicles/ktigertank_d
+	skelmodel ktigerturret_d.skd
+	surface turretneck shader turretneck
+	surface turret_dtl shader turret_dtl_d
+	surface turretbase shader turretbase_d
+	surface turretshaft shader turretshaft
+	surface turretbarrel shader turretbarrel
+
+}
+
+
+animations
+{
+
+	idle    ktigerturret_d.skc
+}
+
+/*QUAKED vehicle_german_kingtigertank-cannon-d (0.0 .0 0.0) (-60 -40 0) (60 40 128)
+Tiger Tank Cannon
+*/

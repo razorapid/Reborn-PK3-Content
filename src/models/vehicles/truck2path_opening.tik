@@ -1,0 +1,25 @@
+TIKI
+setup
+{
+	scale 0.52	// Set default scale to 16/30.5 since world is in 16 units per foot and model is in cm's
+
+	path models/human/animation/scripted/level_m1l1
+	skelmodel truck2_path_follow.skd
+}
+
+init
+{
+	server
+	{
+		surface all +nodraw
+	}
+}
+
+animations
+{
+	idle	truck2_path_follow.skc
+}
+
+/*QUAKED vehicle_allied_truck2path-opening-sequence (0.5 .25 0.25) (-32 -32 0) (32 32 128)
+Mechanism to move the second truck for the opening sequence in M1L1
+*/

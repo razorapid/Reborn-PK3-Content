@@ -1,0 +1,13 @@
+// The is the steilhandgranate used for secondary fire & by AIs
+TIKI
+
+$include models/projectiles/steilhandgranate_base.txt
+
+init
+{
+	server
+	{
+		speed			700
+		minspeed		100
+	}
+}

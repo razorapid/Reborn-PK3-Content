@@ -1,0 +1,25 @@
+TIKI
+setup
+{
+	scale 0.52			// Set default scale to 16/30.5 since world is in 16 units per foot and model is in cm's
+	path models/items/explosive
+	skelmodel explosive2.skd
+	surface detonator shader pulsating_tnt
+	surface blocks shader pulsating_hedgebomb
+}
+
+init
+{
+	server
+	{
+		classname animate
+	}
+}
+
+animations
+{
+	idle     explosive2.skc
+}
+
+/*QUAKED item_explosive2-pulsating (0.5 0.5 1.0) (0 0 0) (0 0 0)
+*/

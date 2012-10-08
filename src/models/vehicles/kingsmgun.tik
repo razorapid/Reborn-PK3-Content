@@ -1,0 +1,46 @@
+TIKI
+setup
+{
+	scale 0.52				// Set default scale to 16/30.5 since world is in 16 units per foot and model is in cm's
+	path models/vehicles/ktigertank
+	skelmodel kingsmgun.skd
+	surface smgun shader turretbase
+}
+
+init
+{
+	server
+	{
+		classname 		TurretGun
+		weapontype		mg
+		name			"MG42"
+
+		// turret settings
+		idleCheckOffset	"-56 0 0"
+
+		// Primary fire type info
+		firetype		bullet
+//		ammotype		"MG"
+		meansofdeath		bullet
+		bulletcount		1
+//		clipsize		20
+//		startammo		20
+//		ammorequired		1
+//		ammorequired		0
+		usenoammo		1
+		firedelay		0.04
+		bulletrange		4000
+		bulletdamage		45
+		bulletspread		100 100
+		tracerfrequency 	5
+	}
+}
+
+animations
+{
+	idle     kingsmgun.skc
+}
+
+/*QUAKED vehicle_german_tigertank_smgun (0.0 .0 0.0) (-60 -40 0) (60 40 128)
+Tiger Tank SMG
+*/

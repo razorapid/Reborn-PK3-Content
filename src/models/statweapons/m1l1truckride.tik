@@ -1,0 +1,51 @@
+TIKI
+setup
+{
+	scale 1.0
+	path models/fx/dummy
+	skelmodel dummy2.skd
+
+}
+
+init
+{
+	server
+	{
+		classname		TurretGun
+		weapontype		mg
+		name			" "
+
+		// turret settings
+		idleCheckOffset	"-56 0 0"
+		viewOffset		"0 0 0"
+//		viewjitter		0.75
+
+		// Primary fire type info
+//		firetype		bullet
+//		meansofdeath	bullet
+//		bulletcount		1
+//		usenoammo		1
+//		firedelay		0.06
+//		bulletrange		4000
+//		bulletdamage	45
+//		bulletspread	40 40
+//		tracerfrequency 3 // to compensate for the slower fire rate
+
+		// AI animation group info
+//		weapongroup		mg42
+
+		// DM Attributes
+//		dmbulletcount		1
+//		dmfiredelay		0.06
+//		dmbulletrange		4000
+//		dmbulletdamage	45
+//		dmbulletspread	40 40
+	}
+}
+
+
+animations
+{
+	idle	dummy2.skc
+	fire	dummy2.skc
+}

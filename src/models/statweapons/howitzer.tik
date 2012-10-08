@@ -1,0 +1,29 @@
+TIKI
+setup
+{
+	scale 0.52			// Set default scale to 16/30.5 since world is in 16 units per foot and model is in cm's
+	path models/statweapons/howitzer
+	skelmodel howitzer.skd
+	surface all shader howitzer
+}
+
+init
+{
+   	server
+	{
+		classname animate
+		setsize "-46 -26 0" "46 26 96"
+		seatoffset "-14 0 24"
+		gravity 0.6
+		vehiclespeed 1200
+		canjump
+	}
+}
+
+animations
+{
+	idle     howitzer.skc
+}
+
+/*QUAKED turretweapon_allied_howitzer (0.5 .25 0.25) (-152 -104 0) (296 104 136)
+*/

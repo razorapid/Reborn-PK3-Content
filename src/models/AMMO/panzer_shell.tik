@@ -1,0 +1,21 @@
+TIKI
+setup
+{
+	scale 0.52
+	path models/ammo/panzer_shell
+	skelmodel panzer_shell.skd
+	surface all shader panzershell
+}
+
+animations
+{
+	idle panzer_shell_reload.skc	
+		{
+		server
+		{
+			45 surface all -nodraw
+			68 surface all +nodraw
+
+		}
+	
+}

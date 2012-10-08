@@ -1,0 +1,35 @@
+TIKI
+setup
+{
+	scale 0.52
+   	path models/vehicles/bmwbike
+	skelmodel bmwbike_d.skd
+   	surface material1 shader bmwbike_d
+	surface material2 shader bmwbike_d
+	surface material3 shader bmwbike_d
+	surface material4 shader bmwbike_d
+	surface material5 shader bmwbike_d
+	surface material6 shader bmwbike_d
+	surface material7 shader bmwbike_d
+	surface material8 shader bmwbike_dcull
+	surface material9 shader bmwbike_dcull
+}
+
+init
+{
+	server
+	{
+		classname animate
+        setsize "-140 -80 0" "140 80 120"
+
+    }
+}
+
+animations
+{
+   	idle bmwbike_d.skc
+}
+
+/*QUAKED vehicle_german_bmwbike-destroyed (0 0 0) (-40 -20 0) (40 20 50)
+BMW
+*/

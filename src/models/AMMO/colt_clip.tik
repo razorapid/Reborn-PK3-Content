@@ -1,0 +1,33 @@
+TIKI
+setup
+{
+	scale 0.52
+	path models/ammo/coltclip
+	skelmodel clip_colt.skd
+	surface colt45 shader colt
+}
+
+init
+{
+	server
+	{
+		surface colt45 	+nodraw
+	}
+}
+
+animations
+{
+	idle 	clipreload_colt.skc
+   {	
+	server
+		{
+			0  surface colt45 +nodraw
+			18 surface colt45 -nodraw
+			39 surface colt45 +nodraw
+			
+		}
+			
+	}
+
+	
+}

@@ -1,0 +1,57 @@
+TIKI
+setup
+{
+	scale 0.52			// Set default scale to 16/30.5 since world is in 16 units per foot and model is in cm's
+	path models/items/camera
+	skelmodel camera.skd
+	surface camera shader camera
+}
+
+init
+{
+	server
+	{
+		setsize	"-4 -4 0" "4 4 4"
+		classname InventoryItem
+		name "Spy Camera"
+		firetype clickitem
+		semiauto
+		ammorequired 0		// unlimited usage
+		usenoammo 1
+		firedelay 0.75		// delay between uses
+		bulletrange 4000
+		crosshair 0
+		zoom 60 1
+	}
+	client
+	{
+	}
+}
+
+animations
+{
+	idle     camera.skc
+	fire     camera.skc
+	{
+		server
+		{
+			entry activateitem
+		}
+		client
+		{
+			entry stopaliaschannel snd_camerapic
+			entry sound snd_camerapic
+
+			// flash
+			entry blockdlight 300 0.2 viewlensflare
+			(
+				color 0.7 0.7 0.7
+				colorvelocity -2.0 -2.0 -2.0
+				scalerate -1.0
+			)
+		}
+	}
+}
+
+/*QUAKED item_camera (0.5 0.5 1.0) (-8 -8 -8) (8 8 8)
+*/

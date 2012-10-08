@@ -1,0 +1,20 @@
+TIKI
+setup
+{
+	scale 0.52				// Set default scale to 16/30.5 since world is in 16 units per foot and model is in cm's
+	path models/vehicles/sdkfz
+	skelmodel sdkfz_shield.skd
+	surface material8 shader sdkfz
+}
+
+
+
+animations
+{
+	idle     		sdkfz_shield.skc
+
+
+
+/*QUAKED sdkfz_shield (0.0 .0 0.0) (-168 -64 0) (184 72 112)
+SDKFZ Halftrack shield
+*/

@@ -1,0 +1,99 @@
+TIKI
+setup
+{
+	scale 0.52				// Set default scale to 16/30.5 since world is in 16 units per foot and model is in cm's
+	path models/vehicles/ktigertank
+	skelmodel kingtank.skd
+	surface tank1 shader ktank
+	surface tank2 shader ktank
+	surface tank3 shader ktank
+	surface treadwheel shader ktreadwheel
+	surface twheel_in shader ktwheel_in
+	surface treadwheel_b shader ktreadwheel
+	surface back_wheel shader kback_wheel
+	surface frontwheel shader kfrontwheel
+	surface treads shader ktreads
+	surface treadrims shader ktreadrims
+	surface smallwheel shader ksmallwheel
+	surface innerwheel shader kinnerwheel
+	surface tankcull shader ktankcull
+
+
+	path models/vehicles/ktigertank
+	skelmodel kingsmgun.skd
+	surface mg shader tankmg
+	surface ropes shader ktank
+
+
+}	
+
+init
+{
+	server
+	{
+		//classname drivablevehicle
+		classname VehicleTank
+		//setsize "-300 -120 0" "175 120 78"
+		//setsize "-120 -120 0" "120 120 78"
+		setsize "-60 -60 0" "60 60 78"
+		//setsize "-12 -12 0" "12 12 78"
+		vehicleWheelCorners "300 200 78" "75 0 -1.5"
+		vehiclespeed 200
+		vehiclemass 1500
+		vehicletread 10
+		vehicleradius 0.33
+		vehiclerollingresistance 0.5
+		vehicledrag 0.00001
+		turnrate 25
+		mass 99999
+
+		// Spawn and attach the parts
+		spawnturret 0 "vehicles/kingcannon.tik"
+		//spawnturret 1 "vehicles/kingsmgun.tik"
+
+		// Set the Animation Set to use
+		AnimationSet "king_"
+		SoundSet "king_"
+
+
+			//////////////////////////////////////////
+			// Pitch-Mod Sound for vehicles by speed
+			//
+			// Linearly Interpolates from the minimum pitch when the vehicle is at the minimum speed to 
+			// the maximum pitch when the vehicle is at the maximum speed.
+			//
+			// Speed is in World Units.
+			//
+			//
+			//                 +--------------- Minimum Speed
+			//                 |  +------------ Minimum Pitch
+			//                 |  |
+			//                 |  |      +----- Maximum Speed
+			//                 |  |      |  +-- Maximum Pitch
+			//                 V  V      V  V
+			setsoundparameters 0 0.95   200 1		
+
+
+	}
+	client
+	{
+		cache vehicles/kingcannon.tik
+		cache vehicles/kingsmgun.tik
+	}
+}
+
+animations
+{
+	idle			kingtiger_level.skc
+	lean_back		kingtiger_lean_back.skc
+	lean_forward	kingtiger_lean_forward.skc
+	lean_left		kingtiger_lean_left.skc
+	lean_right		kingtiger_lean_right.skc
+	level			kingtiger_level.skc
+	low				kingtiger_low.skc
+	high			kingtiger_high.skc
+}
+
+/*QUAKED vehicle_german_kingtigertank (0.0 .0 0.0) (-60 -40 0) (60 40 128)
+Tiger Tank
+*/

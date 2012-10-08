@@ -1,0 +1,24 @@
+TIKI
+setup
+{
+	scale 0.52
+	path models/items/healthpacks
+	skelmodel firstaid.skd
+	surface material1 shader firstaid_dm
+}
+
+init
+{
+	server
+	{
+		classname Health
+		amount 50
+		dmamount 50
+		pickupsound med_kit
+	}
+}
+
+animations
+{
+	idle firstaid.skc
+}

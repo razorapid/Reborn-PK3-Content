@@ -1,0 +1,26 @@
+TIKI
+setup
+{
+	scale 0.52			// Set default scale to 16/30.5 since world is in 16 units per foot and model is in cm's
+	path models/static/scr536
+	skelmodel scr536.skd
+	surface scr536 shader walkietalkie
+}
+
+init
+{
+	server
+	{
+		classname animate
+	}
+}
+
+animations
+{
+	idle     scr536.skc
+}
+
+/*QUAKED item_walkietalkie (0.5 0.0 0.5) (-16 -16 0) (16 16 32)
+scr536 handitalkie
+fixed by Z
+*/

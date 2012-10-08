@@ -1,0 +1,25 @@
+TIKI
+setup
+{
+	scale 0.52
+	path models/items/subplans
+	skelmodel naxosplans2.skd
+	surface material1 shader projektnaxos_pulsating
+	surface material2 shader naxosplans2_pulsating
+}
+
+init
+{
+	server
+	{
+		classname animate
+	}
+}
+
+animations
+{
+	idle     naxosplans2.skc
+}
+
+/*QUAKED animate_item_naxosplans2-pulse (0.0 0.75 0.5) (-8 -8 0) (8 8 16)
+*/

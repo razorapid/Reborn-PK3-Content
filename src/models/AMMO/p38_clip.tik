@@ -1,0 +1,33 @@
+TIKI
+setup
+{
+	scale 0.52
+	path models/ammo/p38_clip
+	skelmodel p38_clip.skd
+	surface all shader p38
+}
+
+init
+{
+	server
+	{
+		surface all 	+nodraw
+	}
+}
+
+animations
+{
+	idle 	p38_clip_reload.skc
+   {	
+	server
+		{
+			0  surface all 	+nodraw
+			18 surface all 	-nodraw
+			39 surface all 	+nodraw
+			
+		}
+			
+	}
+
+	
+}

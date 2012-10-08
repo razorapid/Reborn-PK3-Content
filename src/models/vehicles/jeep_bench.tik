@@ -1,0 +1,48 @@
+TIKI
+setup
+{
+	//scale 0.52				// Set default scale to 16/30.5 since world is in 16 units per foot and model is in cm's
+	scale 1.33				// Convert from inches to game units
+	path models/vehicles/jeep
+	skelmodel jeep_bench.skd
+	surface window shader jeepwindow 
+	surface jeep2 shader jeep
+ 	surface jeep3 shader jeep
+	surface jeep4 shader jeep
+ 	surface jeep5 shader jeep 
+	surface tredz shader jeeptredz 
+	surface wheelz shader jeepwheelz 
+}
+
+init
+{
+	server
+	{
+		//classname VehicleWheelsX4
+		classname drivableVehicle
+		setsize "-50 -40 0" "50 40 60"
+		vehicleinit jeep.tik
+		vehiclespeed 750
+		vehiclemass 1500 // not used
+		vehicletread 10 // not used
+		vehicleradius 0.33
+		vehiclerollingresistance 0.5 // not used
+		vehicledrag 0.00001
+		turnrate 15
+		vehiclebouncy 0.2
+		vehiclespringy 0.8
+		vehicleYaw -10 10
+		vehicleRoll -10 10
+		vehicleZ -5 10
+		mass 1500
+	}
+}
+
+animations
+{
+	idle     jeep_bench.skc
+}
+
+/*QUAKED vehicle_allied_jeep_bench (0.0 0.0 0.0) (-50 -40 0) (50 40 60)
+Jeep
+*/

@@ -1,0 +1,33 @@
+TIKI
+setup
+{
+	scale 0.35
+	//scale 0.52			// Set default scale to 16/30.5 since world 
+					// is in 16 units per foot and model is in cm's
+	path models/statweapons/20mmflak
+	skelmodel 20mmflak.skd
+	surface 20mmflak1 shader 20mmflak	
+	surface 20mmflak2 shader 20mmflak	
+	surface 20mmflak3 shader 20mmflak	
+}
+
+init
+{
+   	server
+      {
+      	classname animate
+      	setsize "-46 -26 0" "46 26 96"
+      }
+}
+
+animations
+{
+	idle     	20mmflak.skc
+	60degrees	20mmflak_60degrees.skc
+	30degrees	20mmflak_30degrees.skc
+	00degrees	20mmflak_00degrees.skc
+}
+
+/*QUAKED turretweapon_german_20mmflak (0.5 .25 0.25) (-32 -32 0) (32 32 128)
+Big gun - Boom boom.
+*/

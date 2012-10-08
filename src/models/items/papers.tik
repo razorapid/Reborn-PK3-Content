@@ -1,0 +1,51 @@
+TIKI
+setup
+{
+	scale 0.52			// Set default scale to 16/30.5 since world is in 16 units per foot and model is in cm's
+	path models/items/papers
+	skelmodel papers.skd
+	surface papers shader wehrpass
+}
+
+init
+{
+	server
+	{
+		setsize	"-4 -4 0" "4 4 4"
+		classname InventoryItem
+		name "Papers"
+		rank 2 2
+		ammorequired 0		// unlimited usage
+		firedelay 0.5		// delay between uses
+		crosshair 0
+	}
+}
+
+animations
+{
+	visa	   papers_visa.skc
+	idle     papers.skc
+	fire     show_papers.skc
+	{
+		server
+		{
+			// we activate them every 10 frames so that the player
+			// has a good chance of showing them to the AI even
+			// if they're waving them around all silly like.
+			30 activatepapers
+			40 activatepapers
+			50 activatepapers
+			60 activatepapers
+			70 activatepapers
+		}
+		client
+		{
+			first stopaliaschannel snd_papers
+			first sound snd_papers
+		}
+	}
+}
+
+/*QUAKED item_papers (0.5 0.5 1.0) (-8 -8 0) (8 8 16)
+German Papers.
+*/

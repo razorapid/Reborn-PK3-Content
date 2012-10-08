@@ -1,0 +1,24 @@
+TIKI
+setup
+{
+	scale 1.50
+	path models/items/bangalore
+	skelmodel bangalore.skd
+	surface bangalore shader bangalore
+}
+
+init
+{
+	server
+	{
+		classname object
+	}
+}
+
+animations
+{
+	idle     bangalore.skc
+}
+
+/*QUAKED static_item_bangalore (0.5 0.5 1.0) (-8 -48 0) (8 48 8)
+*/

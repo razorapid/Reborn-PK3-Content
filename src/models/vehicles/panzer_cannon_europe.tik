@@ -1,0 +1,142 @@
+TIKI
+setup
+{
+	scale 0.52				// Set default scale to 16/30.5 since world is in 16 units per foot and model is in cm's
+	path models/vehicles/panzer_iv
+	skelmodel panzer_cannon.skd
+      surface turret shader panzer_iv_turret_eu
+      surface undercarriage shader panzer_iv_undercarriage_eu
+}
+init
+{
+	server
+	{
+		classname 		VehicleTurretGun
+		weapontype		cannon
+		name			"PanzerCannonEurope"
+
+		// turret settings
+		idleCheckOffset	"-56 0 0"
+
+		// Primary fire type info
+		projectile		models/projectiles/panzerIVshell.tik
+		firetype		heavy
+		meansofdeath		rocket
+		//bulletcount		1
+		usenoammo		1
+		firedelay			5
+		turnspeed			38
+		pitchcaps			"-30 15 0"
+
+		// DM Attributes
+		dmfiredelay		5
+
+		SoundSet "tank_"
+
+	}
+	client
+	{
+		
+		cache muzsprite.spr
+		cache models/fx/muzflash.tik
+		cache models/ammo/rifleshell.tik
+		cache models/fx/snipesmoke.tik
+	}
+}
+
+
+animations
+{
+	idle     panzer_cannon.skc
+	fire     panzer_cannon_fire.skc
+	{
+		server
+		{
+			first shoot
+		}
+		client
+		{
+			entry stopaliaschannel tank_snd_fire
+			first sound tank_snd_fire weapon 1.0 -1 0.95 0.1
+
+			// muzzle flash
+			first tagdlight tag_barrel 0.25 0.2 0.05 110 0.11
+			first tagspawn tag_barrel
+			(
+				spawnrate 1.00
+				model muzsprite.spr
+				alpha 0.50
+				color 1.00 1.00 1.00
+				varycolor
+				scale 1.70
+				life 0.05
+				scalerate 1.00
+				velocity 4.00
+				friction 3.00
+				fade
+				alignstretch 1.00
+			)
+
+			first tagspawn tag_barrel
+			(
+				spawnrate 1.00
+				model muzsprite.spr
+				alpha 0.50
+				color 1.00 1.00 1.00
+				scale 1.60
+				life 0.05
+				scalerate 0.70
+				velocity 17.00
+				offsetalongaxis 9 0 0
+				fade
+				alignstretch 0.40
+			)
+
+			first tagspawn tag_barrel
+			(
+				spawnrate 1.00
+				model muzsprite.spr
+				alpha 0.50
+				color 1.00 1.00 1.00
+				scale 1.60
+				life 0.05
+				velocity 18.00
+				fade
+			)
+
+			first tagspawn tag_barrel
+			(
+				spawnrate 1.00
+				model models/fx/muzflash.tik
+				color 1.00 1.00 1.00
+				scale 1.09
+				life 0.01
+				velocity 2009.00
+				accel 0.00 20.00 30.00
+				friction 2.00
+				offsetalongaxis range -10 4 0 0
+				fade
+				alignstretch 0.02
+			)
+
+			first tagspawn tag_barrel
+			(
+				spawnrate 1.00
+				model models/fx/snipesmoke.tik
+				color 1.00 1.00 1.00
+				scale 4.00
+				life 1.00
+				velocity 220.00
+				friction 10.00
+				angles 0 0 random 270
+				avelocity 0 0 10
+				align
+			)
+
+		}
+	}
+}
+
+/*QUAKED vehicle_german_panzer-cannon-eu (0.0 .0 0.0) (-60 -40 0) (60 40 128)
+panzer_iv
+*/

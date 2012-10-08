@@ -1,0 +1,33 @@
+TIKI
+setup
+{
+	scale 0.52				// Set default scale to 16/30.5 since world is in 16 units per foot and model is in cm's
+	path models/vehicles/stuka
+	skelmodel stuka.skd
+	surface stuka4 shader stuka_desert
+	surface stuka3 shader stuka_desert
+	surface stuka2 shader stuka_desert
+	surface stuka1 shader stuka_desert
+	surface stukawindow shader stukawindow_desert
+}
+
+init
+{
+	server
+	{
+		classname drivablevehicle
+      		setsize "-60 -40 0" "60 40 120"
+      		seatoffset "-14 0 24"
+      		gravity 1.0
+      		vehiclespeed 800
+	}
+}
+
+animations
+{
+	idle     stuka.skc
+}
+
+/*QUAKED vehicle_german_airplane-stuka-desertcamo (0.0 0.0 0.0) (-65 -40 0) (65 40 120)
+Stuka Bomber
+*/

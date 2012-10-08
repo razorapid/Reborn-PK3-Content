@@ -1,0 +1,28 @@
+TIKI
+setup
+{
+	scale 0.52				// Set default scale to 16/30.5 since world is in 16 units per foot and model is in cm's
+	path models/vehicles/car
+	skelmodel car.skd
+	surface carwindow shader carwindow
+	surface car3 shader car
+	surface car2 shader car
+}
+
+init
+{
+	server
+	{
+		classname drivablevehicle
+		setsize "-60 -40 0" "60 40 128"
+	}
+}
+
+animations
+{
+	idle     car.skc
+}
+
+/*QUAKED vehicle_europe_car-grey (0.5 .25 0.25) (-32 -32 0) (32 32 128)
+Grey European Car
+*/

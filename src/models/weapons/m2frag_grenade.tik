@@ -1,0 +1,7 @@
+TIKI
+
+$include models/weapons/m2frag_grenade_base.txt
+
+/*QUAKED playerweapon_allied_m2-grenade (0.0 0.0 1.0) (-8 -8 -8) (8 8 8)
+American grenade - M2 Fragmentation Grenade.
+*/

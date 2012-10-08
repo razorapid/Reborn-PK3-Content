@@ -1,0 +1,32 @@
+TIKI
+setup
+{
+	//scale 0.52			// Set default scale to 16/30.5 since world is in 16 units per foot and model is in cm's
+	scale 1.33			// Convert from inches to game units
+	path models/vehicles/m3
+	skelmodel m3.skd
+	surface m31 shader m3
+	surface m32 shader m3tredz
+     	surface m33 shader m3
+ 	surface m34 shader m3
+	surface m35 shader m3
+	surface m36 shader m3
+}
+
+init
+{
+	server
+	{
+		classname drivablevehicle
+		setsize "-60 -40 0" "60 40 128"
+	}
+}
+
+animations
+{
+	idle     m3.skc
+}
+
+/*QUAKED vehicle_allied_m3halftrack (0.0 .0 0.0) (-60 -40 0) (60 40 128)
+M3 Halftrack
+*/

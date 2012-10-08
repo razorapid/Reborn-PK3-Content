@@ -1,0 +1,26 @@
+TIKI
+setup
+{
+	scale 0.52
+	path models/items/documents
+	skelmodel documents1.skd
+	surface material1 shader envelope
+	surface material2 shader book4
+	surface material3 shader document1
+}
+
+init
+{
+	server
+	{
+		classname object
+	}
+}
+
+animations
+{
+	idle     documents1.skc
+}
+
+/*QUAKED static_items_documents1c(0.0 0.75 0.5) (-8 -8 0) (8 8 16)
+*/

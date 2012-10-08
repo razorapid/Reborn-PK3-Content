@@ -1,0 +1,24 @@
+TIKI
+setup
+{
+	scale 0.52
+	path models/items/officer_uniform
+	skelmodel officer_uniform.skd
+	surface tunic shader officer_uniform
+}
+
+init
+{
+	server
+	{
+		classname object
+	}
+}
+
+animations
+{
+	idle     officer_uniform.skc
+}
+
+/*QUAKED static_items_officer-uniform(0.0 0.75 0.5) (-8 -8 0) (8 8 16)
+*/

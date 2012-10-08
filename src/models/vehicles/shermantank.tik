@@ -1,0 +1,99 @@
+TIKI
+setup
+{
+	scale 0.52				// Set default scale to 16/30.5 since world is in 16 units per foot and model is in cm's
+	path models/vehicles/shermantank
+	skelmodel shermantank.skd
+	surface shermantank2 shader shermantank
+	surface shermantank5 shader shermantank
+	surface shermantank3 shader shermantank
+	surface shermantredz shader shermantredz
+	surface shermantank4 shader shermantank
+	surface shermantank7 shader shermantank
+	surface shermantank6 shader shermantank
+}
+
+init
+{
+	server
+	{
+		classname drivablevehicle
+		setsize "-300 -80 0" "30 80 128"
+		vehicleWheelCorners "148 148 78" "0 0 -1.5"
+		vehiclespeed 200
+		vehiclemass 1500
+		vehicletread 10
+		vehicleradius 0.33
+		vehiclerollingresistance 0.5
+		vehicledrag 0.00001
+		turnrate 25
+		mass 1000
+
+		// Set the Animation Set to use
+		AnimationSet "shermantank_"
+		SoundSet "shermantank_"
+
+			//////////////////////////////////////////
+			// Pitch-Mod Sound for vehicles by speed
+			//
+			// Linearly Interpolates from the minimum pitch when the vehicle is at the minimum speed to 
+			// the maximum pitch when the vehicle is at the maximum speed.
+			//
+			// Speed is in World Units.
+			//
+			//
+			//                 +--------------- Minimum Speed
+			//                 |  +------------ Minimum Pitch
+			//                 |  |
+			//                 |  |      +----- Maximum Speed
+			//                 |  |      |  +-- Maximum Pitch
+			//                 V  V      V  V
+			setsoundparameters 0 0.95   200 1		
+
+	}
+}
+
+animations
+{
+	idle     shermantank.skc
+	skidding shermantank.skc
+	{
+		client
+		{
+			entry stopaliaschannel snd_skid_stone
+			entry sound snd_skid_stone
+
+			first tagspawn "tire_spew_back_left"
+			(
+				count 1
+				scale .7
+				model models/fx/snipesmoke.tik
+			)
+
+			first tagspawn "tire_spew_back_right"
+			(
+				count 1
+				scale .7
+				model models/fx/snipesmoke.tik
+			)
+
+			first tagspawn "tire_spew_front_left"
+			(
+				count 1
+				scale .25
+				model models/fx/snipesmoke.tik
+			)
+
+			first tagspawn "tire_spew_front_right"
+			(
+				count 1
+				scale .25
+				model models/fx/snipesmoke.tik
+			)
+		}
+	}
+}
+
+/*QUAKED vehicle_allied_tank-sherman (0.5 .25 0.25) (-32 -32 0) (32 32 128)
+Sherman Tank
+*/

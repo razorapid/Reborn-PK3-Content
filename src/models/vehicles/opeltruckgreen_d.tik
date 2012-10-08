@@ -1,0 +1,35 @@
+TIKI
+setup
+{
+	scale 0.52				// Set default scale to 16/30.5 since world is in 16 units per foot and model is in cm's
+	path models/vehicles/opeltruck
+	skelmodel opel_d.skd
+	surface opel1 shader opelgreen_d
+	surface opel2 shader opel_cullgreen_d
+	surface opel3 shader opelgreen_d
+	surface opel4 shader opelgreen_d
+	surface opel5 shader opelgreen_d
+	surface opelhub shader opelhubgreen_norotate
+	surface opeltread shader opeltread_norotate
+	surface opelwindows shader opelwindows_d
+	surface engine shader opelengine
+}
+
+init
+{
+	server
+	{
+		classname animate
+        setsize "-140 -80 0" "140 80 120"
+
+    }
+}
+
+animations
+{
+	idle		     opel_d.skc	
+}
+
+/*QUAKED vehicle_german_opeltruckgreen-destroyed (0.0 0.0 0.0) (-65 -40 0) (65 40 120)
+Opel Truck
+*/

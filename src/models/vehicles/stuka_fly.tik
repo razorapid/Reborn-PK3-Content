@@ -1,0 +1,35 @@
+TIKI
+setup
+{
+	scale 0.52				// Set default scale to 16/30.5 since world is in 16 units per foot and model is in cm's
+	path models/vehicles/stuka
+	skelmodel stuka_fly.skd
+	surface stuka4 shader stuka
+	surface stuka3 shader stuka
+	surface stuka2 shader stuka
+	surface stuka1 shader stuka
+	surface stukawindow shader stukawindow
+	surface prop shader prop
+}
+
+init
+{
+	server
+	{
+		classname animate
+      		setsize "-32 -32 -32" "32 32 32"
+        		seatoffset "0 0 0"
+      		gravity 1.0
+			health 100
+      		//vehiclespeed 800
+	}
+}
+
+animations
+{
+	idle     stuka_fly.skc
+}
+
+/*QUAKED vehicle_german_airplane-stuka-fly (0.0 0.0 0.0) (-65 -40 0) (65 40 120)
+Stuka Bomber
+*/

@@ -1,0 +1,31 @@
+
+TIKI
+setup
+{
+	scale 0.52			// Set default scale to 16/30.5 since world 
+						// is in 16 units per foot and model is in cm's
+	//scale 1.55				// Seems to work better than 0.52
+	path models/statweapons/88mmflak
+	skelmodel 88base.skd
+	surface all shader flak88
+}
+
+init
+{
+   	server
+      {
+      	classname animate
+      	setsize "-46 -26 0" "46 26 96"
+      	seatoffset "-14 0 24"
+      }
+}
+
+
+animations
+{
+	idle     88base.skc
+}
+
+/*QUAKED turretweapon_german_88mmflakbase (0.5 .25 0.25) (-32 -32 0) (32 32 128)
+Big gun - Boom boom.
+*/
