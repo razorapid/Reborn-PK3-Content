@@ -1,8 +1,13 @@
 //	Reborn hud.scr 09/17/2012
 //	by ArMaGedDoN
 // 	Last Updated 09/17/2012
+//	Version 1.0
 
-main:
+_libname:
+	local.name = "HUD Library 1.0"
+end local.name
+
+_init:
 
 	//global accessors  ----- Is this the format you decided on?
 	level.hud = local CreateListener 

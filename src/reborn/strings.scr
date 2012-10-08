@@ -49,13 +49,48 @@ array_to_float
 safechardata
 */
 
+_libname:
+	local.name = "Strings Library 1.0"
+end local.name
+
+_init:
+	level.strings = local CreateListener
+	level.strings.safeCharData = reborn/strings.scr::SafeCharData
+	level.strings.stripNewLines = reborn/strings.scr::StripNewLines
+	level.strings.makeLine = reborn/strings.scr::MakeLine
+	level.strings.addQuotes = reborn/strings.scr::AddQuotes
+	level.strings.cutLeft = reborn/strings.scr::CutLeft
+	level.strings.cutRight = reborn/strings.scr::CutRight
+	level.strings.trim = reborn/strings.scr::Trim
+	level.strings.arrayToLower = reborn/strings.scr::ArrayToLower
+	level.strings.arrayToUpper = reborn/strings.scr::ArrayToUpper
+	level.strings.charData = reborn/strings.scr::CharData
+	level.strings.charDataUppercase = reborn/strings.scr::CharDataUppercase
+	level.strings.charDataLowercase = reborn/strings.scr::CharDataLowercase
+	level.strings.inStr = reborn/strings.scr::InStr
+	level.strings.left = reborn/strings.scr::Left
+	level.strings.right = reborn/strings.scr::Right
+	level.strings.mid = reborn/strings.scr::Mid
+	level.strings.reverse = reborn/strings.scr::Reverse
+	level.strings.toLower = reborn/strings.scr::ToLower
+	level.strings.toUpper = reborn/strings.scr::ToUpper
+	level.strings.splitString = reborn/strings.scr::SplitString
+	level.strings.splitLine = reborn/strings.scr::SplitLine
+	level.strings.replace = reborn/strings.scr::Replace
+	level.strings.remove = reborn/strings.scr::Remove
+	level.strings.formatReplace = reborn/strings.scr::FormatReplace
+	level.strings.combine = reborn/strings.scr::Combine
+	level.strings.arrayToInt = reborn/strings.scr::ArrayToInt
+	level.strings.arrayToString = reborn/strings.scr::ArrayToString
+	level.strings.arrayToFloat = reborn/strings.scr::ArrayToFloat
+end
 
 
 ////////////////////////////////////////////////////////////////////////
 // safechardata
 // all chars which can be safe in a file name
 ////////////////////////////////////////////////////////////////////////
-safechardata:
+SafeCharData:
 
 	local.array = makearray
 	"a"       
@@ -128,19 +163,19 @@ end local.array
 // Removes all new line chars
 // useage: local.name = waitexec global/strings.scr::strip_newlines "str\ning"
 ////////////////////////////////////////////////////////////////////////
-strip_newlines local.string:
+StripNewlines local.string:
 	//strip new lines
-	local.string = waitthread remove local.string "\n"
+	local.string = waitthread Remove local.string "\n"
 end local.string
 ////////////////////////////////////////////////////////////////////////
 // clean_filename
 // Removes invalid chars from a string for save filesave
 // useage: local.name = waitexec global/strings.scr::clean_filename "filename"
 ////////////////////////////////////////////////////////////////////////
-clean_filename local.filename:
+CleanFilename local.filename:
 
 	//get safe data
-	local.chardata = waitthread safechardata
+	local.chardata = waitthread SafeCharData
 	
 	//init new name
 	local.newname = ""
@@ -181,7 +216,7 @@ end local.newname
 // RGB light from string
 // Will produce a light from a string
 // returns a array of the light as int
-light_from_string local.string:
+LightFromString local.string:
 
 	//split the line
 	local.light_array = waitexec global/strings.scr::split_line local.string 1
@@ -204,7 +239,7 @@ end local.light
 
 // produces a random light
 // returns a array of the light as int
-random_light:
+RandomLight:
 
 	local.colour_is_pretty = 1
 	while(local.colour_is_pretty == 1)
@@ -231,7 +266,7 @@ end local.light
 // team_count
 // returns an array with string index's "allies" , "axis" and "spectator"
 // used to count players on a team.
-team_count:
+TeamCount:
 
 
 	local.team[allies] = 0
@@ -251,7 +286,7 @@ end local.team
 // eg
 // local.string = waitexec global/strings.scr::makeline "hello"
 // local.string will be '\nhello\n'
-makeline local.string:
+MakeLine local.string:
 
 	local.string = ("\n" + local.string + "\n" )
 
@@ -262,7 +297,7 @@ end local.string
 // eg
 // local.string = waitexec global/strings.scr::add_quotes "hello"
 // local.string will be '"hello"'
-add_quotes local.string:
+AddQuotes local.string:
 	local.string = ("\"" + local.string + "\"")
 end local.string
 
@@ -272,7 +307,7 @@ end local.string
 // eg
 // local.string = waitexec global/strings.scr::cut_left "hello" 3
 // local.string will be 'he'
-cut_left local.string local.cutcount:
+CutLeft local.string local.cutcount:
 
 	//get the size of the string.
 	local.number = local.string.size - local.cutcount
@@ -280,7 +315,7 @@ cut_left local.string local.cutcount:
 	local.number++
 
 	//cut the string reversed left
-	local.string = waitthread right local.number local.string
+	local.string = waitthread Right local.number local.string
 
 end local.string
 
@@ -290,7 +325,7 @@ end local.string
 // eg
 // local.string = waitexec global/strings.scr::cut_right "hello" 3
 // local.string will be 'he'
-cut_right local.string local.cutcount:
+CutRight local.string local.cutcount:
 
 	//get the size of the string.
 	local.number = local.string.size - local.cutcount
@@ -299,7 +334,7 @@ cut_right local.string local.cutcount:
 	local.number++
 
 	//cut the string reversed left
-	local.string = waitthread left local.number local.string
+	local.string = waitthread Left local.number local.string
 
 end local.string
 
@@ -308,7 +343,7 @@ end local.string
 // removed trailing spaces from front and back of a string.
 // usage: local.str = waitexec global/strings.scr::trim (str string)
 // returns: trimmed string
-trim local.string:
+Trim local.string:
 
 	if(local.string == "")
 	{
@@ -367,11 +402,11 @@ trim local.string:
 		{
 			if(local.times == 1)
 			{
-				local.string = waitthread cut_left local.string local.spaces
+				local.string = waitthread CutLeft local.string local.spaces
 			}
 			else
 			{
-				local.string = waitthread cut_right local.string local.spaces
+				local.string = waitthread CutRight local.string local.spaces
 			}
 		}
 	}
@@ -381,14 +416,14 @@ end local.string
 // convert a array to lower  case.
 // usage: exec global/strings.scr::array_to_lower (const array of strings)
 // returns: array of lower case strings
-array_to_lower local.strings:
+ArrayToLower local.strings:
 
 	for(local.linni = 1; local.linni <= local.strings.size; local.linni++)
 	{
 		for(local.anniken = 1; local.anniken <= local.strings[local.linni].size; local.anniken++)
 		{
 			local.string = local.strings[local.linni] [local.anniken]
-			local.strings[local.linni][local.anniken] = waitthread to_lower local.string
+			local.strings[local.linni][local.anniken] = waitthread ToLower local.string
 		}
 	}
 
@@ -399,17 +434,17 @@ end  local.strings
 // convert a array to upper case.
 // usage: exec global/strings.scr::array_to_upper (const array of strings)
 // returns: array of upper case strings
-array_to_upper local.strings:
+ArrayToUpper local.strings:
 
-	local.lower = waitthread chardata_uppercase
-	local.upper = waitthread chardata_lowercase
+	local.lower = waitthread CharDataUppercase
+	local.upper = waitthread CharDataLowercase
 
 	for(local.linni = 1; local.linni <= local.strings.size; local.linni++)
 	{
 		for(local.anniken = 1; local.anniken <= local.strings[local.linni].size; local.anniken++)
 		{
 			local.string = local.strings[local.linni] [local.anniken]
-			local.strings[local.linni][local.anniken] = waitthread to_upper local.string
+			local.strings[local.linni][local.anniken] = waitthread ToUpper local.string
 		}
 	}
 
@@ -417,7 +452,7 @@ end  local.strings
 
 
 // returns all lowercase chars
-chardata:
+CharData:
 
 	local.array = makearray
 	"a"          "A"
@@ -454,7 +489,7 @@ end local.array
 //of cause by jv
 
 // returns all lowercase chars
-chardata_lowercase:
+CharDataLowercase:
 	local.hasharray = makeArray
 	a
 	b
@@ -492,7 +527,7 @@ chardata_lowercase:
 end local.array
 
 // returns all uppercase chars
-chardata_uppercase:
+CharDataUppercase:
 	local.hasharray = makeArray
 	A
 	B
@@ -538,7 +573,7 @@ end local.array
 // gives 4 because it starts at 0
 
 // if none found it will return NIL
-instr local.char local.string local.startpos:
+InStr local.char local.string local.startpos:
 
 	if(local.string == "")
 	{
@@ -618,7 +653,7 @@ end
 // eg
 // local.string = waitexec global/strings.scr::right 3 "hello"
 // local.string will be 'llo'
-right local.pos local.string:
+Right local.pos local.string:
 
 	local.start = local.string.size - local.pos
 	local.right = ""
@@ -640,7 +675,7 @@ end local.right
 // local.string = waitexec global/strings.scr::left 3 "hello"
 // local.string will be 'hel'
 //
-left local.pos local.string:
+Left local.pos local.string:
 
 	local.pos--
 	local.left = ""
@@ -661,7 +696,7 @@ end local.left
 //eg
 // local.string = waitexec global/strings.scr 2 "hello" 2
 // local.string would become 'll'
-mid local.start local.string local.count:
+Mid local.start local.string local.count:
 
 	//init string
 	local.mid = ""
@@ -691,7 +726,7 @@ end local.mid
 //eg
 // local.string = waitexec global/strings.scr::reverse "hello"
 // local.string would become 'olleh'
-reverse local.string:
+Reverse local.string:
 
 	local.left = ""
 	for(local.i = local.string.size - 1; local.i >=  0; local.i--)
@@ -716,7 +751,7 @@ end local.left
 //eg2
 // local.string = waitexec global/strings.scr::to_lower "hello" 0
 // local.string will become 'hello'
-to_lower local.string local.index:
+ToLower local.string local.index:
 
 	local.chardata = waitthread chardata
 
@@ -757,10 +792,10 @@ end local.string
 //eg2
 // local.string = waitexec global/strings.scr::to_lower "HELLO" 0
 // local.string will become 'hELLO'
-to_lower local.string local.index:
+ToLower local.string local.index:
 
-	local.lower = waitthread chardata_lowercase
-	local.upper = waitthread chardata_uppercase
+	local.lower = waitthread CharDataLowercase
+	local.upper = waitthread CharDataUppercase
 
 	for(local.i = 0; local.i <= local.string.size - 1; local.i++)
 	{
@@ -843,10 +878,10 @@ end local.string
 // local.string = waitexec global/strings.scr::to_upper "hello" 0
 // local.string will become 'Hello'
 
-to_upper local.string local.index:
+ToUpper local.string local.index:
 
-	local.upper = waitthread chardata_lowercase
-	local.lower = waitthread chardata_uppercase
+	local.upper = waitthread CharDataLowercase
+	local.lower = waitthread CharDataUppercase
 
 	for(local.i = 0; local.i <= local.string.size - 1; local.i++)
 	{
@@ -880,7 +915,7 @@ end local.string
 // usage local.wordarray = waitexec global/strings.scr::split_string ( string string , string spacer)
 // returns array of strings.
 // local.word[1] etc is a word
-split_string local.string local.spacer:
+SplitString local.string local.spacer:
 
 	//which word are we on
 	local.word = 1
@@ -941,7 +976,7 @@ end local.words
 // local.wordarray[3] is 'hello mummy'
 //
 
-split_line local.info local.dont_say local.spacer:
+SplitLine local.info local.dont_say local.spacer:
 
 	local.wordcount = 1
 
@@ -1065,7 +1100,7 @@ end ( local.words::local.wordcount::local.actual)
 // local.string would become
 // "once upon a time there was  a mod"
 
-replace local.string local.replace local.replace_with:
+Replace local.string local.replace local.replace_with:
 
 	if(local.string == "")
 	{
@@ -1079,7 +1114,7 @@ replace local.string local.replace local.replace_with:
 	for (local.i = 0;local.i <= local.string.size; local.i++)
 	{
 		//get our first
-		local.position = waitthread instr local.replace local.string
+		local.position = waitthread InStr local.replace local.string
 
 		//did we find it
 		if(local.position == NIL)
@@ -1088,7 +1123,7 @@ replace local.string local.replace local.replace_with:
 		}
 
 		//get before it
-		local.textleft = waitthread left local.position local.string
+		local.textleft = waitthread Left local.position local.string
 
 		//get length to the end
 
@@ -1106,7 +1141,7 @@ replace local.string local.replace local.replace_with:
 		local.length = (local.string.size - local.start)
 
 		//get after it
-		local.textright = waitthread mid local.start local.string local.length
+		local.textright = waitthread Mid local.start local.string local.length
 
 		//update temp, and file text
 		local.string = local.textleft + local.replace_with + local.textright
@@ -1128,8 +1163,8 @@ end local.string
 // local.string = waitexec global/strings.scr::remove "hello you idiot" "idiot"
 // local.string would become
 // "hello you"
-remove local.string local.string_remove:
-	local.string = waitthread replace local.string local.string_remove ""
+Remove local.string local.string_remove:
+	local.string = waitthread Replace local.string local.string_remove ""
 end local.string
 
 // format_replace is used like replace except it will only replace a single instance in a group of the same character.
@@ -1142,7 +1177,7 @@ end local.string
 // local.string would become
 // "once upon a time there was_a mod"
 
-format_replace local.string local.replace local.replace_with:
+FormatReplace local.string local.replace local.replace_with:
 
 	local.new_str = ""
 
@@ -1170,7 +1205,7 @@ end local.new_str
 // combine combines a array of stirngs into one single string of all.
 // exec global/strings:;combine (array , int start in array)
 ///////////////////////////////////////////////////////////
-combine local.words local.start:
+Combine local.words local.start:
 
 	local.actual = ""
 
@@ -1203,7 +1238,7 @@ end local.actual
 // converts a array into interger
 // returns the array as int
 ///////////////////////////////////////////////////////////
-array_to_int local.array:
+ArrayToInt local.array:
 
 	if(local.array[0] != NIL)
 	{
@@ -1226,7 +1261,7 @@ end local.array
 // converts a array into string
 // returns the array as string
 ///////////////////////////////////////////////////////////
-array_to_str local.array:
+ArrayToStr local.array:
 
 	if(local.array[0] != NIL)
 	{
@@ -1249,7 +1284,7 @@ end local.array
 // converts a array into float
 // returns the array as float
 ///////////////////////////////////////////////////////////
-array_to_float local.array:
+ArrayToFloat local.array:
 
 	if(local.array[0] != NIL)
 	{
