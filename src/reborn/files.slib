@@ -1,0 +1,642 @@
+_libinfo:
+	local.info["name"] = "Files Library"
+	local.info["namespace"] = "files"
+	local.info["title"] = "Files Library 1.1"
+	local.info["version"] = 1.1
+	local.info["author"] = "Elgan, RazoRapiD"
+end local.info
+
+_libinit local.libFilePath:
+	local.init["loaded"] = 0
+	local.init["lib"] = NIL
+
+	level.files = local CreateListener
+	
+	if(level.files != NULL && level.files != NIL) {
+	
+		level.files.newFile = local.libFilePath::NewFile
+		level.files.copyFile = local.libFilePath::CopyFile
+		level.files.removeFile = local.libFilePath::RemoveFile
+		level.files.renameFile = local.libFilePath::RenameFile
+		level.files.moveFile = local.libFilePath::MoveFile
+		level.files.fileExists = local.libFilePath::FileExists
+		level.files.isFileEmpty = local.libFilePath::IsFileEmpty
+		level.files.safeFilename = local.libFilePath::SafeFileName
+		level.files.SEEK_SET = 0
+		level.files.SEEK_CUR = 1
+		level.files.SEEK_END = 2
+		level.files._totalfiles = 0
+		level.files.__maxDefaultStringSize = 256
+		level.files._libPath = local.libFilePath
+	
+		local.init["loaded"] = 1
+		local.init["lib"] = level.hud
+	}
+	
+end local.init
+
+CopyFile local.fileName local.copyName:
+	
+	local.result = fcopy local.fileName local.copyName
+	
+end local.result
+
+RemoveFile local.fileName:
+	
+	local.result = fremove local.fileName
+	
+end local.result
+
+RenameFile local.oldFilename local.newFilename:
+	
+	local.result = frename local.oldFilename local.newFilename
+	
+end local.result
+
+MoveFile local.fileName local.destinationPath:
+	if(level.REBORN.isLibraryLoaded[strings] == 0)
+		end -1
+	
+	local.lastSlashPos = 0
+	local.index = local.fileName.size - 1
+	while(local.fileName[local.index] != "/")
+		local.index--
+
+	local.name = waitexec level.strings.right local.fileName (local.fileName.size - local.index)
+	if(local.destinationPath[local.destinationPath.size-1] != "/")
+		local.destinationPath += "/"
+		
+	local.newFilename = local.destinationPath + local.namespace
+	
+	local.result = frename local.fileName local.newFilename
+
+end local.result
+
+FileExists local.fileName:
+
+	local.result = fexists local.fileName
+
+end local.result
+
+IsFileEmpty local.fileName:
+	local.result = 0
+
+	local.fileExists = fexists local.fileName
+	if(local.fileExists != 1)
+		end -1
+	
+	local.file = fopen local.fileName "r"
+	if(!local.file)
+		end -2
+	
+	local.fseekResult = fseek local.file 0 level.files.SEEK_END
+	if(local.fseekResult != 0)
+		end -3
+		
+	local.size = ftell local.file
+	if(local.size == -1)
+		end -4
+	
+	if(local.size == 0)
+		local.result = 1;
+	
+	local.fcloseResult = fclose local.file
+	if(local.fcloseResult != 0) {
+		println(level.files.libInfo[name]+" ERROR: Could not close file during IsFileEmpty function!")
+		end -5
+	}
+
+end local.result
+
+SafeFileName local.fileName:
+	if(level.REBORN.isLibraryLoaded[strings] == 0)
+		end
+		
+	//get safe data
+	local.charData = level.strings.safeCharData
+	
+	//init new name
+	local.safeName = ""
+
+	//go through the name
+	for(local.i = 0; local.i < local.fileName.size; local.i++)
+	{
+		local.letter = local.fileName[local.i]
+
+		//check if its in the alphabet
+		for(local.j = 0; local.j < local.charData.size; local.j++)
+		{
+			if(local.letter == local.charData[local.j][1])
+			{
+				local.safeName += local.letter
+				break
+			}
+		}
+	}
+
+	//if its not long enough
+	if(local.newname.size <= 0)
+		end
+
+end local.result
+
+NewFile local.filename local.accesstype:
+	//we open files here
+	if(local.filename == NIL)
+		end
+	
+	//if we already have a file with this filename open
+	if(level.files._filePaths[local.filename] != NIL && level.files._filePaths[local.filename] != NULL) {
+		
+		//say that we are being accessed more..
+		level.files._filePaths[local.filename].beingaccessed++
+		end level.files._filePaths[local.filename] 
+	}
+
+	//have we reached max file count
+	if(level.files._totalFiles >= 10 || getCVar("sv_scriptfiles") >= 32) {
+		println ("\n^~^~^ FILE ERROR: MAX REACHED\n")
+		end
+	}
+
+	//get an id that is free
+	for(local.i = 0; local.i <= 10; local.i++) {
+		if( level.files._filesArray[local.i] == NIL || level.files._filesArray[local.i] == NULL  ) {
+			local.fileid = local.i
+		}
+	}
+	
+	//got a real id?
+	if(!local.fileid) {
+		println ("\n^~^~^ FILE ERROR: No free file id?\n")
+		end
+	}
+
+	//how are we opening it
+	if(local.accesstype == NIL) {
+		local.accesstype = "a+"
+	}
+
+	//add a file
+	level.files._totalFiles++
+
+	// Build the file
+	local.file = local CreateListener
+	//give this file a targetname
+	local.file targetname "files"
+	local.file.filename = local.filename
+	local.file.accesstype = local.accesstype
+	local.file.isOpen = 0 //false
+	local.file.handle = NIL
+	local.file.dontFlush = 0
+
+	local.file.id = local.fileid
+
+	local.file.autoSave = 1
+	local.file.position = 0
+	local.file.iniSections = 0
+	local.file.beingAccessed = 0
+	local.file.autoIniToData = 1
+	
+	local.file.__todelete = 0
+
+	//build the threads
+	local.file.close = level.files.__libPath::("__close" + local.file.id)
+	local.file.open = level.files.__libPath::("__open" + local.file.id)
+	local.file.delete = level.files.__libPath::("__delete" + local.file.id)
+
+	local.file.parseINI = level.files.__libPath::("__parseini" + local.file.id)
+	local.file.fileDataFromIni = level.files.__libPath::("filedataFromIni" + local.file.id)
+
+	local.file.readText = level.files.__libPath::("__readtext" + local.file.id)
+	local.file.readLines = level.files.__libPath::("__readlines" + local.file.id)
+
+	local.file.read = level.files.__libPath::("__read" + local.file.id)
+	local.file.readLine = level.files.__libPath::("__readline" + local.file.id)
+	local.file.readChar = level.files.__libPath::("__readchar" + local.file.id)
+
+	local.file.overwrite = level.files.__libPath::("overwrite" + local.file.id)
+	
+	local.file.saveText = level.files.__libPath::("__savetext" + local.file.id)
+	local.file.saveLines = level.files.__libPath::("__savelines" + local.file.id)
+	
+	local.file.write = level.files.__libPath::("__write" + local.file.id)
+	local.file.writeLine = level.files.__libPath::("__writeline" + local.file.id)
+	local.file.writeChar = level.files.__libPath::("__writechar" + local.file.id)
+	
+	local.file.addSection = level.files.__libPath::("__addsection" + local.file.id)
+	local.file.addKey = level.files.__libPath::("__addkey" + local.file.id)
+	
+	local.file.removeSection = level.files.__libPath::("__removesection" + local.file.id)
+	local.file.removeKey = level.files.__libPath::("__removekey" + local.file.id)
+
+	local.file.seek = level.files.__libPath::("__seek" + local.file.id)
+	local.file.tell = level.files.__libPath::("__tell" + local.file.id)
+	local.file.rewind = level.files.__libPath::("__rewind" + local.file.id)
+	local.file.flush = level.files.__libPath::("__flush" + local.file.id)
+	local.file.error = level.files.__libPath::("__error" + local.file.id)
+
+	//assign this file as is
+	level.files._filesArray[local.file.id] = local.file
+	//so we can check an object
+	level.files._filePaths[local.filename] = local.file
+
+	else
+	{
+		println ("\n^~^~^ FILE ERROR: Failed to open the file handle: \"" + local.file.filename  + "\" With type: \"" + local.file.accesstype  + "\"\n")
+		local.file immediateremove
+		end
+	}
+
+end local.file
+
+__close1:
+	goto Close 1
+__close2:
+	goto Close 2
+__close3:
+	goto Close 3
+__close4:
+	goto Close 4
+__close5:
+	goto Close 5
+__close6:
+	goto Close 6
+__close7:
+	goto Close 7
+__close8:
+	goto Close 8
+__close9:
+	goto Close 9
+__close10:
+	goto Close 10
+Close local.id:
+	
+	if(local.id == NIL) {
+		println ("\n^~^~^ FILE ERROR: Failed to close file with no id: \"NIL\"\n")
+		end
+	}
+
+	//get the file from the id
+	local.file = level.files._filesArray[local.id]
+	if(local.file == NIL) {
+		println ("\n^~^~^ FILE ERROR: Failed to get file object with id: \"" + local.id + "\" in close\n")
+		end
+	}
+
+	//file is closed alfready?
+	if(!local.file.isOpen)
+		end
+
+	//close the file
+	local.file.result = fclose(local.file.handle)
+
+	//file is closed
+	local.file.isOpen = 0
+
+end
+
+////////////////////////////////////////////////////////////////////////
+// open file
+////////////////////////////////////////////////////////////////////////
+__open1 local.accesstype:
+	goto Open 1 local.accesstype
+__open2 local.accesstype:
+	goto Open 2 local.accesstype
+__open3 local.accesstype:
+	goto Open 3 local.accesstype
+__open4 local.accesstype:
+	goto Open 4 local.accesstype
+__open5 local.accesstype:
+	goto Open 5 local.accesstype
+__open6 local.accesstype:
+	goto Open 6 local.accesstype
+__open7 local.accesstype:
+	goto Open 7 local.accesstype
+__open8 local.accesstype:
+	goto Open 8 local.accesstype
+__open9 local.accesstype:
+	goto Open 9 local.accesstype
+__open10 local.accesstype:
+	goto Open 10 local.accesstype
+Open local.id local.accesstype:
+
+	if(local.id == NIL) {
+		println ("\n^~^~^ FILE ERROR: Failed to open file with no id: \"NIL\"\n")
+		end
+	}
+	
+	//get the file from the id
+	local.file = level.files._filesArray[local.id]
+	if(local.file == NIL) {
+		println ("\n^~^~^ FILE ERROR: Failed to get file object with id: \"" + local.id + "\" in open\n")
+		end
+	}
+
+	//reset close warning
+	local.file.donewarning = 0
+
+	//if we did not overfwrite the access type, then use the defaults from the file
+	if(local.accesstype == NIL)
+		local.accesstype = local.file.accesstype
+
+	//if file already open, close it
+	if(local.file.isopen)
+		waitthread local.file.close
+
+	//open it!
+	local.file.handle = fopen local.file.filename local.accesstype
+
+	if(local.file.handle != 0)
+		local.file.isOpen = 1 // true
+	else
+		local.file.isOpen = 0 // false
+
+end
+
+__delete1:
+	goto Delete 1
+__delete2:
+	goto Delete 2
+__delete3:
+	goto Delete 3
+__delete4:
+	goto Delete 4
+__delete5:
+	goto Delete 5
+__delete6:
+	goto Delete 6
+__delete7:
+	goto Delete 7
+__delete8:
+	goto Delete 8
+__delete9:
+	goto Delete 9
+__delete10:
+	goto Delete 10
+Delete local.id:
+
+	if(local.id == NIL) {
+		println ("\n^~^~^ FILE ERROR: Failed to deletefile file with no id: \"NIL\"\n")
+		end
+	}
+
+	//get the file from the id
+	local.file = level.files._filesArray[local.id]
+	if(local.file == NIL) {
+		println ("\n^~^~^ FILE ERROR: Failed to get file object with id: \"" + local.id + "\" in freadchar\n")
+		end
+	}
+	
+	//dont delete if we are being accessed
+	if(local.file.beingaccessed > 0) {
+		local.file.__todelete = 1
+		local.file.beingaccessed--
+		end
+	}
+	
+	//close if it was open
+	if(local.file.isOpen)
+		waitthread local.file.close
+	
+	local.result = fremove local.file.fileName
+	
+	if(local.result == 0) {
+		//free mem
+		level.files.__filesArray[local.id] = NIL
+	
+		//one less file
+		level.files.__totalfiles--
+	
+		//del file and free mem
+		local.file delete
+	}
+
+end
+
+__readtext1:
+	goto ReadText 1
+__readtext2:
+	goto ReadText 2
+__readtext3:
+	goto ReadText 3
+__readtext4:
+	goto ReadText 4
+__readtext5:
+	goto ReadText 5
+__readtext6:
+	goto ReadText 6
+__readtext7:
+	goto ReadText 7
+__readtext8:
+	goto ReadText 8
+__readtext9:
+	goto ReadText 9
+__readtext10:
+	goto ReadText 10
+ReadText local.id:
+
+	if(local.id == NIL) {
+		println ("\n^~^~^ FILE ERROR: Failed to deletefile file with no id: \"NIL\"\n")
+		end
+	}
+
+	//get the file from the id
+	local.file = level.files._filesArray[local.id]
+	if(local.file == NIL) {
+		println ("\n^~^~^ FILE ERROR: Failed to get file object with id: \"" + local.id + "\" in freadchar\n")
+		end
+	}
+	
+	//close if it was open
+	if(local.file.isOpen == 0 || (local.file.accessTypeGroup & level.files.READ_BINARY == 1))
+		end
+		
+	local.file.text = freadall local.file.handle local.file.text
+end
+
+__readlines1:
+	goto ReadLines 1
+__readlines2:
+	goto ReadLines 2
+__readlines3:
+	goto ReadLines 3
+__readlines4:
+	goto ReadLines 4
+__readlines5:
+	goto ReadLines 5
+__readlines6:
+	goto ReadLines 6
+__readlines7:
+	goto ReadLines 7
+__readlines8:
+	goto ReadLines 8
+__readlines9:
+	goto ReadLines 9
+__readlines10:
+	goto ReadLines 10
+ReadLines local.id:
+
+	if(local.id == NIL) {
+		println ("\n^~^~^ FILE ERROR: Failed to deletefile file with no id: \"NIL\"\n")
+		end
+	}
+
+	//get the file from the id
+	local.file = level.files._filesArray[local.id]
+	if(local.file == NIL) {
+		println ("\n^~^~^ FILE ERROR: Failed to get file object with id: \"" + local.id + "\" in freadchar\n")
+		end
+	}
+	
+	//close if it was open
+	if(local.file.isOpen == 0 || (local.file.accessTypeGroup & level.files.READ_BINARY == 1))
+		end
+		
+	local.file.text = freadall local.file.handle local.file.text
+	
+	if(local.file.text != NULL && local.file.text != NIL && level.REBORN.isLibraryLoaded[strings] != 0) {
+		local.file.lines = waitthread level.strings.splitString local.text "\n"
+	}
+	
+end
+
+__read1:
+	goto Read 1
+__read2:
+	goto Read 2
+__read3:
+	goto Read 3
+__read4:
+	goto Read 4
+__read5:
+	goto Read 5
+__read6:
+	goto Read 6
+__read7:
+	goto Read 7
+__read8:
+	goto Read 8
+__read9:
+	goto Read 9
+__read10:
+	goto Read 10
+Read local.id local.stringMaxSize:
+
+	if(local.id == NIL) {
+		println ("\n^~^~^ FILE ERROR: Failed to deletefile file with no id: \"NIL\"\n")
+		end
+	}
+
+	//get the file from the id
+	local.file = level.files._filesArray[local.id]
+	if(local.file == NIL) {
+		println ("\n^~^~^ FILE ERROR: Failed to get file object with id: \"" + local.id + "\" in freadchar\n")
+		end
+	}
+	
+	//close if it was open
+	if(local.file.isOpen == 0)
+		end
+		
+	if(local.stringMaxSize == NULL || local.stringMaxSize == NIL)
+		local.stringMaxSize = level.files.__maxDefaultStringSize
+		
+	local.string = fgets local.file.handle local.stringMaxSize
+	
+end local.string
+
+__readline1:
+	goto ReadLine 1
+__readline2:
+	goto ReadLine 2
+__readline3:
+	goto ReadLine 3
+__readline4:
+	goto ReadLine 4
+__readline5:
+	goto ReadLine 5
+__readline6:
+	goto ReadLine 6
+__readline7:
+	goto ReadLine 7
+__readline8:
+	goto ReadLine 8
+__readline9:
+	goto ReadLine 9
+__readline10:
+	goto ReadLine 10
+ReadLine local.id local.stringMaxSize:
+
+	if(local.id == NIL) {
+		println ("\n^~^~^ FILE ERROR: Failed to deletefile file with no id: \"NIL\"\n")
+		end
+	}
+
+	//get the file from the id
+	local.file = level.files._filesArray[local.id]
+	if(local.file == NIL) {
+		println ("\n^~^~^ FILE ERROR: Failed to get file object with id: \"" + local.id + "\" in freadchar\n")
+		end
+	}
+	
+	//close if it was open
+	if(local.file.isOpen == 0)
+		end
+		
+	if(local.stringMaxSize == NULL || local.stringMaxSize == NIL)
+		local.stringMaxSize = level.files.__maxDefaultStringSize
+		
+	local.string = fgets local.file.handle local.stringMaxSize
+	local.line = NIL
+	
+	for(local.i = 0; local.i < local.string.size; local.i++)
+		if(local.string[local.i] != "\n")
+			local.line += local.string[local.i]
+	
+end local.line
+	
+__readchar1:
+	goto ReadChar 1
+__readchar2:
+	goto ReadChar 2
+__readchar3:
+	goto ReadChar 3
+__readchar4:
+	goto ReadChar 4
+__readchar5:
+	goto ReadChar 5
+__readchar6:
+	goto ReadChar 6
+__readchar7:
+	goto ReadChar 7
+__readchar8:
+	goto ReadChar 8
+__readchar9:
+	goto ReadChar 9
+__readchar10:
+	goto ReadChar 10
+ReadChar local.id:
+
+	if(local.id == NIL) {
+		println ("\n^~^~^ FILE ERROR: Failed to deletefile file with no id: \"NIL\"\n")
+		end
+	}
+
+	//get the file from the id
+	local.file = level.files._filesArray[local.id]
+	if(local.file == NIL) {
+		println ("\n^~^~^ FILE ERROR: Failed to get file object with id: \"" + local.id + "\" in freadchar\n")
+		end
+	}
+	
+	//close if it was open
+	if(local.file.isOpen == 0)
+		end
+		
+	if(local.stringMaxSize == NULL || local.stringMaxSize == NIL)
+		local.stringMaxSize = level.files.__maxDefaultStringSize
+		
+	local.string = fgets local.file.handle local.stringMaxSize
+	
+end local.string

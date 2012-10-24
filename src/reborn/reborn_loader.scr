@@ -32,7 +32,7 @@ main:
 end
 
 InitializeRebornLibraries:
-	local.libsList = flist "" ".scrlib" 1
+	local.libsList = flist "" ".slib" 1
 	local.libNamesCount = 0
 	
 	for(local.i = 0; local.i < local.libsList.size; local.i++) {
@@ -40,7 +40,7 @@ InitializeRebornLibraries:
 		if(local.libFile == NULL || local.libFile == "" || local.libFile.size < 8 )
 			continue
 		
-		local.libInfo = waitexec local.libFile::_libinfo
+		local.libInfo = waitexec local.libFile::__libinfo
 		if(local.libInfo == NULL || local.libInfo == NIL || typeof(local.libInfo) != "array")
 			continue
 		
@@ -74,7 +74,7 @@ InitializeRebornLibraries:
 				level.REBORN._librariesCount++
 				
 				println("--> Loading \""+local.libs[local.libName]["title"]+"\" ("+local.libs[local.libName]["libFile"]+")...")
-				local.libInit = waitexec local.libs[local.libName]["libFile"]::_libinit local.libs[local.libName]["libFile"]
+				local.libInit = waitexec local.libs[local.libName]["libFile"]::__libinit local.libs[local.libName]["libFile"]
 				
 				if(local.libInit != NULL && local.libInit != NIL && typeof(local.libInit) == "array") {
 					local.libs[local.libName]["libLoaded"] = local.libInit["loaded"]

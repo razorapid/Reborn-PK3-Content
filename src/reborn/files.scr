@@ -433,7 +433,7 @@ end local.init
 // "w+"	Create an empty file for both freading and writing. If a file with the same name alfready exists its content is erased and the file is treated as a new empty file.
 // "a+"	Open a file for freading and appending. All writing operations are performed at the end of the file, protecting the previous content to be overwritten. You can reposition (fseek, rewind) the internal pointer to anywhere in the file for freading, but writing operations will move it back to the end of file. The file is created if it does not exist.
 ////////////////////////////////////////////////////////////////////////
-newfile local.filename local.accesstype:
+NewFile local.filename local.accesstype:
 	//failsafe, if we exec this too early. The script will crasht he game.
 //	level waittill spawn
 
