@@ -107,17 +107,17 @@ For variable type you can choose from:
 Another example:
 
 > /** Variable, Type: Integer, Description: Keeps seconds **/  
-> level.mymod.secondLeft = 30
+> level.mymod.secondsLeft = 30
 
 MorpheusDoc documentation comments for functions are a bit different.
 The scheme is as follows:
 
 > /**  
-> * Description: test description  
-> * @filename: string, File's name  
-> * @accesstype: string, File access type, optional  
-> * Returns: Handle to file  
-> * Usage: local.file = waitexec level.newFile "file.txt" "r+"  
+> \* Description: test description  
+> \* @filename: string, File's name  
+> \* @accesstype: string, File access type, optional  
+> \* Returns: Handle to file  
+> \* Usage: local.file = waitexec level.newFile "file.txt" "r+"  
 > **/  
 > NewFile local.filename local.accesstype:  
 > ...  
