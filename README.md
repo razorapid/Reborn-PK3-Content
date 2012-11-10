@@ -47,17 +47,17 @@ The folder structure for the project will look like this:
 
 <code>
  ../mymodfolder/  
-     |  
-     --> compile.bat  
-     --> compile-pk3.bat  
-     --> compile-clear.bat  
-     --> build.bat  
-     --> build/  
-     --> src/  
-          |  
-          --> myownmod/  
-               |  
-               --> myownmod.mcfg  
-               --> libs/  
-               --> scripts/  
+# |  
+# --> compile.bat  
+# --> compile-pk3.bat  
+# --> compile-clear.bat  
+# --> build.bat  
+# --> build/  
+# --> src/  
+## |  
+## --> myownmod/  
+### |  
+### --> myownmod.mcfg  
+### --> libs/  
+### --> scripts/  
 </code>			  
