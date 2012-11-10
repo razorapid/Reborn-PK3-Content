@@ -16,7 +16,6 @@ __libinit local.libFilePath:
 	local.init["lib"] = NIL
 	
 	if(level.strings != NULL && level.strings != NIL) {
-		//global accessors  ----- Is this the format you decided on?
 		level.hud = local CreateListener 
 		level.hud.nextHudID = local.libFilePath::NextHudID
 		level.hud.nextIHudID = local.libFilePath::NextIHudID

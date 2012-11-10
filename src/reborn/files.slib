@@ -1,4 +1,4 @@
-_libinfo:
+__libinfo:
 	local.info["name"] = "Files Library"
 	local.info["namespace"] = "files"
 	local.info["title"] = "Files Library 1.1"
@@ -6,7 +6,7 @@ _libinfo:
 	local.info["author"] = "Elgan, RazoRapiD"
 end local.info
 
-_libinit local.libFilePath:
+__libinit local.libFilePath:
 	local.init["loaded"] = 0
 	local.init["lib"] = NIL
 
@@ -22,6 +22,8 @@ _libinit local.libFilePath:
 		level.files.fileExists = local.libFilePath::FileExists
 		level.files.isFileEmpty = local.libFilePath::IsFileEmpty
 		level.files.safeFilename = local.libFilePath::SafeFileName
+		
+		/** Constant, Type: Integer, Description: lalalal **/
 		level.files.SEEK_SET = 0
 		level.files.SEEK_CUR = 1
 		level.files.SEEK_END = 2
@@ -140,6 +142,13 @@ SafeFileName local.fileName:
 
 end local.result
 
+/**
+* Description: test description
+* @filename: string, File's name
+* @accesstype: string, File access type, optional
+* Usage: local.file = waitexec level.newFile "file.txt" "r+"
+* Returns: Handle to file
+**/
 NewFile local.filename local.accesstype:
 	//we open files here
 	if(local.filename == NIL)

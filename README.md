@@ -56,4 +56,89 @@ The folder structure for the project will look like this:
 			* myownmod.mcfg  
 			* __libs/__
 			* __scripts/__
-</code>			  
+</code>		
+
+MorpheusDoc
+===========
+
+MorpheusDoc is a JavaDoc-like tool for autmatic Script Library documentation creation.
+It can create documentation in Markdown and HTML version.
+
+It's in a very early alpha stage, but it's already useable.
+
+To use use type:
+
+> \> MorpheusDoc.exe \<scriptlib\> \<output\> \<outputtype\>
+
+For example:
+
+> \> MorpheusDoc.exe files.scr files.html -html
+
+You can choose between -html or -md output types.
+
+__How to create proper Script Library Documentation__
+
+MorpheusDoc skips functions and variables that start with __.
+Every MorpheusDoc documentation comment is inside of /** **/ comment tags.
+
+It'll look for Variables and Constants declared in __libinfo function.
+To declare them use specific notation:
+
+> /** Constant, Type: String, Description: Custom constant variable **/
+> level.mymod.CONSTANT_VARIABLE = "content"
+
+Variables can be either: Variable, or Constant
+For variable type you can choose from:
+* String
+* Integer
+* Float
+* Vector
+* Entity
+* Player
+* Weapon
+* Array
+* Origin
+* Function
+* Void
+* Unknown
+
+Another example:
+
+> /** Variable, Type: Integer, Description: Keeps seconds **/
+> level.mymod.secondLeft = 30
+
+MorpheusDoc documentation comments for functions are a bit different.
+The scheme is as follows:
+
+> /**
+> * Description: test description
+> * @filename: string, File's name
+> * @accesstype: string, File access type, optional
+> * Returns: Handle to file
+> * Usage: local.file = waitexec level.newFile "file.txt" "r+"
+> **/
+> NewFile local.filename local.accesstype:
+> ...
+
+MorpheusDoc will scan whole lib and identify public functions (those which doesn't start with __).
+It'll create a documentation for them even if MorpheusDoc Comments doesn't exists for given function.
+
+In the comment, you can use multiple entires to describe arguments.
+Arguments have to start with @, after which you should specify the name of the argument that you want to describe.
+After the colon (:), you should specify a type of a variable.
+For argument type you can choose from:
+* String
+* Integer
+* Float
+* Vector
+* Entity
+* Player
+* Weapon
+* Array
+* Origin
+* Function
+* Void
+* Unknown
+
+Argument type is followed by a comma, after which, you can specify a description for argument.
+Second comma is optional. After that comma, you can specify additional parameter - optional, which states that given argument is optional and not required by the function.
