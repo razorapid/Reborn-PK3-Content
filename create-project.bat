@@ -29,9 +29,9 @@ GOTO END
 :HELP
 	ECHO.
 	ECHO Help:
-	ECHO 	create-project.bat ^<path^> ^<projectname^> ^<libtitle^> ^<version^> ^<author^>
+	ECHO 	create-project.bat ^<path^> ^<projectname^>
 	ECHO.
-	ECHO 	eg. create-scriptlib.bat strings "Strings Library" "Elgans Strings Library" 1.0 "Elgan"
+	ECHO 	eg. create-project.bat mymodfolder myownmod
 	PAUSE
 	GOTO END
 	
