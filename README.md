@@ -51,10 +51,10 @@ The folder structure for the project will look like this:
 	* compile-pk3.bat  
 	* compile-clear.bat  
 	* build.bat  
-	* ''build/''  
-	* ''src/'' 
-		* ''myownmod/''    
+	* __build/__
+	* __src/__
+		* __myownmod/__
 			* myownmod.mcfg  
-			* ''libs/''  
-			* ''scripts/''  
+			* __libs/__
+			* __scripts/__
 </code>			  
