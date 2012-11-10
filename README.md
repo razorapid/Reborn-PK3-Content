@@ -125,7 +125,7 @@ The scheme is as follows:
 MorpheusDoc will scan whole lib and identify public functions (those which doesn't start with __).
 It'll create a documentation for them even if MorpheusDoc Comments doesn't exists for given function.
 
-In the comment, you can use multiple entires to describe arguments.
+In the comment, you can use multiple entries to describe arguments.
 Arguments have to start with @, after which you should specify the name of the argument that you want to describe.
 After the colon (:), you should specify a type of a variable.  
 
@@ -145,4 +145,4 @@ For argument type you can choose from:
 * Unknown
 
 Argument type is followed by a comma, after which, you can specify a description for argument.
-Second comma is optional. After that comma, you can specify additional parameter - optional, which states that given argument is optional and not required by the function.
+Second comma is optional. After that comma, you can specify additional parameter - __optional__, which states that given argument is optional and not required by the function.
