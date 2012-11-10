@@ -45,19 +45,16 @@ This will create a proper folder structure for your project, as well as Mod Conf
 
 The folder structure for the project will look like this:
 
-`
- ../mymodfolder/  
-     |  
-     --> compile.bat  
-     --> compile-pk3.bat  
-     --> compile-clear.bat  
-     --> build.bat  
-     --> build/  
-     --> src/  
-          |  
-          --> myownmod/  
-               |  
-               --> myownmod.mcfg  
-               --> libs/  
-               --> scripts/  
-`			  
+<code>
+* ''../mymodfolder/''  
+** compile.bat  
+** compile-pk3.bat  
+** compile-clear.bat  
+** build.bat  
+** ''build/''  
+** ''src/'' 
+*** ''myownmod/''    
+**** myownmod.mcfg  
+**** ''libs/''  
+**** ''scripts/''  
+</code>			  
