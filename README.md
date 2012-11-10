@@ -45,7 +45,7 @@ This will create a proper folder structure for your project, as well as Mod Conf
 
 The folder structure for the project will look like this:
 
-> ../mymodfolder/
+> ../mymodfolder/<br/>
 >    |
 > 	 --> compile.bat
 >    --> compile-pk3.bat
