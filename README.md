@@ -72,7 +72,7 @@ To use type:
 
 For example:
 
-> \> MorpheusDoc.exe files.scr files.html -html
+> \> MorpheusDoc.exe files.slib files.html -html
 
 You can choose between -html or -md output types.
 
@@ -87,8 +87,10 @@ To declare them use specific notation:
 > /** Constant, Type: String, Description: Custom constant variable **/  
 > level.mymod.CONSTANT_VARIABLE = "content"
 
-Variables can be either: Variable, or Constant
+Variables can be either: Variable, or Constant  
+
 For variable type you can choose from:
+
 * String
 * Integer
 * Float
@@ -125,8 +127,10 @@ It'll create a documentation for them even if MorpheusDoc Comments doesn't exist
 
 In the comment, you can use multiple entires to describe arguments.
 Arguments have to start with @, after which you should specify the name of the argument that you want to describe.
-After the colon (:), you should specify a type of a variable.
+After the colon (:), you should specify a type of a variable.  
+
 For argument type you can choose from:
+
 * String
 * Integer
 * Float
