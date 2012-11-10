@@ -44,7 +44,6 @@ For example:
 This will create a proper folder structure for your project, as well as Mod Config File (.mcfg), and proper build and compile scripts.
 
 The folder structure for the project will look like this:
-
 <code>
 * __../mymodfolder/__ 
 	* compile.bat  
