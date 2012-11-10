@@ -1,10 +1,10 @@
-_libinfo:
+__libinfo:
 	local.info["name"] = "Strings Library"
 	local.info["title"] = "Strings Library 1.0"
 	local.info["version"] = 0.9
 	local.info["author"] = "Elgan"
 end local.info
 
-_libinit local.libFilePath:
+__libinit local.libFilePath:
 	println("Called test lib init")
 end

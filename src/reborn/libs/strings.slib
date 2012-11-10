@@ -49,7 +49,7 @@ array_to_float
 safechardata
 */
 
-_libinfo:
+__libinfo:
 	local.info["name"] = "Strings Library"
 	local.info["namespace"] = "strings"
 	local.info["title"] = "Strings Library 1.1"
@@ -57,7 +57,7 @@ _libinfo:
 	local.info["author"] = "Elgan"
 end local.info
 
-_libinit local.libFilePath:
+__libinit local.libFilePath:
 	local.init["loaded"] = 0
 	local.init["lib"] = NIL
 	

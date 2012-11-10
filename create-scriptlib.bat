@@ -5,7 +5,7 @@ GOTO CREATE
 GOTO END
 
 :CREATE
-	ECHO _libinfo: > %1.scrlib
+	ECHO __libinfo: > %1.scrlib
 	ECHO 	local.info["name"] ^= %2 >> %1.scrlib
 	ECHO 	local.info["namespace"] ^= "%1" >> %1.scrlib
 	ECHO 	local.info["title"] ^= %3 >> %1.scrlib
@@ -13,7 +13,7 @@ GOTO END
 	ECHO 	local.info["author"] ^= %5 >> %1.scrlib
 	ECHO end local.info >> %1.scrlib
 	ECHO. >> %1.scrlib
-	ECHO _libinit local.libFilePath: >> %1.scrlib
+	ECHO __libinit local.libFilePath: >> %1.scrlib
 	ECHO. >> %1.scrlib
 	ECHO 	local.init["loaded"] ^= 0 >> %1.scrlib
 	ECHO 	local.init["lib"] ^= NIL >> %1.scrlib

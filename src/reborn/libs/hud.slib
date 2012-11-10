@@ -3,7 +3,7 @@
 // 	Last Updated 09/17/2012
 //	Version 1.0
 
-_libinfo:
+__libinfo:
 	local.info["name"] = "Hud Library"
 	local.info["namespace"] = "hud"
 	local.info["title"] = "HUD Library 1.1"
@@ -11,7 +11,7 @@ _libinfo:
 	local.info["author"] = "ArMaGedDoN"
 end local.info
 
-_libinit local.libFilePath:
+__libinit local.libFilePath:
 	local.init["loaded"] = 0
 	local.init["lib"] = NIL
 	
