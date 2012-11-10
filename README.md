@@ -66,7 +66,7 @@ It can create documentation in Markdown and HTML version.
 
 It's in a very early alpha stage, but it's already useable.
 
-To use use type:
+To use type:
 
 > \> MorpheusDoc.exe \<scriptlib\> \<output\> \<outputtype\>
 
@@ -84,7 +84,7 @@ Every MorpheusDoc documentation comment is inside of /** **/ comment tags.
 It'll look for Variables and Constants declared in __libinfo function.
 To declare them use specific notation:
 
-> /** Constant, Type: String, Description: Custom constant variable **/
+> /** Constant, Type: String, Description: Custom constant variable **/  
 > level.mymod.CONSTANT_VARIABLE = "content"
 
 Variables can be either: Variable, or Constant
@@ -104,21 +104,21 @@ For variable type you can choose from:
 
 Another example:
 
-> /** Variable, Type: Integer, Description: Keeps seconds **/
+> /** Variable, Type: Integer, Description: Keeps seconds **/  
 > level.mymod.secondLeft = 30
 
 MorpheusDoc documentation comments for functions are a bit different.
 The scheme is as follows:
 
-> /**
-> * Description: test description
-> * @filename: string, File's name
-> * @accesstype: string, File access type, optional
-> * Returns: Handle to file
-> * Usage: local.file = waitexec level.newFile "file.txt" "r+"
-> **/
-> NewFile local.filename local.accesstype:
-> ...
+> /**  
+> * Description: test description  
+> * @filename: string, File's name  
+> * @accesstype: string, File access type, optional  
+> * Returns: Handle to file  
+> * Usage: local.file = waitexec level.newFile "file.txt" "r+"  
+> **/  
+> NewFile local.filename local.accesstype:  
+> ...  
 
 MorpheusDoc will scan whole lib and identify public functions (those which doesn't start with __).
 It'll create a documentation for them even if MorpheusDoc Comments doesn't exists for given function.
