@@ -64,7 +64,22 @@ __libinit local.libFilePath:
 	level.strings = local CreateListener
 	
 	if(level.strings != NULL && level.strings != NIL) {
-		level.strings.safeCharData = waitthread SafeCharData
+	
+		/** Constant, Type: integer, Description: Test constant **/
+		level.strings.testConstant = 55
+	
+		/** Variable, Type: array, Description: Array with all single characters. **/
+		level.strings.charData = waitthread __CharData
+		
+		/** Variable, Type: array, Description: Array with safe characters. **/
+		level.strings.safeCharData = waitthread __SafeCharData
+		
+		/** Variable, Type: array, Description: Array with all uppercase characters. **/
+		level.strings.charDataUppercase = waitthread __CharDataUppercase
+		
+		/** Variable, Type: array, Description: Array with all lowercase characters. **/
+		level.strings.charDataLowercase = waitthread __CharDataLowercase
+		
 		level.strings.stripNewLines = local.libFilePath::StripNewLines
 		level.strings.makeLine = local.libFilePath::MakeLine
 		level.strings.addQuotes = local.libFilePath::AddQuotes
@@ -72,10 +87,7 @@ __libinit local.libFilePath:
 		level.strings.cutRight = local.libFilePath::CutRight
 		level.strings.trim = local.libFilePath::Trim
 		level.strings.arrayToLower = local.libFilePath::ArrayToLower
-		level.strings.arrayToUpper = local.libFilePath::ArrayToUpper
-		level.strings.charData = waitthread CharData
-		level.strings.charDataUppercase = waitthread CharDataUppercase
-		level.strings.charDataLowercase = waitthread CharDataLowercase
+		level.strings.arrayToUpper = local.libFilePath::ArrayToUpper	
 		level.strings.inStr = local.libFilePath::InStr
 		level.strings.left = local.libFilePath::Left
 		level.strings.right = local.libFilePath::Right
@@ -100,11 +112,12 @@ __libinit local.libFilePath:
 end local.init
 
 
-////////////////////////////////////////////////////////////////////////
-// safechardata
-// all chars which can be safe in a file name
-////////////////////////////////////////////////////////////////////////
-SafeCharData:
+/**
+* Description: All chars which can be safe in a file name
+* Usage: local.safeChars = waitexec __SafeCharData
+* Returns: Array of chars
+**/
+__SafeCharData:
 
 	local.array = makearray
 	"a"       
@@ -172,19 +185,24 @@ SafeCharData:
 	"."
 endarray
 end local.array
-////////////////////////////////////////////////////////////////////////
-// strip_newlines
-// Removes all new line chars
-// useage: local.name = waitexec global/strings.scr::strip_newlines "str\ning"
-////////////////////////////////////////////////////////////////////////
+
+/**
+* Description: Removes all new line characters
+* Usage: local.name = waitexec level.strings.stripNewlines "str\ning"
+* @string: string, String from which new lines will be removed
+* Returns: String with new lines removed
+**/
 StripNewlines local.string:
 	//strip new lines
 	local.string = waitthread Remove local.string "\n"
 end local.string
 
-// RGB light from string
-// Will produce a light from a string
-// returns a array of the light as int
+/**
+* Description: Produce a light from a specially formatted string
+* @string: string, String with light description in format: 
+* Usage: local.light = waitexec level.strings.lightFromString ""
+* Returns: Array of the light as int
+**/
 LightFromString local.string:
 
 	//split the line
@@ -206,8 +224,10 @@ LightFromString local.string:
 
 end local.light
 
-// produces a random light
-// returns a array of the light as int
+/**
+* Description: Produces a random light
+* Returns: Array of the light as int
+**/
 RandomLight:
 
 	local.colour_is_pretty = 1
@@ -232,9 +252,10 @@ RandomLight:
 end local.light
 
 
-// team_count
-// returns an array with string index's "allies" , "axis" and "spectator"
-// used to count players on a team.
+/**
+* Description: Used to count players on a team
+* Returns: Returns an array with string index's "allies" , "axis" and "spectator"
+**/
 TeamCount:
 
 
@@ -250,11 +271,13 @@ TeamCount:
 
 end local.team
 
-// makeline
-// turns the string into a line
-// eg
-// local.string = waitexec global/strings.scr::makeline "hello"
-// local.string will be '\nhello\n'
+
+/**
+* Description: Turns the string into a line
+* @string: string, String that will be converted into a line
+* Usage: local.string = waitexec level.strings.makeLine "hello"
+* Returns: String with new line characters at the beginning and end (for example: '\nhello\n')
+**/
 MakeLine local.string:
 
 	local.string = ("\n" + local.string + "\n" )
@@ -266,6 +289,7 @@ end local.string
 // eg
 // local.string = waitexec global/strings.scr::add_quotes "hello"
 // local.string will be '"hello"'
+
 AddQuotes local.string:
 	local.string = ("\"" + local.string + "\"")
 end local.string
@@ -405,8 +429,8 @@ end  local.strings
 // returns: array of upper case strings
 ArrayToUpper local.strings:
 
-	local.lower = waitthread CharDataUppercase
-	local.upper = waitthread CharDataLowercase
+	local.lower = waitthread __CharDataUppercase
+	local.upper = waitthread __CharDataLowercase
 
 	for(local.linni = 1; local.linni <= local.strings.size; local.linni++)
 	{
@@ -421,7 +445,7 @@ end  local.strings
 
 
 // returns all lowercase chars
-CharData:
+__CharData:
 
 	local.array = makearray
 	"a"          "A"
@@ -458,7 +482,7 @@ end local.array
 //of cause by jv
 
 // returns all lowercase chars
-CharDataLowercase:
+__CharDataLowercase:
 	local.hasharray = makeArray
 	a
 	b
@@ -496,7 +520,7 @@ CharDataLowercase:
 end local.array
 
 // returns all uppercase chars
-CharDataUppercase:
+__CharDataUppercase:
 	local.hasharray = makeArray
 	A
 	B
@@ -763,8 +787,8 @@ end local.string
 // local.string will become 'hELLO'
 ToLower local.string local.index:
 
-	local.lower = waitthread CharDataLowercase
-	local.upper = waitthread CharDataUppercase
+	local.lower = waitthread __CharDataLowercase
+	local.upper = waitthread __CharDataUppercase
 
 	for(local.i = 0; local.i <= local.string.size - 1; local.i++)
 	{
@@ -849,8 +873,8 @@ end local.string
 
 ToUpper local.string local.index:
 
-	local.upper = waitthread CharDataLowercase
-	local.lower = waitthread CharDataUppercase
+	local.upper = waitthread __CharDataLowercase
+	local.lower = waitthread __CharDataUppercase
 
 	for(local.i = 0; local.i <= local.string.size - 1; local.i++)
 	{

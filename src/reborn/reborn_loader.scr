@@ -7,8 +7,8 @@ main:
 	level.REBORN = local CreateListener
 	
 	if(level.REBORN != NIL && level.REBORN != NULL) {
-		level.REBORN._librariesCount = 0
-		level.REBORN._loadedLibrariesCount = 0;
+		level.REBORN.__librariesCount = 0
+		level.REBORN.__loadedLibrariesCount = 0;
 	
 		// Loading and initializing ScriptLibraries
 		waitthread InitializeRebornLibraries
@@ -21,7 +21,7 @@ main:
 			local.modConfigs[local.i] = waitthread LoadModConfigFile local.modConfigFiles[local.i]
 		}
 		
-		level.REBORN._modConfigs = local.modConfigs
+		level.REBORN.__modConfigs = local.modConfigs
 	}
 	else {
 		println("Reborn Loader ERROR: Could not initialize loader!")
@@ -70,8 +70,8 @@ InitializeRebornLibraries:
 		if(local.libNames[local.i] != NULL && local.libNames[local.i] != NIL && local.libNames[local.i] != "") {
 			local.libName = local.libNames[local.i]
 			if(local.libs[local.libName] != NULL && local.libs[local.libName] != NIL && local.libs[local.libName]["libLoaded"] == 0) {
-				level.REBORN.getLibrariesList[level.REBORN._librariesCount] = local.libs[local.libName]["namespace"]
-				level.REBORN._librariesCount++
+				level.REBORN.getLibrariesList[level.REBORN.__librariesCount] = local.libs[local.libName]["namespace"]
+				level.REBORN.__librariesCount++
 				
 				println("--> Loading \""+local.libs[local.libName]["title"]+"\" ("+local.libs[local.libName]["libFile"]+")...")
 				local.libInit = waitexec local.libs[local.libName]["libFile"]::__libinit local.libs[local.libName]["libFile"]
@@ -81,8 +81,8 @@ InitializeRebornLibraries:
 					level.REBORN.isLibraryLoaded[local.libs[local.libName]["namespace"]] = local.libInit["loaded"]
 					level.REBORN.getLibrary[local.libs[local.libName]["namespace"]] = local.libInit["lib"]
 					level.REBORN.getLibraryInfo[local.libs[local.libName]["namespace"]] = local.libs[local.libName]
-					level.REBORN.getLoadedLibrariesList[level.REBORN._loadedLibrariesCount] = local.libs[local.libName]["namespace"]
-					level.REBORN._loadedLibrariesCount++
+					level.REBORN.getLoadedLibrariesList[level.REBORN.__loadedLibrariesCount] = local.libs[local.libName]["namespace"]
+					level.REBORN.__loadedLibrariesCount++
 				}
 				else {
 					local.libInit["loaded"] = 0

@@ -1,0 +1,162 @@
+<html>
+<head></head>
+<style>
+  .bold { font-weight: bold; }
+</style>
+<body>
+<h1>Strings Library</h1>
+<table>
+<tr><td>Title:</td><td><span class="bold">Strings Library 1.1</span></td></tr>
+<tr><td>Namespace:</td><td><span class="bold">strings</span></td></tr>
+<tr><td>Author:</td><td><span class="bold">Elgan</span></td></tr>
+<tr><td>Version:</td><td><span class="bold">1.1</span></td></tr>
+</table><h2>Constants:</h2>
+<table>
+<tr><td><span class="bold">level.strings.testConstant</span></td><td>Integer</td><td> 55</td><td>Test constant</td></tr>
+</table>
+<h2>Variables:</h2>
+<table>
+<tr><td><span class="bold">level.strings.charData</span></td><td>Array</td><td></td><td>Array with all single characters.</td></tr>
+<tr><td><span class="bold">level.strings.safeCharData</span></td><td>Array</td><td></td><td>Array with safe characters.</td></tr>
+<tr><td><span class="bold">level.strings.charDataUppercase</span></td><td>Array</td><td></td><td>Array with all uppercase characters.</td></tr>
+<tr><td><span class="bold">level.strings.charDataLowercase</span></td><td>Array</td><td></td><td>Array with all lowercase characters.</td></tr>
+</table>
+<h2>Functions List:</h2>
+<ul>
+<li> level.strings.stripNewlines</li>
+<li> level.strings.lightFromString</li>
+<li> level.strings.randomLight</li>
+<li> level.strings.teamCount</li>
+<li> level.strings.makeLine</li>
+<li> level.strings.addQuotes</li>
+<li> level.strings.cutLeft</li>
+<li> level.strings.cutRight</li>
+<li> level.strings.trim</li>
+<li> level.strings.arrayToLower</li>
+<li> level.strings.arrayToUpper</li>
+<li> level.strings.inStr</li>
+<li> level.strings.right</li>
+<li> level.strings.left</li>
+<li> level.strings.mid</li>
+<li> level.strings.reverse</li>
+<li> level.strings.toLower</li>
+<li> level.strings.toUpper</li>
+<li> level.strings.splitString</li>
+<li> level.strings.splitLine</li>
+<li> level.strings.replace</li>
+<li> level.strings.remove</li>
+<li> level.strings.formatReplace</li>
+<li> level.strings.combine</li>
+<li> level.strings.arrayToInt</li>
+<li> level.strings.arrayToStr</li>
+<li> level.strings.arrayToFloat</li>
+</ul>
+<h2>Functions Overview:</h2>
+<p class="bold">StripNewlines ( String string )</p>
+<pre>Removes all new line characters
+</pre>
+<p class="bold">Arguments:</p>
+
+<table>
+<tr><td>String</td><td><span class="bold">string</span></td><td>String from which new lines will be removed</td><td></td></tr>
+</table>
+
+<p class="bold">Usage:</p>
+
+<pre>local.name = waitexec level.strings.stripNewlines "str\ning"</pre>
+<p class="bold">Returns:</p>
+
+<pre>String with new lines removed</pre>
+<br />
+<p class="bold">LightFromString ( String string )</p>
+<pre>Produce a light from a specially formatted string
+</pre>
+<p class="bold">Arguments:</p>
+
+<table>
+<tr><td>String</td><td><span class="bold">string</span></td><td>String with light description in format:</td><td></td></tr>
+</table>
+
+<p class="bold">Usage:</p>
+
+<pre>local.light = waitexec level.strings.lightFromString ""</pre>
+<p class="bold">Returns:</p>
+
+<pre>Array of the light as int</pre>
+<br />
+<p class="bold">RandomLight (  )</p>
+<pre>Produces a random light
+</pre>
+<p class="bold">Returns:</p>
+
+<pre>Array of the light as int</pre>
+<br />
+<p class="bold">TeamCount (  )</p>
+<pre>Used to count players on a team
+</pre>
+<p class="bold">Returns:</p>
+
+<pre>Returns an array with string index's "allies" , "axis" and "spectator"</pre>
+<br />
+<p class="bold">MakeLine ( String string )</p>
+<pre>Turns the string into a line
+</pre>
+<p class="bold">Arguments:</p>
+
+<table>
+<tr><td>String</td><td><span class="bold">string</span></td><td>String that will be converted into a line</td><td></td></tr>
+</table>
+
+<p class="bold">Usage:</p>
+
+<pre>local.string = waitexec level.strings.makeLine "hello"</pre>
+<p class="bold">Returns:</p>
+
+<pre>String with new line characters at the beginning and end (for example: '\nhello\n')</pre>
+<br />
+<p class="bold">AddQuotes ( Unknown string )</p>
+<br />
+<p class="bold">CutLeft ( Unknown string, Unknown cutcount )</p>
+<br />
+<p class="bold">CutRight ( Unknown string, Unknown cutcount )</p>
+<br />
+<p class="bold">Trim ( Unknown string )</p>
+<br />
+<p class="bold">ArrayToLower ( Unknown strings )</p>
+<br />
+<p class="bold">ArrayToUpper ( Unknown strings )</p>
+<br />
+<p class="bold">InStr ( Unknown char, Unknown string, Unknown startpos )</p>
+<br />
+<p class="bold">Right ( Unknown pos, Unknown string )</p>
+<br />
+<p class="bold">Left ( Unknown pos, Unknown string )</p>
+<br />
+<p class="bold">Mid ( Unknown start, Unknown string, Unknown count )</p>
+<br />
+<p class="bold">Reverse ( Unknown string )</p>
+<br />
+<p class="bold">ToLower ( Unknown string, Unknown index )</p>
+<br />
+<p class="bold">ToUpper ( Unknown string, Unknown index )</p>
+<br />
+<p class="bold">SplitString ( Unknown string, Unknown spacer )</p>
+<br />
+<p class="bold">SplitLine ( Unknown info, Unknown dont_say, Unknown spacer )</p>
+<br />
+<p class="bold">Replace ( Unknown string, Unknown replace, Unknown replace_with )</p>
+<br />
+<p class="bold">Remove ( Unknown string, Unknown string_remove )</p>
+<br />
+<p class="bold">FormatReplace ( Unknown string, Unknown replace, Unknown replace_with )</p>
+<br />
+<p class="bold">Combine ( Unknown words, Unknown start )</p>
+<br />
+<p class="bold">ArrayToInt ( Unknown array )</p>
+<br />
+<p class="bold">ArrayToStr ( Unknown array )</p>
+<br />
+<p class="bold">ArrayToFloat ( Unknown array )</p>
+<br />
+</body>
+</html>

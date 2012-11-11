@@ -16,6 +16,7 @@ __libinit local.libFilePath:
 	local.init["lib"] = NIL
 	
 	if(level.strings != NULL && level.strings != NIL) {
+		
 		level.hud = local CreateListener 
 		level.hud.nextHudID = local.libFilePath::NextHudID
 		level.hud.nextIHudID = local.libFilePath::NextIHudID
@@ -26,34 +27,40 @@ __libinit local.libFilePath:
 	
 end local.init;
 
-// Returns next avalable Hud ID, otherwise returns 0
-// Example local.id = waitthread level.hud.nextHudID
+/**
+* Description: Next available global HUD ID to use with huddraw_ functions.
+* Usage: local.id = waitexec level.hud.nextHudID
+* Returns: Global HUD ID as integer. If no free global HUD ID's exist, it returns 0. 
+**/
 NextHudID:
 	if(level.hud == NULL || level.hud == NIL)
 		end -1
 
-	if(level.hud._currentHud == NIL)
-		level.hud._currentHud = 6
+	if(level.hud.__currentHud == NIL)
+		level.hud.__currentHud = 6
 	else
-		if(level.hud._currentHud < 130 && level.hud._currentHud != 0)
-			level.hud._currentHud++
+		if(level.hud.__currentHud < 130 && level.hud.__currentHud != 0)
+			level.hud.__currentHud++
 		else
-			level.hud._currentHud = 0	
+			level.hud.__currentHud = 0	
 	
-end level.hud._currentHud
+end level.hud.__currentHud
 
-// Returns next avalable iHud ID, otherwise returns 0
-// Example local.id = waitthread level.hud.nextIHudID
+/**
+* Description: Next available individual HUD ID to use with ihuddraw_ functions.
+* Usage: local.id = waitexec level.hud.nextIHudID
+* Returns: Individual HUD ID as integer. If no free individual HUD ID's exist, it returns 0.
+**/
 NextIHudID:
 	if(level.hud == NULL || level.hud == NIL)
 		end -1
 	
-	if(level.hud._currentIHud == NIL)
-		level.hud._currentIHud = 131
+	if(level.hud.__currentIHud == NIL)
+		level.hud.__currentIHud = 131
 	else 
-		if(level.hud._currentIHud < 255 && level.hud._currentIHud != 0)
-			level.hud._currentIHud++
+		if(level.hud.__currentIHud < 255 && level.hud.__currentIHud != 0)
+			level.hud.__currentIHud++
 		else
-			level.hud._currentIHud = 0	
+			level.hud.__currentIHud = 0	
 	
-end level.hud._currentIHud
+end level.hud.__currentIHud
