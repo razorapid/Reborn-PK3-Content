@@ -59,21 +59,20 @@ The folder structure for the project will look like this:
 			* __data/__
 </code>		
 
-__build/__ folder is where the compiled .pk3 library/mod will be placed after building the project.
-__src/__ is the directory where your mod project is located.
+__build/__ folder is where the compiled .pk3 library/mod will be placed after building the project.  
+__src/__ is the directory where your mod project is located.  
 
-__libs/__ - you should place all the Script Libraries under this directory. While it's not a must, it helps to organize the mod.
-__scripts/__ - you should place here all other scripts that are part of your mod.
-__data/__ - all custom files, for example text files, ini files, some definitions etc. that your mod uses and reads.
+__libs/__ - you should place all the Script Libraries under this directory. While it's not a must, it helps to organize the mod.  
+__scripts/__ - you should place here all other scripts that are part of your mod.  
+__data/__ - all custom files, for example text files, ini files, some definitions etc. that your mod uses and reads.  
 
-myownmod.mcfg - mod config file that let's you configure your mod. It's used by Reborn ModLoader Framework to load all the mods in a way that they won't conflict with others.
+__myownmod.mcfg__ - mod config file that let's you configure your mod. It's used by Reborn ModLoader Framework to load all the mods in a way that they won't conflict with others.  
 
 After building your project with __build.bat__, a .pk3 file will be created inside of __build/__ folder. It'll be called __r_myownmod.pk3__
 Of course you can rename it, or use __compile.bat__ to compile your project with another name, but it's best to leave it by default.
-__r\___ prefix helps to recognize Reborn compatible mod.
+__r___ prefix helps to recognize Reborn compatible mod.
 
 Your __r_myownmod.pk3__ file structure will look as follows:
-
 <code>
 * __myownmod/__
 	* myownmod.mcfg  
