@@ -11,6 +11,7 @@ GOTO END
 	@MKDIR %1\src\%2
 	@MKDIR %1\src\%2\libs
 	@MKDIR %1\src\%2\scripts
+	@MKDIR %1\src\%2\data
 	
 	ECHO >> %1\src\%2\%2.mcfg
 	
