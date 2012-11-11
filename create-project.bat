@@ -19,7 +19,7 @@ GOTO END
 	@COPY compile-pk3.bat %1\compile-pk3.bat
 	@COPY compile-clear.bat %1\compile-clear.bat
 	
-	ECHO compile.bat %2 >> %1\build.bat
+	ECHO compile.bat r_%2 >> %1\build.bat
 	
 	ECHO.
 	ECHO Project tree created!
