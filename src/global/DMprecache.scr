@@ -1,3 +1,4 @@
+//Weapons
 cache models/weapons/colt45.tik
 cache models/weapons/p38.tik
 cache models/weapons/silencedpistol.tik
@@ -14,12 +15,18 @@ cache models/weapons/panzerschreck.tik
 cache models/weapons/shotgun.tik
 cache models/weapons/m2frag_grenade.tik
 cache models/weapons/steilhandgranate.tik
+cache models/statweapons/flak88turret.tik
+cache models/statweapons/mg42_gun.tik
+cache models/statweapons/mg42_gun_fake.tik
+cache models/statweapons/mg42_gun_viewmodel.tik
+
+//Player Models
 cache models/player/allied_airborne.tik
 cache models/player/allied_airborne_fps.tik
 cache models/player/allied_manon.tik
 cache models/player/allied_manon_fps.tik
-cache models/player/allied_oss.tik
-cache models/player/allied_oss_fps.tik
+cache models/player/allied_SAS.tik
+cache models/player/allied_SAS_fps.tik
 cache models/player/allied_pilot.tik
 cache models/player/allied_pilot_fps.tik
 cache models/player/american_army.tik
@@ -30,8 +37,6 @@ cache models/player/german_afrika_officer.tik
 cache models/player/german_afrika_officer_fps.tik
 cache models/player/german_afrika_private.tik
 cache models/player/german_afrika_private_fps.tik
-cache models/player/german_elite_gestapo.tik
-cache models/player/german_elite_gestapo_fps.tik
 cache models/player/german_elite_sentry.tik
 cache models/player/german_elite_sentry_fps.tik
 cache models/player/german_elite_sentry_fps.tik
@@ -43,8 +48,6 @@ cache models/player/german_panzer_obershutze.tik
 cache models/player/german_panzer_obershutze_fps.tik
 cache models/player/german_panzer_shutze.tik
 cache models/player/german_panzer_shutze_fps.tik
-cache models/player/german_panzer_tankcommander.tik
-cache models/player/german_panzer_tankcommander_fps.tik
 cache models/player/german_scientist.tik
 cache models/player/german_scientist_fps.tik
 cache models/player/german_waffenss_officer.tik
@@ -55,9 +58,113 @@ cache models/player/german_wehrmacht_officer.tik
 cache models/player/german_wehrmacht_officer_fps.tik
 cache models/player/german_wehrmacht_soldier.tik
 cache models/player/german_wehrmacht_soldier_fps.tik
-cache models/player/german_winter1.tik
-cache models/player/german_winter1_fps.tik
-cache models/player/german_winter2.tik
-cache models/player/german_winter2_fps.tik
+cache models/player/german_winter_1.tik
+cache models/player/german_winter_1_fps.tik
+cache models/player/german_winter_2.tik
+cache models/player/german_winter_2_fps.tik
 cache models/player/german_worker.tik
 cache models/player/german_worker_fps.tik
+////cache models/player/german_panzer_tankcommander.tik        Channel named Bip01 L Clavicle pos not added. (Bone will not work without it)
+////cache models/player/german_panzer_tankcommander_fps.tik    Channel named Bip01 R Clavicle pos not added. (Bone will not work without it)
+
+
+//Player models Out
+////cache models/player/german_winter1.tik
+////cache models/player/german_winter1_fps.tik
+////cache models/player/german_winter2.tik
+////cache models/player/german_winter2_fps.tik
+////cache models/player/allied_oss.tik
+////cache models/player/allied_oss_fps.tik
+////cache models/player/german_elite_gestapo.tik
+////cache models/player/german_elite_gestapo_fps.tik
+
+//Vehicles
+cache models/vehicles/shermantank.tik
+cache models/vehicles/sdkfz.tik
+cache models/vehicles/vehiclesoundentity.tik
+cache models/vehicles/opeltruck.tik
+cache models/vehicles/tigercannon.tik
+cache models/vehicles/jeep_30cal_viewmodel.tik
+cache models/vehicles/jeep_30cal.tik
+
+//Vehicles out
+////cache models/vehicles/jeep.tik //console spam fix tik
+////cache models/vehicles/kingcannon.tik //console spam
+////cache models/vehicles/kingtank.tik //console spam
+////cache models/vehicles/tigertank.tik //console spam
+
+
+//Caching all FX
+cache models/fx/bh_paper_lite.tik
+cache models/fx/bh_paper_hard.tik
+cache models/fx/bh_wood_lite.tik
+cache models/fx/bh_wood_hard.tik
+cache models/fx/bh_metal_lite.tik
+cache models/fx/bh_metal_hard.tik
+cache models/fx/bh_stone_lite.tik
+cache models/fx/bh_stone_hard.tik
+cache models/fx/bh_dirt_lite.tik
+cache models/fx/bh_dirt_hard.tik
+cache models/fx/bh_grass_lite.tik
+cache models/fx/bh_grass_hard.tik
+cache models/fx/bh_mud_lite.tik
+cache models/fx/bh_mud_hard.tik
+cache models/fx/bh_water_lite.tik
+cache models/fx/bh_water_hard.tik
+cache models/fx/bh_glass_lite.tik
+cache models/fx/bh_glass_hard.tik
+cache models/fx/bh_sand_lite.tik
+cache models/fx/bh_sand_hard.tik
+cache models/fx/bh_foliage_lite.tik
+cache models/fx/bh_foliage_hard.tik
+cache models/fx/bh_snow_lite.tik
+cache models/fx/bh_snow_hard.tik
+cache models/fx/bh_carpet_lite.tik
+cache models/fx/bh_carpet_hard.tik
+cache models/fx/bh_human_uniform_lite.tik
+cache models/fx/bh_human_uniform_hard.tik
+cache models/fx/water_trail_bubble.tik
+cache models/fx/grenexp_base.tik
+cache models/fx/bazookaexp_base.tik
+cache models/fx/grenexp_paper.tik
+cache models/fx/grenexp_wood.tik
+cache models/fx/grenexp_metal.tik
+cache models/fx/grenexp_stone.tik
+cache models/fx/grenexp_dirt.tik
+cache models/fx/grenexp_grass.tik
+cache models/fx/grenexp_mud.tik
+cache models/fx/grenexp_water.tik
+cache models/fx/grenexp_gravel.tik
+cache models/fx/grenexp_sand.tik
+cache models/fx/grenexp_foliage.tik
+cache models/fx/grenexp_snow.tik
+cache models/fx/grenexp_carpet.tik
+cache models/fx/water_ripple_still.tik
+cache models/fx/water_ripple_moving.tik
+cache models/fx/barrel_oil_leak_big.tik
+cache models/fx/barrel_oil_leak_medium.tik
+cache models/fx/barrel_oil_leak_small.tik
+cache models/fx/barrel_oil_leak_splat.tik
+cache models/fx/barrel_water_leak_big.tik
+cache models/fx/barrel_water_leak_medium.tik
+cache models/fx/barrel_water_leak_small.tik
+cache models/fx/barrel_water_leak_splat.tik
+cache models/fx/fs_light_dust.tik
+cache models/fx/fs_heavy_dust.tik
+cache models/fx/fs_dirt.tik
+cache models/fx/fs_grass.tik
+cache models/fx/fs_mud.tik
+cache models/fx/fs_puddle.tik
+cache models/fx/fs_sand.tik
+cache models/fx/fs_snow.tik
+
+//Global - Missing caches
+cache models/fx/dummy.tik
+cache models/items/binoculars.tik
+cache models/items/dm_50_healthbox.tik
+
+//Other missing caches
+//cache models/fx/scriptbazookaexplosion.tik
+cache models/animate/fx_mortar_dirt.tik
+cache models/fx/bazookaexplosion_dm.tik
+cache models/fx/windows/debris_0.tik
