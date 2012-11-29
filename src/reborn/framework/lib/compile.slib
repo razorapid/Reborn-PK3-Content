@@ -1,0 +1,63 @@
+/**
+ Medal of Honor: Allied Assault v1.12 REBORN  -  Morpheus Script
+ ================================================================
+ DATA TRANSFORMATION & COMPILATION LIBRARY; Script Framework BETA
+ ================================================================
+ BY Sor	
+ VERSION 1.0.01 (18/11/2012)
+ =-------------------------------------------------------------=		
+ Copyright (c) 2009-2013  Lenny Knockx
+ All rights reserved.
+ =-------------------------------------------------------------=
+ Permission to use, copy, modify, and/or distribute this software 
+ for any purpose with or without fee is hereby granted, provided 
+ that the above copyright notice and this permission notice appear
+ in all copies.
+ ---------------
+ THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL 
+ WARRANTIES WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED 
+ WARRANTIES OF MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL 
+ THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT, OR 
+ CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM 
+ LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, 
+ NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR 
+ IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+ =-------------------------------------------------------------=
+ CONTACT: 	http://www.x-null.net/forums/member.php?185-Sor
+ WEBSITE: 	http://www.x-null.net | www.mohaairborne.co.cc
+ ================================================================
+*/
+// compiles data for entities based on input vars: minumum _thread and thread with flags (for the properties that need checking&compiling) 
+// compiles data for locations, nodes... based on input vars
+// compiles data read from bsp...
+// compiles hud data
+// loadable presets? 
+
+// Compilethread will return "property"="value" or "command"::"arg1"::... and $Compile.Ent will 
+// format this data into one coherent string. {}-brackets are used for telling the translator to
+// read the next part as an entity declaration. $Decompile.Array (don' know yet)
+// will only return this construct as an object array or as default entity construct defined by the
+// engine's entity (de)compiler. You will need to use your own function to 
+// get an actual entity back, but if you use $Parse.Str you can pass the threadpath on so the 
+// entity string is already compiled when you receive the output.
+
+// $Compile.Format.
+__init:
+
+
+end level.Compiler;
+
+__info:
+
+end local.inf;
+
+// => write $Compile.@Array for arrays formatted like how they're written in morpheus script (optional seperator, default:\n), no decompile equivalent!
+// Add Compile.Array(ToStr) as redirection of $Array.Compile.. then write $Decompile.(StrTo)Array which probably also needs to stay in array.slib..
+// and then write 'standard entity (de)compiler' :)
+
+
+/// NOTE: it is however completely feasible to have a generic function that saves most properties
+/// and command used on specified entities. Using typeof command, .classname property and the
+/// GameModuleClasses (for information but also for default values, one can come a long way. 
+/// If I do this, then the compile and decompile functions thread arguments might become optional
+/// and we will be able to automatically process entity arrays.

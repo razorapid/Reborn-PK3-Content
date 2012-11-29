@@ -1,0 +1,57 @@
+// HUD functions
+// all sorts, but primarily for HUD main menu and submenu's
+/*
+Menu Handler: recognize menu links, if one leaves, all processes active in the previous menu are terminated and the menu is deactivated
+-> setupthread (should be handled individually either at connection or at activation)
+-> updatethread (seperately called)
+-> activation func
+	deactivates of gametype and mod hud (maybe even global hud)
+	deactivates whatever menu is currently being accessed
+	activates main menu (or other type of hud) if this menu doesn't specify that it must be deactivated (or if it does specify that it must be activated)
+	activates specified menu
+-> deactivation func
+	activates of gametype and mod hud (maybe even global hud) BUT NOT IF the menu is being deactivated to load another menu
+	deactivates specified menu (with or without fade/withdraw/both)
+	deactivates main menu only if specified so
+-> set deactivation threads 
+prevMenu var
+prevTab var
+
+Player has property array that contains most internal threads run on him. These are sent to debug where their scripts are paused while player is in menu mode.
+*/
+main:
+
+
+
+end
+
+/**
+Server-side mouse interface:
+Once menu opens, centerview player (& calibrate). Take snapshot and project resolution 1920x1080 to 3D fov data. Immobilize & immune player.
+Transform viewangles to convergence point (i.e. crosshair.. so perhaps trace from eyebone then?) and if it is within the resolution fov then custom-hud mouse 
+will appear at correct 2D position on screen and the player can move it by moving his mouse ;-) => need to tweak speed & smoothness.
+
+Buttons & interactive hud-elements have a 2D setsize set, thus mouse-over & fireheld above an interactive element's position will trigger it. =D
+
+Player cannot access menu when 1) he's firing his weapon; 2) he's being fired at; 3) has been damaged less than 5 seconds ago; 4) completing
+an objective or task (usually involving timer, use & cansee :p)
+*/
+
+/** Each HUD menu element has:
+ * .Namespace property: 
+ * .IsMain property: is main menu of its namespace?
+ * .Page element: define menu's background & global style
+ *
+ * .Tab[] element: define menu's tab pages & buttons
+ *	* .Page-element: define tab page background & global style
+ *	* .Content-element: define tab page content and interactive content
+ *
+ *	* .SubTab[]-element: define menu's subtab pages & buttons
+ *	* 	* .Page-element: define tab page background & global style
+ *	* 	* .Content-element: define tab page content and interactive content
+ ...
+ Menu's can consist of multiple menus, they only need buttons to reference eachother for that.
+ However, there are a few options. If you define the same namespace property to your menus, then
+ not only can you use the homebutton-element but the menus will be linked as one whole 
+ when they are cached so each menu is initialized when the namespace is loaded.
+ */

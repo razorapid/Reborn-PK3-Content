@@ -1,0 +1,13 @@
+/** CONNECTION EVENT SCRIPT */
+
+main local.player:
+	if (level.eventSys) {
+		for (local.i = 0; local.i < level.eventSys.list["connected"].size; local.i++) {
+			if (typeof level.eventSys.list["connected"][local.i] == "const array") {
+				thread level.eventSys.list["connected"][local.i] local.player;
+			} else {
+				exec level.eventSys.list["connected"][local.i] local.player;
+			}
+		}
+	}
+end;

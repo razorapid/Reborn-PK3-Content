@@ -1,0 +1,46 @@
+/** DAMAGE EVENT REGISTRATION */
+
+main local.target local.inflictor local.damage local.position local.direction local.normal local.knockback local.damageflags local.meansofdeath local.location local.entity:
+	if (level.eventSys) {
+		for (local.i = 0; local.i < level.eventSys.list["damage"].size; local.i++) {
+			if (typeof level.eventSys.list["damage"][local.i] == "const array") {
+				thread level.eventSys.list["damage"][local.i] local.target local.inflictor local.damage local.position local.direction local.normal local.knockback local.damageflags local.meansofdeath local.location local.entity;
+			} else {
+				exec level.eventSys.list["damage"][local.i] local.target local.inflictor local.damage local.position local.direction local.normal local.knockback local.damageflags local.meansofdeath local.location local.entity;
+			}
+		}
+	}
+end;
+// need more info on damageflags, meansofdeath, location
+/** local.target - target entity isn't always player or actor entity. It can be a weapon entity or world entity
+local.inflictor - inflictor entity, entity that deals damage
+local.damage - float damage, damage amount
+local.position - vector position
+local.direction - vector direction
+local.normal - vector normal
+local.knockback - int knockback value
+local.damageflags - int damageflags
+local.meansofdeath - int meansofdeath
+local.location - int location id
+local.entity - entity that get's damage, often a player but can be any oder damageable entity
+------------------------------------------------- 
+damage locs:
+-1 General
+0 Pelvis
+1 Lower Torso
+2 Mid Torso
+3 Upper Torso
+4 Neck
+5 Head
+6 RUpperArm
+7 RForearm
+8 RHand
+9 LUpperArm
+10 LForearm
+11 LHand
+12 RThigh
+13 RCalf
+14 RFoot
+15 LThigh
+16 LCalf
+17 LFoot */

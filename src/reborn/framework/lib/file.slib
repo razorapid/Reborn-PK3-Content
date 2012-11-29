@@ -1,0 +1,108 @@
+/**
+ Medal of Honor: Allied Assault v1.12 REBORN  -  Morpheus Script
+ ================================================================
+ FILE SYSTEM LIBRARY; 						Script Framework BETA
+ ================================================================
+ BY Sor	
+ VERSION 1.0.01 (18/11/2012)
+ =-------------------------------------------------------------=		
+ Copyright (c) 2009-2013  Lenny Knockx
+ All rights reserved.
+ =-------------------------------------------------------------=
+ Permission to use, copy, modify, and/or distribute this software 
+ for any purpose with or without fee is hereby granted, provided 
+ that the above copyright notice and this permission notice appear
+ in all copies.
+ ---------------
+ THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL 
+ WARRANTIES WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED 
+ WARRANTIES OF MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL 
+ THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT, OR 
+ CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM 
+ LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, 
+ NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR 
+ IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+ =-------------------------------------------------------------=
+ CONTACT: 	http://www.x-null.net/forums/member.php?185-Sor
+ WEBSITE: 	http://www.x-null.net | www.mohaairborne.co.cc
+ ================================================================
+*/
+
+// Each different thing that needs to be written/logged to an external file, has its own distinctive FILENAME of which a set is made if necessary.
+// to recognize section: \sX\.../sX/ use array with specific words -> for 'long-range' file searching
+// to recognize keys: array of specific keys ('key'='value', requests need to return the value); also support for keys in bsp files, tiki files etc...
+
+/* need to check how many characters a variable in mohaa can hold... => game.Root.CAP_STRINGBUFFER = 522234 => or about half a megabyte and then
+ the game slowly starts losing its mind.*/
+
+/* keyvalues etc?? 
+=> keynames are saved in file object. They can be single keynames or redundant keynames. 
+=> individual: search for the first instance of keynames and update only that one
+=> group: search for section name or indicator, then from there update the first instances of keynames with specified keyvalues (input:array) 	?? simpler way ??
+=> all: read and save all sections, keynames, keyvalues.. in accessible buffers. After user is done editing them they are (over)written back to file
+	-> reading buffer works from one point in file to another or from one point till end of file 
+=> else: append (= add new at end of file) by defining how many should be printed and presets ready for editing are loaded into buffer and written to
+file when ready */
+
+// hard-register qconsole.log by default with appropriate settings
+// hard-registering saves register automatically to file with all its settings and it will be automatically loaded as well
+
+/* ini (http://en.wikipedia.org/wiki/INI_file) & xml (http://www.w3schools.com/xml/default.asp) & cfg support; registration of custom parsing templates 
+Copies of file (using 'Copy') are automatically registered with the same settings, vice versa for delete, update when renamed etc..
+*/
+__init:
+
+end level.File;
+
+__info:
+
+end local.inf;
+
+
+registerFile local.fileName local.filePath local.pak3 local.maxAccess local.maxFlags:
+
+
+
+end
+
+initVars:
+	// MAX FILE ACCESS PERMISSIONS 
+	level.fileMAXACCESS["r"][1] = "r"
+	level.fileMAXACCESS["r+"] = "r"::"r+"
+	level.fileMAXACCESS["a"] = "r"::"a"
+	level.fileMAXACCESS["a+"] = "r"::"a"::"a+"
+	level.fileMAXACCESS["w"] = "r"::"w"
+	level.fileMAXACCESS["w+"] = "r"::"r+"::"w"::"w+"
+	level.fileMAXFLAGS = 127 //default value
+	/* 
+	CONTINUE: Check PERMISSION FLAGS if operation is PRIMARYCMD; if operation is "open" or non-PRIMARY (which requires opening), check if flag value is a uneven number;
+	if so, continue; if not, then it means the file is set as inaccessible and all editing and reading operations are considered invalid.
+	
+	CONTINUE: IF NON-PRIMARY, check if operation is allowed by MAX ACCESS PERMISSIONS:
+	level.fileCMD[accesstype][chosen_operation] => should be 1;
+	if not => check with lower ACCESSTYPES defined by the above arrays.
+	if still not => ERROR & TERMINATE;
+	*/
+	level.fileFLAG[0] = "register"
+	level.fileFLAG[1] = "open"
+	level.fileFLAG[2] = "create"
+	level.fileFLAG[4] = "unregister"
+	level.fileFLAG[8] = "copy"
+	level.fileFLAG[16] = "rename"
+	level.fileFLAG[32] = "move"
+	level.fileFLAG[64] = "delete"
+	
+	level.filePRIMARYCMD["register"] = 1
+	level.filePRIMARYCMD["unregister"] = 1
+	level.filePRIMARYCMD["create"] = 1
+	level.filePRIMARYCMD["open"] = 1
+	level.filePRIMARYCMD["close"] = 1
+	level.filePRIMARYCMD["copy"] = 1
+	level.filePRIMARYCMD["rename"] = 1
+	level.filePRIMARYCMD["move"] = 1
+	level.filePRIMARYCMD["delete"] = 1
+	
+	level.MAXPHYSFILES = 128 	// arbitrary limit on how many files there may be created, it checks the fileregister to take an accurate history
+	level.MAXOPENFILES = 32 	// as 32 is the maximum amount of files that can be opened at a time
+	level.MAXTEXTBUFFER = 16		// max amount of buffers to store & edit text before writing, each buffer is 1024 chars
+end

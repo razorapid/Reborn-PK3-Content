@@ -1,0 +1,5 @@
+// sequences of files.slib executions in order to practically update or write to files/scripts.
+// statefile merger; examine state{} block per block; compare line per line, check size, use $Str.Compare
+// script obfuscator; mode1:rename vars (take level/local/group/game vars into account;same variable names in different contexts get a new name each time;var length is kept;omit local.? vars with one char), mode2:+Compress; <var prefix>
+// updaters/appenders for config & data storage.
+// => 'PRINTER' FUNC -> print/add to file text;array struct;ent struct... with dynamic support for other output channels than qconsole! 

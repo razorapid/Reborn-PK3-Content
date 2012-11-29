@@ -1,0 +1,27 @@
+/** KILLED EVENT SCRIPT */
+
+main local.attacker local.damage local.inflictor local.position local.direction local.normal local.knockback local.damageflags local.meansofdeath local.location local.player:
+	if (level.eventSys) {
+		for (local.i = 0; local.i < level.eventSys.list["kill"].size; local.i++) {
+			if (typeof level.eventSys.list["kill"][local.i] == "const array") {
+				thread level.eventSys.list["kill"][local.i] local.attacker local.damage local.inflictor local.position local.direction local.normal local.knockback local.damageflags local.meansofdeath local.location local.player;
+			} else {
+				exec level.eventSys.list["kill"][local.i] local.attacker local.damage local.inflictor local.position local.direction local.normal local.knockback local.damageflags local.meansofdeath local.location local.player;
+			}
+		}
+	}
+end;
+
+/* local.attacker - attacker entity (player) that killed
+local.damage - float damage, damage amount
+local.inflictor - inflictor entity, in most cases it isn't a player entity, it can be a weapon entity or world entity
+local.position - vector position
+local.direction - vector direction
+local.normal - vector normal
+local.knockback - int knockback value
+local.damageflags - int damageflags
+local.meansofdeath - int meansofdeath
+local.location - int location id
+local.player - player entity that got killed
+*/
+// Need to check if this is also activated when bots die

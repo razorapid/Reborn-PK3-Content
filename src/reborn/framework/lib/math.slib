@@ -1,0 +1,981 @@
+/**
+ Medal of Honor: Allied Assault v1.12 REBORN  -  Morpheus Script
+ ================================================================
+ MATHEMATICAL FUNCTIONS LIBRARY; 			Script Framework BETA
+ ================================================================
+ BY Sor	
+ VERSION 1.1.21 (23/11/2012)
+ =-------------------------------------------------------------=		
+ Copyright (c) 2009-2013  Lenny Knockx
+ All rights reserved.
+ =-------------------------------------------------------------=
+ Permission to use, copy, modify, and/or distribute this software 
+ for any purpose with or without fee is hereby granted, provided 
+ that the above copyright notice and this permission notice appear
+ in all copies.
+ ---------------
+ THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL 
+ WARRANTIES WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED 
+ WARRANTIES OF MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL 
+ THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT, OR 
+ CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM 
+ LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, 
+ NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR 
+ IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+ =-------------------------------------------------------------=
+ CONTACT: 	http://www.x-null.net/forums/member.php?185-Sor
+ WEBSITE: 	http://www.x-null.net | www.mohaairborne.co.cc
+ ================================================================
+*/
+/** 
+IsNumArray => HasType "int"::"float"
+ArrayEuclDiv => for IsNumArray arrays, optional dimension & entries.
+ArrayDiv
+ArrayMult
+ArrayAdd
+ArraySub
+ArrayMod
+ArrayPow
+*/
+/*!
+	ToColour => converts #RRGGBB & #RGB hex to ( R G B ) dec.
+*/
+///faculty => take max int val into account
+///fibonacci => take max int val into account
+/*!
+$Int.ToArray	=|
+$Float.ToArray	=|> casts 'int = data' to 'int[0/start] = local.data'
+$Bool.ToArray	=|
+
+$Int.ToVector	=|
+$Float.ToVector	=|> casts 'int = data' to 'int = ( data data data )'
+$Bool.ToVector	=|
+(or .ToVec)
+
+// more hassle-free casting
+$Float.ToStr	//casting
+$Float.ToBool	//casting
+$Float.ToInt	//casting
+$Float.Fraction => returns decimal part of float; also $Float.Frac
+$Float.Compare => compares two floats, 0=equal; 1=lower than; 2=greater than
+$Float.Mod => fmod
+$Float.Ceil => $Math.Ceil
+$Float.Floor => $Math.Floor
+$Float.Round => $Math.Round
+
+$Bool.ToStr	
+$Bool.ToInt	//only returns 0 if 0
+$Bool.ToFloat // only returns 0 if 0.0
+*/
+///add euclidian division function: ((num - (num % 10)) / 10) => RETURN INT
+///re-write/update median
+///RoundToNearestMult	(round X to nearest multitude of Y)
+///CeilToNearestMult	(round X up to nearest multitude of Y)
+///FloorToNearestMult	(round X down to nearest multitude of Y)
+///NormalizeDegrees/Norm (normalize degrees back to [0,360] range
+///GLOBAL VARS: Users can use group. objects.
+///SUPPORT NUMSTRINGS: use $Str.IsNumerical local.x 
+__init:
+	//Temporary:
+	level.Math = local CreateListener; level.Math targetname "Math";
+	level.Math.filePath = "reborn/framework/lib/";
+	level.Math.fileName = "math.slib";
+	level.Math.initThread = "__init";
+	level.Math.parent = "Library";
+	level.Math.isRoot = false;
+	level.Math.mSize = 0;
+	level.Math.pSize = 6;
+	//
+	
+	if ($/*System.Library.*/Math) {
+		/// Cross-reference:
+		level.Math = $Math;
+		
+		///MATHEMATICAL CONSTANTS:
+		level.Math.PI = 3.141592654; 
+		level.Math.E = 2.718281828;		/**Euler's number*/
+		level.Math.PHI = 1.618033988;	/**Golden ratio Phi*/
+		level.Math.SQ2 = 1.414213562;	/**Square root of two*/
+
+		// Users need to use group.x and .y objects for multiple transformations
+		//parm.math = local CreateListener;
+		
+		// Shortcuts
+		level.Math.Int = waitthread /*$System.fullPath::#DefineClass "Int" "reborn/framework/lib/math.slib"::*/"__initInt";
+		//level.Math.Float = waitthread $System.fullPath::#DefineClass "Float" "reborn/framework/lib/math.slib"::"__initFloat";
+		//level.Math.Bool = waitthread $System.fullPath::#DefineClass "Bool" "reborn/framework/lib/math.slib"::"__initBool";
+
+		level.Math.IsNum = 					(level.Math.filePath + level.Math.fileName)::"IsNumber";
+		level.Math.NaN = 					(level.Math.filePath + level.Math.fileName)::"NotaNumber";
+		level.Math.ToRadians = 				(level.Math.filePath + level.Math.fileName)::"ToRadians";
+		level.Math.ToDegrees = 				(level.Math.filePath + level.Math.fileName)::"ToDegrees";
+		/*level.Math.Rad = 					(level.Math.filePath + level.Math.fileName)::"ToRadians";
+		level.Math.Deg = 					(level.Math.filePath + level.Math.fileName)::"ToDegrees";*/
+		// for radians input: 15
+		level.Math.Cos = 					(level.Math.filePath + level.Math.fileName)::"Cos";
+		level.Math.Sin = 					(level.Math.filePath + level.Math.fileName)::"Sin";
+		level.Math.Tan =					(level.Math.filePath + level.Math.fileName)::"Tan";
+		level.Math.Acos =					(level.Math.filePath + level.Math.fileName)::"Acos";
+		level.Math.Asin =					(level.Math.filePath + level.Math.fileName)::"Asin";
+		level.Math.Atan =					(level.Math.filePath + level.Math.fileName)::"Atan";
+		level.Math.Atan2 =					(level.Math.filePath + level.Math.fileName)::"Atan2";
+		//level.Math.Cosec =				(level.Math.filePath + level.Math.fileName)::"Csc";
+		level.Math.Csc =					(level.Math.filePath + level.Math.fileName)::"Csc";
+		level.Math.Sec =					(level.Math.filePath + level.Math.fileName)::"Sec";
+		level.Math.Cot =					(level.Math.filePath + level.Math.fileName)::"Cot";
+		//level.Math.Acosec =				(level.Math.filePath + level.Math.fileName)::"Acsc";
+		level.Math.Acsc =					(level.Math.filePath + level.Math.fileName)::"Acsc";
+		level.Math.Asec =					(level.Math.filePath + level.Math.fileName)::"Asec";
+		level.Math.Acot =					(level.Math.filePath + level.Math.fileName)::"Acot";
+		// Same as above, but for degrees input: 15
+		level.Math.Cosd = 					(level.Math.filePath + level.Math.fileName)::"Cosd";
+		level.Math.Sind = 					(level.Math.filePath + level.Math.fileName)::"Sind";
+		level.Math.Tand =					(level.Math.filePath + level.Math.fileName)::"Tand";
+		level.Math.Acosd =					(level.Math.filePath + level.Math.fileName)::"Acosd";
+		level.Math.Asind =					(level.Math.filePath + level.Math.fileName)::"Asind";
+		level.Math.Atand =					(level.Math.filePath + level.Math.fileName)::"Atand";
+		level.Math.Atan2d =					(level.Math.filePath + level.Math.fileName)::"Atan2d";
+		level.Math.Cotd =					(level.Math.filePath + level.Math.fileName)::"Cotd";
+		level.Math.Acotd =					(level.Math.filePath + level.Math.fileName)::"Acotd";
+		//level.Math.Cosecd =				(level.Math.filePath + level.Math.fileName)::"Cscd";
+		level.Math.Cscd =					(level.Math.filePath + level.Math.fileName)::"Cscd";
+		level.Math.Secd =					(level.Math.filePath + level.Math.fileName)::"Secd";
+		level.Math.Cotd =					(level.Math.filePath + level.Math.fileName)::"Cotd";
+		//level.Math.Acosecd =				(level.Math.filePath + level.Math.fileName)::"Acscd";
+		level.Math.Acscd =					(level.Math.filePath + level.Math.fileName)::"Acscd";
+		level.Math.Asecd =					(level.Math.filePath + level.Math.fileName)::"Asecd";
+		level.Math.Acotd =					(level.Math.filePath + level.Math.fileName)::"Acotd";
+		// Remaining trimmed functions :) thanks to Razo's new scripting commands
+		level.Math.Exp =					(level.Math.filePath + level.Math.fileName)::"Exp";
+		level.Math.Frexp =					(level.Math.filePath + level.Math.fileName)::"Frexp";
+		level.Math.Ldexp =					(level.Math.filePath + level.Math.fileName)::"Ldexp";
+		level.Math.Ln =						(level.Math.filePath + level.Math.fileName)::"Log";
+		level.Math.Log =					(level.Math.filePath + level.Math.fileName)::"Log";
+		level.Math.Log2 =					(level.Math.filePath + level.Math.fileName)::"Log2";
+		level.Math.Modf =					(level.Math.filePath + level.Math.fileName)::"Modf";
+		level.Math.Pow =					(level.Math.filePath + level.Math.fileName)::"Pow";
+		level.Math.Floor =					(level.Math.filePath + level.Math.fileName)::"Floor";
+		level.Math.Ceil =					(level.Math.filePath + level.Math.fileName)::"Ceil";
+		level.Math.Fmod =					(level.Math.filePath + level.Math.fileName)::"Fmod";
+		level.Math.Sqrt =					(level.Math.filePath + level.Math.fileName)::"Sqrt";
+		// Square root different methods & versions.
+		level.Math.Sqrt1 =					(level.Math.filePath + level.Math.fileName)::"Sqrt1";
+		level.Math.Sqrt2 =					(level.Math.filePath + level.Math.fileName)::"Sqrt2";
+		level.Math.Sqrt3 =					(level.Math.filePath + level.Math.fileName)::"Sqrt3";
+		// General functions...
+		level.Math.IsPowOf2 = 				(level.Math.filePath + level.Math.fileName)::"IsPowOf2";
+		level.Math.Round = 					(level.Math.filePath + level.Math.fileName)::"Round";
+		level.Math.FloorToPowOf = 			(level.Math.filePath + level.Math.fileName)::"FloorToPowOf";
+		level.Math.CeilToPowOf = 			(level.Math.filePath + level.Math.fileName)::"CeilToPowOf";
+		level.Math.RoundToPowOf = 			(level.Math.filePath + level.Math.fileName)::"RoundToPowOf";
+		level.Math.Median = 				(level.Math.filePath + level.Math.fileName)::"Median";
+		level.Math.Average = 				(level.Math.filePath + level.Math.fileName)::"Average";		
+		/*level.Math.Med = 					(level.Math.filePath + level.Math.fileName)::"Median";
+		level.Math.Avg = 					(level.Math.filePath + level.Math.fileName)::"Average";
+		level.Math.Eucl = 					(level.Math.filePath + level.Math.fileName)::"EuclDivision";*/
+		level.Math.EuclDiv = 				(level.Math.filePath + level.Math.fileName)::"EuclDivision";
+		
+		level.Math.msize = 50;
+	}
+end level.Math;
+
+__initInt:
+	level.Int = local CreateListener; 
+	level.Int targetname "Int";
+	
+	level.Int.MAX_VALUE = 2147483647;
+	level.Int.MAX_VALUE_POW = 31; //from -2^31 to (2^31) - 1
+	level.Int.MIN_VALUE = -2147483648;
+	level.Int.SIGNED = true;
+
+	// Method shortcuts
+	level.Int.IsPowOf2 = 		(level.Math.filePath + level.Math.fileName)::"IsPowOf2";
+	level.Int.ToStr = 			(level.Math.filePath + level.Math.fileName)::"IntToStr";
+	level.Int.ToFloat = 		(level.Math.filePath + level.Math.fileName)::"IntToFloat";
+	level.Int.ToBool = 			(level.Math.filePath + level.Math.fileName)::"IntToBool";
+	level.Int.FloorToPowOf = 	(level.Math.filePath + level.Math.fileName)::"FloorToPowOf";
+	level.Int.CeilToPowOf = 	(level.Math.filePath + level.Math.fileName)::"CeilToPowOf";
+	level.Int.RoundToPowOf = 	(level.Math.filePath + level.Math.fileName)::"RoundToPowOf";
+end
+
+IntToStr local.int:
+	if (local.int) {
+		if (typeof local.int == "int") {
+			local.result = string(local.int);
+		} else {
+			local.result = local.int;
+		}
+	}
+end local.result;
+
+IntToFloat local.int:
+	if (local.int) {
+		if (typeof local.int == "int") {
+			local.result = float(local.int);
+		} else {
+			local.result = local.int;
+		}
+	}
+end local.result;
+
+IntToBool local.int:
+	if (local.int) {
+		if (typeof local.int == "int") {
+			if (local.int == 0) {
+				local.result = false;
+			} else {
+				local.result = true;
+			}
+		} else {
+			local.result = local.int;
+		}
+	}
+end local.result;
+
+FloatToStr local.float:
+	if (local.float) {
+		if (typeof local.float == "float") {
+			// Cast float to vector
+			local.tmpVec = ( local.float 0.0 0.0 );
+			
+			// Cast vector to string, which represents its values 
+			// with six decimals instead of three.
+			local.tmpStr = string (local.tmpVec);
+			
+			// Needed no longer.
+			local.tmpVec = NIL;
+			
+			// Start for() loop at index 1 so we automatically skip the left bracket.
+			local.result = "";
+			for (local.i = 1; local.i < local.tmpStr.size; local.i++) {
+				// If we encounter a comma (i.e. ASCII #44), we have our float.
+				if (charToInt(local.tmpStr[local.i]) == 44) {
+					break;
+				}
+				// Keep adding chars until a comma breaks the loop.
+				local.result += local.tmpStr[local.i];
+			}
+			
+			// Not needed.
+			local.tmpStr = NIL;
+		} else {
+			local.result = local.float;
+		}
+	}
+end local.result;
+
+IsPowOf2 local.x:
+	// If x does not exist; if global x exists, use it and in all other cases unequivocally end;
+	if (local.x == NIL) {if (group.x != NIL) {local.x = group.x;} else {waitthread __Error1 "IsPowOf2"; end;}};
+	// Make x positive
+	local.x = abs(local.x);
+	// This will convert bits so it returns 1 if x is 1,2,4,8,16,32,64,128,256,512,1024,2048,4096...
+end ((local.i != 0) && ((local.i & (local.i - 1)) == 0));
+
+Round local.x:
+	if (local.x == NIL) {if (group.x != NIL) {local.x = group.x;} else {waitthread __Error1 "Round"; end;}};
+	
+	/*Main Logic*/
+	local.y = floor local.x;
+	local.z = ceil local.x;
+	
+	if ((local.x - local.y) < (local.z - local.x)) {
+		local.result = local.y;
+	} else {
+		local.result = local.z;
+	}
+end local.result;
+
+Average local.array local.abs:
+	/*Error & Exception handling*/
+	if (!local.array || local.array.size <= 0 || !(waitthread $Array.IsUserArray local.array)) {
+		if (level.DEBUG) {
+			conprintf "\n ~^~^~^~ FATAL_ERROR[LIB::math.slib::Average]: array <arg1> is either inexistent, uninitialized or invalid! ~^~^~^~ \n\n";
+		}
+	} else if !(waitthread $Array.HasType local.array "int"::"float" 1) {
+		if (level.DEBUG) {
+			conprintf "\n ~^~^~^~ FATAL_ERROR[LIB::math.slib::Average]: array <arg1> either is not one-dimensional or is not homogeneous with int/float variables! ~^~^~^~ \n\n";
+		}
+	}
+	
+	/*Main Logic*/
+	local.sum = 0;
+	local.total = local.array.size;
+	for (local.i = 1; local.i <= local.total; local.i++) {
+		if !(local.abs) {
+			local.sum += local.array[local.i];
+		} else {
+			local.sum += abs(local.array[local.i]);
+		}
+	}
+end (local.result / local.total);
+
+// (round X to nearest power of Y)
+_RoundToPowOf local.x local.y: goto internal3;
+RoundToPowOf local.x local.y:
+	/*Error & Exception handling*/
+	if (local.x == NIL) {if (group.x != NIL) {local.x = group.x;} else {waitthread __Error1 "CeilToPowOf"; end;}};
+	if (local.y == NIL) {if (group.y != NIL) {local.y = group.y;} else {waitthread __Error1 "CeilToPowOf" "y <arg2>"; end;}};
+	if (!(waitthread IsNumber local.y) || local.y < 0) {
+		if (level.DEBUG) {
+			conprintf "\n ~^~^~^~ FATAL_ERROR[LIB::math.slib::RoundToPowOf]: power/exponent <arg2> is either zero or invalid! ~^~^~^~ \n\n";
+		}
+		end;
+	} 
+	
+	/*Main Logic*/
+	internal3:
+	if (local.y == 0) {
+		local.result = 0; //by definition: 0^X=0. Only power is nearest power.
+	} if (local.x <= 0) {
+		local.result = 1; //Nearest power is always going to be this X^0 which, by definition, always equals to 1.
+	}
+	
+	if (waitthread IsNumber local.x) {
+		local.j = 0;
+		for (local.i = 0; local.j <= local.x; local.i++) {
+			local.j = (pow local.y local.i);
+		}
+	
+		local.min = (pow local.y (local.i - 2));
+		local.max = local.j;
+
+		if ((local.x - local.min) < (local.max - local.x)) {
+			local.result = local.min;
+		} else {
+			local.result = local.max;
+		}
+	}
+end local.result;
+
+//(round X up to nearest power of Y)
+_CeilToPowOf local.x local.y: goto internal2;
+CeilToPowOf local.x local.y:
+	/*Error & Exception handling*/
+	if (local.x == NIL) {if (group.x != NIL) {local.x = group.x;} else {waitthread __Error1 "CeilToPowOf"; end;}};
+	if (local.y == NIL) {if (group.y != NIL) {local.y = group.y;} else {waitthread __Error1 "CeilToPowOf" "y <arg2>"; end;}};
+	if (!(waitthread IsNumber local.y) || local.y < 0) {
+		if (level.DEBUG) {
+			conprintf "\n ~^~^~^~ FATAL_ERROR[LIB::math.slib::CeilToPowOf]: power/exponent <arg2> is either zero or invalid! ~^~^~^~ \n\n";
+		}
+		end;
+	} 
+	
+	/*Main Logic*/
+	internal2:
+	if (local.y == 0) {
+		local.result = 0; //by definition: 0^X=0. Only power is nearest power.
+	} if (local.x <= 0) {
+		local.result = 1; //Nearest power is always going to be this X^0 which, by definition, always equals to 1.
+	}
+	
+	if (waitthread IsNumber local.x) {
+		local.j = 0;
+		for (local.i = 0; local.j <= local.x; local.i++;) {
+			local.j = (pow local.y local.i);
+		}
+		local.result = local.j;
+	}
+end local.result;
+
+//(round X down to nearest power of Y)
+_FloorToPowOf local.x local.y: goto internal1;
+FloorToPowOf local.x local.y:
+	/*Error & Exception handling*/
+	if (local.x == NIL) {if (group.x != NIL) {local.x = group.x;} else {waitthread __Error1 "FloorToPowOf"; end;}};
+	if (local.y == NIL) {if (group.y != NIL) {local.y = group.y;} else {waitthread __Error1 "FloorToPowOf" "y <arg2>"; end;}};
+	if (!(waitthread IsNumber local.y) || local.y < 0) {
+		if (level.DEBUG) {
+			conprintf "\n ~^~^~^~ FATAL_ERROR[LIB::math.slib::FloorToPowOf]: power/exponent <arg2> is either zero or invalid! ~^~^~^~ \n\n";
+		}
+		end;
+	} 
+	
+	/*Main Logic*/
+	internal1:
+	if (local.y == 0) {
+		local.result = 0; //by definition: 0^X=0. Only power is nearest power.
+	} if (local.x <= 0) {
+		local.result = 1; //Nearest power is always going to be this X^0 which, by definition, always equals to 1.
+	}
+	
+	if (waitthread IsNumber local.x) {
+		local.j = 0;
+		for (local.i = 0; local.j < local.x; ) {
+			local.i++; // Avoids ++ operator lag.
+			local.j = (pow local.y local.i);
+		}
+		local.result = (pow local.y (local.i - 1));
+	}
+end local.result;
+
+NotaNumber local.var:
+end !(waitthread IsNumber local.var);
+
+IsNumber local.var:
+	local.type = typeof local.var;
+end (local.type == "int" || local.type == "float");
+/// good idea??
+/**local.x = waitthread MakeNumber local.x;
+if (local.x) {
+	continue;
+}*/
+
+ToRadians local.value:
+	if (waitthread IsNumber local.value) {
+		local.result = local.value * ( level.PI / 180.0 );
+	} 
+end local.result;
+
+ToDegrees local.degrees:
+	if (waitthread IsNumber local.value) {
+		local.result = local.value * ( 180.0 / level.PI );
+	}
+end local.result;
+
+/** -------------------------------------------------------------------------------------------------------------------
+*** 		S c r i p t i n g		C m d s 		W r i t t e n		b y 		R a z o [R] a p i d				***
+-------------------------------------------------------------------------------------------------------------------- */
+// These are for reference, really...
+Cos local.x:
+	if (local.x == NIL) {if (group.x != NIL) {local.x = group.x;} else {waitthread __Error1 "Cos"; end;}};
+	if (waitthread IsNumber local.x) {
+		local.result = cos local.x;
+	}
+end local.result;
+
+Sin local.x:
+	if (local.x == NIL) {if (group.x != NIL) {local.x = group.x;} else {waitthread __Error1 "Sin"; end;}};
+	if (waitthread IsNumber local.x) {
+		local.result = sin local.x;
+	}
+end local.result;
+
+Tan local.x:
+	if (local.x == NIL) {if (group.x != NIL) {local.x = group.x;} else {waitthread __Error1 "Tan"; end;}};
+	if (waitthread IsNumber local.x) {
+		local.result = tan local.x;
+	}
+end local.result;
+
+Acos local.x:
+	if (local.x == NIL) {if (group.x != NIL) {local.x = group.x;} else {waitthread __Error1 "Acos"; end;}};
+	if (waitthread IsNumber local.x) {
+		local.result = acos local.x;
+	}
+end local.result;
+
+Asin local.x:
+	if (local.x == NIL) {if (group.x != NIL) {local.x = group.x;} else {waitthread __Error1 "Asin"; end;}};
+	if (waitthread IsNumber local.x) {
+		local.result = asin local.x;
+	}
+end local.result;
+
+Atan local.x:
+	if (local.x == NIL) {if (group.x != NIL) {local.x = group.x;} else {waitthread __Error1 "Atan"; end;}};
+	if (waitthread IsNumber local.x) {
+		local.result = atan local.x;
+	}
+end local.result;
+
+Atan2 local.x local.y:
+	if (local.y == NIL) {if (group.y != NIL) {local.y = group.y;} else {waitthread __Error1 "Atan2" "y <arg1>"; end;}};
+	if (local.x == NIL) {if (group.x != NIL) {local.x = group.x;} else {waitthread __Error1 "Atan2" "x <arg2>"; end;}};
+	if ((waitthread IsNumber local.y) && (waitthread IsNumber local.x)) {
+		local.result = atan2 local.y local.x;
+	}
+end local.result;
+
+Cot local.x:
+	if (local.x == NIL) {if (group.x != NIL) {local.x = group.x;} else {waitthread __Error1 "Cot"; end;}};
+	if (waitthread IsNumber local.x) {
+		if (local.x == 0.0) {
+			local.result = 0.0;
+		} else {
+			local.result = tan (1.0 / local.x);
+		}
+	}
+end local.result;
+
+Csc local.x:
+	if (local.x == NIL) {if (group.x != NIL) {local.x = group.x;} else {waitthread __Error1 "Cosec"; end;}};
+	if (waitthread IsNumber local.x) {
+		if (local.x == 0.0) {
+			local.result = 0.0;
+		} else {
+			local.result = cos (1.0 / local.x);
+		}
+	}
+end local.result;
+
+Sec local.x:
+	if (local.x == NIL) {if (group.x != NIL) {local.x = group.x;} else {waitthread __Error1 "Sec"; end;}};
+	if (waitthread IsNumber local.x) {
+		if (local.x == 0.0) {
+			local.result = 0.0;
+		} else {
+			local.result = sin (1.0 / local.x);
+		}
+	}
+end local.result;
+	
+Acot local.x:
+	if (local.x == NIL) {if (group.x != NIL) {local.x = group.x;} else {waitthread __Error1 "Acot"; end;}};
+	if (waitthread IsNumber local.x) {
+		if (local.x == 0.0) {
+			local.result = 0.0;
+		} else {
+			local.result = atan (1.0 / local.x);
+		}
+	}
+end local.result;
+
+Acsc local.x:
+	if (local.x == NIL) {if (group.x != NIL) {local.x = group.x;} else {waitthread __Error1 "Acosec"; end;}};
+	if (waitthread IsNumber local.x) {
+		if (local.x == 0.0) {
+			local.result = 0.0;
+		} else {
+			local.result = acos (1.0 / local.x);
+		}
+	}
+end local.result;
+
+Asec local.x:
+	if (local.x == NIL) {if (group.x != NIL) {local.x = group.x;} else {waitthread __Error1 "Sec"; end;}};
+	if (waitthread IsNumber local.x) {
+		if (local.x == 0.0) {
+			local.result = 0.0;
+		} else {
+			local.result = asin (1.0 / local.x);
+		}
+	}
+end local.result;
+
+Cosh local.x:
+	if (local.x == NIL) {if (group.x != NIL) {local.x = group.x;} else {waitthread __Error1 "Cosh"; end;}};
+	if (waitthread IsNumber local.x) {
+		local.result = cosh local.x;
+	}
+end local.result;
+
+Sinh local.x:
+	if (local.x == NIL) {if (group.x != NIL) {local.x = group.x;} else {waitthread __Error1 "Sinh"; end;}};
+	if (waitthread IsNumber local.x) {
+		local.result = sinh local.x;
+	}
+end local.result;
+
+Tanh local.x:
+	if (local.x == NIL) {if (group.x != NIL) {local.x = group.x;} else {waitthread __Error1 "Tanh"; end;}};
+	if (waitthread IsNumber local.x) {
+		local.result = tanh local.x;
+	}
+end local.result;
+
+//=================================================================================================================//
+// SUPPORT FOR DEGREES INPUT																					   //
+//=================================================================================================================//
+Cosd local.x:
+	if (local.x == NIL) {if (group.x != NIL) {local.x = group.x;} else {waitthread __Error1 "Cosd"; end;}};
+	if (waitthread IsNumber local.x) {
+		local.x = waitthread ToRadians local.x;
+		local.result = cos local.x;
+	}
+end local.result;
+
+Sind local.x:
+	if (local.x == NIL) {if (group.x != NIL) {local.x = group.x;} else {waitthread __Error1 "Sind"; end;}};
+	if (waitthread IsNumber local.x) {
+		local.x = waitthread ToRadians local.x;
+		local.result = sin local.x;
+	}
+end local.result;
+
+Tand local.x:
+	if (local.x == NIL) {if (group.x != NIL) {local.x = group.x;} else {waitthread __Error1 "Sind"; end;}};
+	if (waitthread IsNumber local.x) {
+		local.x = waitthread ToRadians local.x;
+		local.result = tan local.x;
+	}
+end local.result;
+
+Acosd local.x:
+	if (local.x == NIL) {if (group.x != NIL) {local.x = group.x;} else {waitthread __Error1 "Acosd"; end;}};
+	if (waitthread IsNumber local.x) {
+		local.x = waitthread ToRadians local.x;
+		local.result = acos local.x;
+	}
+end local.result;
+
+Asind local.x:
+	if (local.x == NIL) {if (group.x != NIL) {local.x = group.x;} else {waitthread __Error1 "Asind"; end;}};
+	if (waitthread IsNumber local.x) {
+		local.x = waitthread ToRadians local.x;
+		local.result = asin local.x;
+	}
+end local.result;
+
+Atand local.x:
+	if (local.x == NIL) {if (group.x != NIL) {local.x = group.x;} else {waitthread __Error1 "Atand"; end;}};
+	if (waitthread IsNumber local.x) {
+		local.x = waitthread ToRadians local.x;
+		local.result = atan local.x;
+	}
+end local.result;
+
+Atan2d local.x local.y:
+	if (local.y == NIL) {if (group.y != NIL) {local.y = group.y;} else {waitthread __Error1 "Atan2d" "y <arg1>"; end;}};
+	if (local.x == NIL) {if (group.x != NIL) {local.x = group.x;} else {waitthread __Error1 "Atan2d" "x <arg2>"; end;}};
+	if ((waitthread IsNumber local.y) && (waitthread IsNumber local.x)) {
+		local.y = waitthread ToRadians local.y;
+		local.x = waitthread ToRadians local.x;
+		local.result = atan2 local.y local.x;
+	}
+end local.result;
+
+Coshd local.x:
+	if (local.x == NIL) {if (group.x != NIL) {local.x = group.x;} else {waitthread __Error1 "Coshd"; end;}};
+	if (waitthread IsNumber local.x) {
+		local.x = waitthread ToRadians local.x;
+		local.result = cosh local.x;
+	}
+end local.result;
+
+Sinhd local.x:
+	if (local.x == NIL) {if (group.x != NIL) {local.x = group.x;} else {waitthread __Error1 "Sinhd"; end;}};
+	if (waitthread IsNumber local.x) {
+		local.x = waitthread ToRadians local.x;
+		local.result = sinh local.x;
+	}
+end local.result;
+
+Tanhd local.x:
+	if (local.x == NIL) {if (group.x != NIL) {local.x = group.x;} else {waitthread __Error1 "Tanhd"; end;}};
+	if (waitthread IsNumber local.x) {
+		local.x = waitthread ToRadians local.x;
+		local.result = tanh local.x;
+	}
+end local.result;
+
+Cscd local.x:
+	if (local.x == NIL) {if (group.x != NIL) {local.x = group.x;} else {waitthread __Error1 "Cosecd"; end;}};
+	if (waitthread IsNumber local.x) {
+		if (local.x == 0.0) {
+			local.result = 0.0;
+		} else {
+			local.result = cos (1.0 / local.x);
+		}
+	}
+end local.result;
+
+Secd local.x:
+	if (local.x == NIL) {if (group.x != NIL) {local.x = group.x;} else {waitthread __Error1 "Secd"; end;}};
+	if (waitthread IsNumber local.x) {
+		if (local.x == 0.0) {
+			local.result = 0.0;
+		} else {
+			local.result = sin (1.0 / local.x);
+		}
+	}
+end local.result;
+
+Cotd local.x:
+	if (local.x == NIL) {if (group.x != NIL) {local.x = group.x;} else {waitthread __Error1 "Cotd"; end;}};
+	if (waitthread IsNumber local.x) {
+		if (local.x == 0.0) {
+			local.result = 0.0;
+		} else {
+			local.x = waitthread ToRadians local.x;
+			local.result = tan (1.0 / local.x);
+		}
+	}
+end local.result;
+
+Acotd local.x:
+	if (local.x == NIL) {if (group.x != NIL) {local.x = group.x;} else {waitthread __Error1 "Acotd"; end;}};
+	if (waitthread IsNumber local.x) {
+		if (local.x == 0.0) {
+			local.result = 0.0;
+		} else {
+			local.x = waitthread ToRadians local.x;
+			local.result = atan (1.0 / local.x);
+		}
+	}
+end local.result;
+
+Acscd local.x:
+	if (local.x == NIL) {if (group.x != NIL) {local.x = group.x;} else {waitthread __Error1 "Acosecd"; end;}};
+	if (waitthread IsNumber local.x) {
+		if (local.x == 0.0) {
+			local.result = 0.0;
+		} else {
+			local.result = acos (1.0 / local.x);
+		}
+	}
+end local.result;
+
+Asecd local.x:
+	if (local.x == NIL) {if (group.x != NIL) {local.x = group.x;} else {waitthread __Error1 "Secd"; end;}};
+	if (waitthread IsNumber local.x) {
+		if (local.x == 0.0) {
+			local.result = 0.0;
+		} else {
+			local.result = asin (1.0 / local.x);
+		}
+	}
+end local.result;
+//=================================================================================================================//
+
+/// Returns the base-e exponential function of x, which is the e number raised to the power x.
+Exp local.x:
+	if (local.x == NIL) {if (group.x != NIL) {local.x = group.x;} else {waitthread __Error1 "Exp"; end;}};
+	if (waitthread IsNumber local.x) {
+		local.result = exp local.x;
+	}
+end local.result;
+
+/** Breaks the floating point number x into its binary significand (a floating point value between 0.5(included) and 1.0(excluded)) and an integral exponent for 2, such that:
+x = significand * 2exponent
+If x is zero, both parts (significand and exponent) are zero.*/
+Frexp local.x:
+	if (local.x == NIL) {if (group.x != NIL) {local.x = group.x;} else {waitthread __Error1 "Frexp"; end;}};
+	if (waitthread IsNumber local.x) {
+		local.result = frexp local.x;
+	}
+end local.result;
+
+/// Returns the resulting floating point value from multiplying x (the significand) by 2 raised to the power of exp (the exponent).
+Ldexp local.x local.exp:
+	if (local.x == NIL) {if (group.x != NIL) {local.x = group.x;} else {waitthread __Error1 "Ldexp"; end;}};
+	if ((waitthread IsNumber local.x) && (waitthread IsNumber local.exp)) {
+		local.result = ldexp local.x local.exp;
+	}
+end local.result;
+
+Log local.x:
+	if (local.x == NIL) {if (group.x != NIL) {local.x = group.x;} else {waitthread __Error1 "Log"; end;}};
+	if (waitthread IsNumber local.x) {
+		local.result = log local.x;
+	}
+end local.result;
+
+	//argument	//base number
+Log2 local.x local.b:
+	if (local.x == NIL) {if (group.x != NIL) {local.x = group.x;} else {waitthread __Error1 "Log2"; end;}};
+	if ((waitthread IsNumber local.x) && (waitthread IsNumber local.b)) {
+		local.result = (log local.x) / (log local.b);
+	}
+end local.result;
+
+//Breaks x into two parts: the integer part and the fractional part.
+Modf local.x:
+	if (local.x == NIL) {if (group.x != NIL) {local.x = group.x;} else {waitthread __Error1 "Modf"; end;}};
+	if (typeof local.x == "float") {
+		local.result = modf local.x;
+	}
+end local.result;
+
+Pow local.x local.exp:
+	if (local.x == NIL) {if (group.x != NIL) {local.x = group.x;} else {waitthread __Error1 "Pow"; end;}};
+	if ((waitthread IsNumber local.x) && (waitthread IsNumber local.exp)) {
+		local.result = pow local.x local.exp;
+	}
+end local.result;
+
+//Returns the smallest integral value that is not less than x.
+Ceil local.x:
+	if (local.x == NIL) {if (group.x != NIL) {local.x = group.x;} else {waitthread __Error1 "Ceil"; end;}};
+	if ((waitthread IsNumber local.x) && (waitthread IsNumber local.exp)) {
+		local.result = ceil local.x;
+	}
+end local.result;
+
+//Returns the largest integral value that is not less than x.
+Floor local.x:
+	if (local.x == NIL) {if (group.x != NIL) {local.x = group.x;} else {waitthread __Error1 "Floor"; end;}};
+	if ((waitthread IsNumber local.x) && (waitthread IsNumber local.exp)) {
+		local.result = floor local.x;
+	}
+end local.result;
+
+/** Returns the floating-point remainder of numerator/denominator.
+The remainder of a division operation is the result of subtracting the integral quotient multiplied by the denominator from the numerator:
+
+remainder = numerator - quotient * denominator
+
+x=numerator
+y=denominator*/
+Fmod local.x local.y:
+	if (local.y == NIL) {if (group.y != NIL) {local.y = group.y;} else {waitthread __Error1 "Fmod" "y <arg1>"; end;}};
+	if (local.x == NIL) {if (group.x != NIL) {local.x = group.x;} else {waitthread __Error1 "Fmod" "x <arg2>"; end;}};
+	if ((waitthread IsNumber local.x) && (waitthread IsNumber local.y)) {
+		local.result = fmod local.x local.y;
+	}
+end local.result;
+
+Sqrt local.x:
+	if (local.x == NIL) {if (group.x != NIL) {local.x = group.x;} else {waitthread __Error1 "Sqrt"; end;}};
+	if ((waitthread IsNumber local.x) && (waitthread IsNumber local.exp)) {
+		local.result = sqrt local.x;
+	}
+end local.result;
+
+/** -----------------------------------------------------------------------------------
+*** 								Written by jv_map								***
+------------------------------------------------------------------------------------ */
+// fast square-root
+// only usuable near x=1
+// great for normalizing
+Sqrt1 local.x:
+	if (local.x == NIL) {if (group.x != NIL) {local.x = group.x;} else {waitthread __Error1 "Sqrt"; end;}};
+	// McLaurin expansion
+	if (waitthread IsNumber local.x) {
+		local.result = 0.5 + 0.5 * local.x - 0.125 * (local.x - 1.0) * (local.x - 1.0);
+	}
+end local.result
+
+//square root 
+// by jv_map
+Sqrt2 local.x:
+	if (local.x == NIL) {if (group.x != NIL) {local.x = group.x;} else {waitthread __Error1 "Sqrt"; end;}};
+	if (waitthread IsNumber local.x) {
+		// sqrt(2)
+		local.SQRT_2 = 1.4142135623730951;
+
+		// known values, how convenient
+		if(local.x == 0.0)
+		{
+			local.result = 0.0;
+		}
+		else if(local.x == 1.0)
+		{
+			local.result = 1.0;
+		}
+		else if(local.x == 2.0)
+		{
+			local.result = local.SQRT_2;
+		}
+		else if (local.x < 0.0)
+		{
+			// error
+			conprintf "\n ~^~^~^~ FATAL_ERROR[LIB::math.slib::Sqrt2]: sqrt(" local.x ") has no real solution! ~^~^~^~ \n\n";
+			local.result = 0.0;
+		}
+		else
+		{
+			// reduce x to [1,2] domain
+			local.wx = local.x;
+			local.steps = 0;
+			local.dividesteps = 0;
+		
+			// reduce below 2.0
+			while (local.wx > 2.0)
+			{
+				local.wx = 0.5 * local.wx;
+				local.steps++;
+			}
+		
+			// increase above 1.0
+			while(local.wx < 1.0)
+			{
+				local.wx = 2.0 * local.wx;
+				local.dividesteps++;
+			}
+		
+			// evaluate in [1,2] domain
+			if(local.wx == 1.0)
+			{
+				local.eval = 1.0;
+			}
+			else if (local.wx == 2.0)
+			{
+				local.eval = local.SQRT_2;
+			}
+			else
+			{
+				// approximation
+				local.EVALSLOPE = 0.4267766953;
+				local.EVALMOD = 1.224744871 - 1.51 * local.EVALSLOPE;
+				local.eval = local.EVALSLOPE * local.wx + local.EVALMOD;
+			}
+		
+			// multiply back to original domain
+			for(local.i = 1; local.i <= local.steps; local.i++)
+			{
+				local.eval = local.eval * local.SQRT_2;
+			}
+		
+			// divide back to original domain
+			for(local.i = 1; local.i <= local.dividesteps; local.i++)
+			{
+				local.eval = local.eval / local.SQRT_2;
+			}
+	
+			// correct until required accuracy has been reached
+			local.MAXREFINEMENTSTEPS = 2;
+
+			for(local.i = 1; local.i <= local.MAXREFINEMENTSTEPS; local.i++)
+			{
+				local.fact = local.eval * local.eval / local.x;
+				local.eval = local.eval / (waitthread sqrt1 local.fact);
+			}
+		
+			local.result = local.eval;
+		}
+	}
+end local.result;
+
+/** -----------------------------------------------------------------------------------
+*** 								Written by veers								***
+------------------------------------------------------------------------------------ */
+// Bakhshali approximation
+// indian mathematical manuscript
+// by veers
+Sqrt3 local.x:
+	if (local.x == NIL) {if (group.x != NIL) {local.x = group.x;} else {waitthread __Error1 "Sqrt3"; end;}};
+	if (waitthread IsNumber local.x) {
+		if (local.x < 0.0)
+			end 0.0;
+
+		local.num = local.x;
+
+		// reducing below the accurate squares
+		while ( local.num * local.num > local.x )
+		local.num = 0.1 * local.num;
+
+		local.num_add = local.num;
+
+		// increasing to the environment of the accurate squares
+		while ( local.num * local.num < local.x )
+			local.num += local.num_add;
+
+		local.num -= local.num_add;
+
+		// more accurate approximation to the real squares
+		while ( local.num * local.num < local.x )
+			local.num += 0.1 * local.num_add;
+
+		local.S = local.x;
+		local.N = local.num;
+		local.divisor = 4.0 * local.N * local.N * local.N + 4.0 * local.N * local.S;
+
+		if (local.divisor == 0.0)
+			end 0.0;
+		else
+		{
+			// Bakhshali approximation
+			local.result = (local.N * local.N * local.N * local.N + 6.0 * local.N * local.N * local.S + local.S * local.S) / local.divisor;
+		}
+	}
+end local.result;
+
+__Error1 local.func local.arg:
+	if !(local.arg) {
+		local.arg = "x <arg1>";
+	}
+	if (level.DEBUG) {
+		println "\n ~^~^~^~ FATAL_ERROR[LIB::math.slib::" local.func "]: number " local.arg " does not exist! ~^~^~^~ \n";
+	}
+end;

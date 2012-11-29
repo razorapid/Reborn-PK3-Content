@@ -1,0 +1,36 @@
+
+__ClassNames:
+	local.tmp["Listener"]				= 1
+	local.tmp["CameraManager"]			= 1
+	local.tmp["DM_Manager"]				= 1
+	local.tmp["Level"]					= 1
+	local.tmp["SimpleEntity"]			= 1
+	local.tmp["Entity"]					= 1
+	local.tmp["PathNode"]				= 1
+	local.tmp["SimpleArchivedEntity"]	= 1
+	local.tmp["ScriptModel"]			= 1
+	local.tmp["ScriptSlave"]			= 1
+	local.tmp["ScriptOrigin"]			= 1
+	//...
+end local.tmp;
+
+__ClassDefinitions:
+	local.tmp["PathNode"]				= "info_pathnode"	//spawning "PathNode" crashes the game within several seconds
+	local.tmp["ScriptModel"]			= "script_model"	//or "scriptmodel" or "ScriptModel"
+	local.tmp["ScriptSlave"]			= "script_object"	//or "ScriptSlave"
+	local.tmp["ScriptOrigin"]			= "script_origin"	//or "ScriptOrigin" or "scriptorigin"
+	//...
+end local.tmp;
+
+__TypeCoding:
+	local.tmp["int"] = 			"i";
+	local.tmp["float"] = 		"f";
+	local.tmp["bool"] = 		"b";
+	local.tmp["char"] =			"c";
+	local.tmp["string"] = 		"s";
+	local.tmp["const string"] = "s";
+	local.tmp["vector"] = 		"v";
+	local.tmp["const array"] = 	"a";
+	local.tmp["array"] =		"a";
+	local.tmp["listener"] =		"l";
+end local.tmp;

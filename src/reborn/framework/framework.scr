@@ -1,0 +1,493 @@
+/**
+ Medal of Honor: Allied Assault v1.12 REBORN  -  Morpheus Script
+ ================================================================
+ REBORN FRAMEWORK MAINSCRIPT; 			Multiplayer Bots 4.0 BETA 
+ ================================================================
+ BY Sor
+ VERSION 1.0 (30/10/2012)
+ =-------------------------------------------------------------=		
+ Copyright (c) 2008-2014  Lenny Knockx
+ All rights reserved.
+ =-------------------------------------------------------------=
+ Permission to use, copy, modify, and/or distribute this software 
+ for any purpose with or without fee is hereby granted, provided 
+ that the above copyright notice and this permission notice appear
+ in all copies.
+ ---------------
+ THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL 
+ WARRANTIES WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED 
+ WARRANTIES OF MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL 
+ THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT, OR 
+ CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM 
+ LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, 
+ NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR 
+ IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+ =-------------------------------------------------------------=
+ CONTACT: 	http://www.x-null.net/forums/member.php?185-Sor
+ WEBSITE: 	http://www.x-null.net | www.mohaairborne.co.cc
+ ================================================================
+*/
+/** SKETCH MODE: for reference & prefab purposes only */
+/********************************************************************************************************
+						I	N	I	T	I	A	L	I	Z	A	T	I	O	N
+******************************************************************************************************* */
+main:
+	conprintf "\nINFO[REBORN::framework.scr]: START INITIALIZATION PROCESS of REBORN Scripting Framework v1.0 BETA.\n\n";
+	
+	/*********************************** */
+	level.EVENT = 5;		/*PrePrespawn*/
+	waitthread PrePrespawn;
+	
+	/******************************** */
+	level waittill prespawn;
+	level.EVENT = 4;		/*Prespawn*/
+	if (level.DEBUG) {
+		conprintf "INFO[REBORN::framework.scr]: from loader to prespawn: " (level.time - game.SCRTIME) " seconds; clocked internally at " level.time ".\n";
+	}
+	game.SCRTIME = level.time;
+
+	/***************************** */
+	level waittill spawn;
+	level.EVENT = 3;		/*Spawn*/
+	if (level.DEBUG) {
+		conprintf "INFO[REBORN::framework.scr]: from prespawn to spawn: " (level.time - game.SCRTIME) " seconds; clocked internally at " level.time ".\n";
+	}
+	game.SCRTIME = level.time;
+
+	/********************************* */
+	level waittill postthink;
+	level.EVENT = 2;		/*Postthink*/
+	if (level.DEBUG) {
+		conprintf "INFO[REBORN::framework.scr]: from spawn to postthink: " (level.time - game.SCRTIME) " seconds; clocked internally at " level.time ".\n";
+	}
+	game.SCRTIME = level.time;
+
+	/*********************************** */
+	level waittill playerstart;
+	level.EVENT = 1;		/*Playerstart*/
+	conprintf "INFO[REBORN::framework.scr]: from postthink to playerspawn: " (level.time - game.SCRTIME) " seconds; clocked internally at " level.time ".\n";
+	game.SCRTIME = level.time;
+
+
+	// $Map has hacked and simulated the map/rotation system by now, so gametype is by default 4=obj (when no players) and 2=tdm (when players). Handle by default roundstart:
+	waitthread Waittill_RoundStart;
+	level.EVENT = NIL;		/*no more level events*/
+	conprintf "INFO[REBORN::framework.scr]: from playerspawn to roundstart: " (level.time - game.SCRTIME) " seconds; clocked internally at " level.time ".\n";
+	
+	// SCRTIME has been saved in $System.time by now:
+	game.SCRTIME = NIL;
+
+	conprintf "\nINFO[REBORN::framework.scr]: FINISHED INITIALIZATION PROCESS of REBORN Scripting Framework " $System.version ".\n\n";
+end;
+
+/********************************************************************************************************
+							P	R	E	-	P	R	E	S	P	A	W	N
+******************************************************************************************************* */
+/**
+	$System.Init() => by script & by console, preparations for framework startup next round are made, optionally this will instantly restart round/map/reload map or it will do nothing.
+	$System.Shutdown() => by script: reborn framework is unequivocally shutdown; by console, a warning is given and asks the admin to re-enter the command to proceed; make script appender add if() (checking one bool) to most internal threads and indent its contents by one more.
+	$System.LogMode()	=> no args:get; args:set
+	$System.DisableMod()
+	$System.EnableMod()
+	$System.DisableModComp()
+	$System.EnableModComp()
+	$System.mods => registered mods with their scripts.
+	$System.Runtime()	=> returns amount of minutes/hours the mod is running (or playing maps).
+	$System.version	=> framework version
+	$System.patch => v1.12 patch version
+	$System.ThisScript() => returns path of scriptfile of the ScriptThread this function was called from; path can only be returned if __path/__info is executed successfully. local.result = (parm.previousthread waitthread __path)
+							If NIL, then return NIL. $System.Synchronizing/$System.Maintenance can fix this or a willing/diligent modder.
+	$System.Help. => functions for printing help and info about reborn framework
+	// Server goes into maintenance mode, any user currently ingame, save for clientAdmins & rcon admin, is automatically kicked with moh errormessage 'Server is currently undergoing maintenance/synchronization. 
+	// REBORN Framework System Maintenance/Synchronization; ETA => XX:XX left', and consequently anyone who tries to connect during maintenance/synchronization.
+	$System.Synchronize() => initiates protocol that systematically runs through all detected maps, performing basic scanning and analyzing tasks and switching immediately to the next until all maps have been
+							scanned. This ranges from bsp-read, dimensions-calc, updates to cache, [map trace?], mapscript analysis... Only process where map's precache is checked against the entities found in bsp and
+							mapscript; it is accordingly updated. At the end it will go back to first map and start analysing all found scripts and updating the cache. Custom addons & hooks are scanned/analyzed.
+							Lastly, all internal scripts are MD5 checked. Advanced script analysis: anticipate registrations and events that need caching and do it beforehand so the registration takes little resources as
+							possible, updates scriptfiles with standard __info, parses mod config........... Keep tabs on things in seperate log and automatically shutdown running game instance when done. 
+	$System.Maintenance() => Flags processing for which subtasks of $System.Synchronize() to do and execute them.
+	$System.Schedule() => updates/sets (auto- or )scheduling for maintenance/synchro 
+	$System.Power() => override system power setting which results in the termination and deactivation (or possible re-activation) of background activity (scanning, parsing, logging) as well as other low priority internal functions
+						LOSS OF FUNCTIONALITY INEVITABLE.
+	$System.Tree()	=> reads main/ and all subdirectories and outputs object array with paths being dimensions and files entries.
+	$System.tree	=> if NIL, execute $System.Tree()
+	$System.Preferences. => contains all public/customizable settings for framework
+*/
+PrePrespawn:
+	if ( !($System) && waitthread IsValidFramework) {	//locate & obtain this file's MD5 hash, extract 3 encrypted MD5 hash (i.e. double encryption) secretely scattered throughout this framework; 
+														//if those encryptions do not match up, abort; if they match up, decrypt them using this MD5 hash, if 1 of decryptions doesn't match, abort.
+														//use script obfuscator on encrypt & decrypt scripts???? Also renaming threadlabel, removing comments & making every variable used 1 char short.
+		// Initialize the Root class.
+		waitthread InitializeSystem;
+		// Initialize necessary libraries & functions..
+		thread InitializeLibraries;	
+		// Search, parse, cache & execute if necessary.
+		thread HandleModConfig; 	
+	} else {
+		// TERMINATE FRAMEWORK (use scriptthread ent of main thread?); internal thread watcher, and keeps going even when framework is disabled?
+	}
+	
+	// Goto Prespawn..
+	level waittill prespawn
+	thread Prespawn;
+end;
+
+//time saved at end of each round/map, that indicates the total running time of the framework. 
+//This cvar is purged when the system is forcefully shut down. This cvar is reset when timestamp
+//is 24h off when compared to the last record timestamp (seperated from actual time with ;-symbol
+//while being in cvar "frameworktime"??)
+Runtime:
+	local.totalTime = waitthread FrameworkTime;
+	
+	if (local.totalTime && typeof local.totalTime == "float") {
+		local.result = (waitthread $Time.ToFloatSeconds 0 $Sever.lastTimeStamp[1]) + (level.time - $System.time);
+	} else {
+		local.result = level.time - $System.time;
+	}
+end local.result;
+
+/// Firewall? Only allow calls from internal framework scripts? => security.func; checks local.data["scriptfile"] == 1 and returns true or false
+
+//CVAR frameworkTime:
+FrameworkTime:
+	// GetInternalCV() will check if specified cvar is a registered internal cvar, then
+	// its associated parseThread will be executed and it will supply this function with
+	// output data.
+	// GetCVar() will return getcvar command output, but if a registered parseThread was 
+	// associated with the specified cvar, then its output will be returned. Vice versa
+	// for SetCVar() and SetInternalCV() functions. CVars can also be associated with
+	// compileThreads that must return string types.
+	local.timeData = waitthread $CVar.GetInternalCV "frameworkTime";
+	
+	if (local.timeData.size > 1) {
+		// $Time.StandardFormat() function converts all other supported timetypes to HH::MM::SS. 1 is decimal seconds.
+		// You might be wondering why save frameworkTime as decimal seconds? If the server runs for too long won't
+		// the number no longer fit inside an integer? MoHAA uses 32-bit signed integers which has a positive maximum
+		// value of 2 147 483 647 or (2^31)-1. Thus the server has to run the framework for 2147483647 seconds before
+		// we run out of space in our integer. If we convert this to years, we get 68.05110380523 years. Safe enough.
+		local.totalTime = waitthread $Time.StandardFormat 1 local.timeData[0];
+		$Sever.lastTimeStamp = local.timeData[1][0]::local.timeData[1][1];
+		// $Date.CompareCurrent <type format;0=standard> compares specified date with current date and returns the 
+		// difference in seconds.
+		local.noPlayTime = waitthread $Date.CompareCurrent 0 (local.stamp[2]::local.stamp[1]);
+		$Server.abscenceTime = local.noPlayTime - level.time - 90/*average map loading time*/;
+		//...
+	
+		// $Time.ToFloatSeconds() function converts all supported timetypes to X,X seconds. 0 is standard time format.
+		local.result = waitthread $Time.ToFloatSeconds 0 $Sever.lastTimeStamp[1];
+	} else if (local.timeData.size > 0) {
+	
+	// First time boot-up detected ;-)
+	} else {
+	
+	}
+end local.result;
+
+// CONSTANTS SHOULD BE IN CAPS
+InitializeSystem:
+	// Create root class object:
+	game.Root = local CreateListener; 
+	// It shall be named 'System'!
+	game.Root targetname "System";
+	
+	// System has officially booted at <internal level timestamp>.
+	game.Root.time = level.time;
+	
+	// System is root class.
+	game.Root.isRoot = true;
+	game.Root.parent = NIL;
+	
+	// 'System' specifics:
+	game.Root.fullPath = 	"reborn/framework/framework.scr";
+	game.Root.filePath = 	"reborn/framework/";
+	game.Root.fileName = 	"framework.scr";
+	game.Root.initThread = 	"main";
+	// Root-specific:
+	game.Root.loader = 		"reborn/reborn_loader.scr";
+	
+	// System property size:
+	game.Root.psize = 100;
+	// System method size:
+	game.Root.msize = 25;
+	
+	// These settings can obviously be hacked to make them re-route functions, needing to copy the entire folder to make it work.
+	game.Root.cache = 			"reborn/framework/cache/";
+	game.Root.cmPath = 			"reborn/custom/";
+	game.Root.libPath = 		"reborn/framework/lib/";
+	game.Root.evPath = 			"reborn/framework/event/";
+	game.Root.dbPath = 			"reborn/framework/dev/debug/";
+	game.Root.entPath = 		"reborn/framework/map/ents/";
+	game.Root.hudPath = 		"reborn/framework/HUD/";
+	game.Root.svPath = 			"reborn/framework/server/";
+	game.Root.clPath = 			"reborn/framework/client/";
+	game.Root.devPath =	 		"reborn/framework/dev/";
+	game.Root.mPath = 			"reborn/framework/map/";
+	game.Root.gPath = 			"reborn/framework/game/";
+	game.Root.setPath = 		"reborn/framework/settings/";	
+	
+	// define crucial values
+	game.Root.PULSE = 0.05					//assuming server framerate is 20; need to use sv_framerate and if clientside patch arrives, also cg_framerate
+	game.Root.PULSE_LOWPRIOR = 1.0;			//speed for low priority loops.
+	game.Root.CAP_VAR = 1024;
+	game.Root.CAP_HASHVAR = 1024;
+	game.Root.CAP_ARRAYVAR = 4096;
+	game.Root.CAP_STRINGBUFFER = 522234; 	//about half a MiByte, or 522 234 characters.
+	game.Root.CAP_RENDERED_ENTS = 1024 - 1; //free edicts cap
+	game.Root.CAP_INVISIBLE_ENTS = 8192; 	//arbitrary user-defined cap on invisible, simple ents.. no one really knows what the real limit is
+	game.Root.renderedEntsCnt = 0; 			//check mapregister or search (in background!) in bsp for complex entities and update mapregister with data
+											//waitthread $Map.GetMapBSPData(<mode:extract/count data> <flags: 1=world;2=info;4=renderedEnts;8=simpleEnts;16=allEnts;32=doors;64=windows;128=(path)nodes;256=spawnpoints;512=ladder info;1024=targetnamedEnts...> 
+											//[INT output:all info or just the origin] [STRING specific searchStr?]) 
+	game.Root.invisibleEntsCnt = 1; 		//1 for $System by default: check mapregister or search bsp (in background!) for simple entities and update mapregister with data
+
+	// Reads settings directly into game.Root.Preferences (as an object array: .theme["setting"] = property); 
+	$System waitthread #DefineClass "Preferences" ($System.setPath + "handler.scr"); game.Root.Preferences = $Preferences;
+	
+	// Initialize Entity class & start entity manager.. $Entity.data & $Entity.data2 can now be used!
+	$System waitthread #DefineClass "Entity" ($System.entPath + "entity.slib"); game.Root.Entity = $Entity;
+	
+	// immediately put settings to the test by initializing the debug system & functions
+	if (level.DEBUG) {$System waitthread #DefineClass "Debug" ($System.setPath + "debug.slib"); game.Root.Debug = $Debug;};
+	
+	// Initialize game & levelmap:
+	$System waitthread #DefineClass "Game" ($System.gPath + "game.slib"); game.Root.Game = $Game;
+	$System waitthread #DefineClass "Map" ($System.mPath + "map.slib"); game.Root.Map = $Map;
+	$System waitthread #DefineClass "Server" ($System.svPath + "server.slib"); game.Root.Server = $Server;
+	
+	// Going to be needing this soon
+	// $System.Preferences=>funcPrefix = true then $Library sets prefix to "_"
+	$System waitthread #DefineClass "Library" ($System.filePath + "libraries.scr"); game.Root.Library = $Library;
+	$Library waitthread #DefineClass "Math" ($System.libPath + "math.slib"); $Library.Math = $Math;
+	
+	// Start defining Internal System Settings..
+	thread DefineInternalSystemSettings;
+end;
+
+InitializeLibraries:
+	// Define most important/fundamental library classes.
+	$Library waitthread #DefineClass "String" ($System.libPath + "string.slib"); $Library.Str = $Str;
+	$Library waitthread #DefineClass "File" ($System.libPath + "file.slib"); $Library.File = $File;
+	$Library waitthread #DefineClass "Array" ($System.libPath + "array.slib"); $Library.Array = $Array;
+	$Library waitthread #DefineClass "Parse" ($System.libPath + "parse.slib"); $Library.Parse = $Parse;
+	$Library waitthread #DefineClass "Write" ($System.libPath + "write.slib"); $Library.Write = $Write;
+	$Library waitthread #DefineClass "Compile" ($System.libPath + "compile.slib"); $Library.Compile = $Compile;
+	$Library waitthread #DefineClass "Cache" ($System.cache + "mainhandler.scr"); $Library.Cache = $Cache;
+	// ...
+	
+	level waittill prespawn
+	// ...
+	
+	level waittill spawn
+	$System waitthread #DefineClass "HUD" ($System.hudPath + "HUD.slib"); game.Root.HUD = $HUD;
+	// ...
+	
+	level waittill postthink
+	$System waitthread #DefineClass "Client" ($System.clPath + "client.slib"); $Library.Client = $Client;
+	// ...
+end;
+
+// Extend parm. functionality in accordance with framework's functions; should classes define parm.vars themselves?
+DefineFrameworkParm:
+	//parm.
+end; 
+
+DefineInternalSystemSettings:
+	// temp!
+	level.DEBUG = 3;				//temp: either $System.debug or $Debug.mode!
+	$System.mode = true;			//0=client mode; 1=server mode; this is the primary setting to make certain libraries and functions operate with/without custom/client-side material. Also important for HUD system.
+									//New mods/gametypes/libraries need to support this for it to work, not just handling the var but providing an alternative functionality that works server-side. 
+									//This is more often than not a estethic thing and will disappear once the client patch is released to the public.
+									//Detect clienside? (Client 0 with ping 0) or serverside (time between waittill spawn and waittill playerstart > 3sec)? System.hook_mode can override this.
+									//OR check for "connecting to...", "starting MOHAA_server.exe" in start qconsole as well.
+	$System.hooks = true;			//Scripts/functions that ADD/REPLACE public functions existing in internal library classes, overlapping script content (override) will cause the first candidate to be chosen.
+	$System.overrides = false; 		//Scripts/functions that OVERRIDES whole internal libaries/classes files (usually to tinker with internal functions)
+	
+	// only for the pros who really have to... this should not be included in the official documentation. 
+	$System.forceOverride = false;	//this option turns on system overriding. This will forceload an internal library version that would not be loaded otherwise. (It has a special setting set in __info).
+	$System.forceHooking = false;	//this option turns on system hooking. This will forceload a hook-script that would not be loaded otherwise. 
+	
+	// system
+	$System.status = true;					// bool(true) - initializing and/or running; NIL/false - deactivated/shutdown
+	$System.powersave = false;				// bool(true) - powersaving on which puts extra delay on intensive low priority/background threads & several other background systems; bool(false) - powersaving off.
+	$System.powerPulseIncr = $System.PULSE;	// addition to loop delays due to powersaving
+	$System.stateFile = "mike.st"			// framework loads its own statefile.
+	$System.stateFileTorso = "mike_torso.st" //
+	$System.stateFileLegs = "mike_legs.st"	//
+	//...specifics like how many scripts, threads the framework $System has
+	
+	// security settings (still needed? or dumbed-down version for user?)
+	$System.encryption = true; 				//turns de-/encryption on (background sys) or off: checks and updates will be ignored
+	$System.encryptionDouble = true; 		//turns double encryption on. 
+	$System.decryption = 0;					//speed of decryption: 0 - fastest, 1 - reasonable, 2 - low priority
+	$System.decryptionDouble = true; 		//encryptionDouble must be enabled, this means the string is first encrypted by the standard means and then encrypted by itself, and so can only be unlocked by itself  
+	$System.encryptSensitiveData = true;	//whether or not to encrypt sensitive data (like IPs, player data, admin data...), they may also be double-encrypted.
+	$System.MD5Secure = true;				//false: secure most important threads with MD5 checks (entity, debug, server, game, map, framework...), true: extend the MD5 check to all internal framework files
+	$System.MD5Precache = true;				//whether or not to MD5 protect the global/dmprecache.scr script
+end;
+
+
+/* Create classes here and __init threads of main classes are executed.
+They will receive it as 'self' and should store it in a level variable.
+Seperate init thread for $System/root class.
+*/
+/**
+Every function, public or private/internal, that registers/saves data or define/sets something like datastructs/variables/settings has the prefix # as function name.
+Each of these functions has to have a cached version with prefix #@. The cache version requires an addition scriptpath (of caller) argument. If no scriptpath is
+given, the __info thread of caller is called. If that is not found, abort the sequence. You can also overload it with cache-specific options. The data will be 
+initiated right now and saved in $LocalStorage to be written to appropriate file during intermission. What also happens during intermission is the commands, that
+called the caching function are traced in their respective scripts, are surgicaly removed (check ; first then \n). (OR USER NEED TO THOSE FUNCTIONS ONLY IF 
+$LocalStorage TURNS UP NOTHING.) That way, next round, no redundant cache request will occur and the data can be loaded from $LocalStorage at all times from then on.
+
+Periods like Pre-Prespawn to Spawn and Intermission are the only times the framework can run post- and pre-processing sequences and update/self-organise itself during a map.
+*/
+// only for custom classes...?
+#@DefineClass local.name local.path local.init local.scriptPath local.cacheFormat local.cacheFile:
+
+end local.result;
+
+// filePath -> no filename; filename -> evident; fullpath -> filepath+filename
+#DefineClass local.name local.path local.dontInit:
+	/*Error & Exception Handling*/
+	if !(local.name) {
+		if (level.DEBUG) {
+			conprintf "\n ~^~^~^~ FATAL_ERROR[REBORN_FRAMEWORK::#DefineClass]: No class ent targetname <arg1> specified! ~^~^~^~ \n\n"; 
+		}
+		end false;
+	} if !(local.path) {
+		if (level.DEBUG) {
+			conprintf "\n ~^~^~^~ FATAL_ERROR[REBORN_FRAMEWORK::#DefineClass]: No class path <arg2> specified! ~^~^~^~ \n\n"; 
+		}
+		end false;
+	}
+	
+	// Assumes user is not an idiot and is only set to false if things go wrong.
+	local.result = true;
+	
+	// Create SimpleArchivedEntity to store class in. This particular entity class is primitive 
+	// enough to not contribute to the free edicts cap, yet advanced enough to be targetnamed,
+	// making it a perfect object datastructure.
+	if !($(local.name)) {
+		local.class = local CreateListener;
+		local.class targetname local.name;
+	
+		// Increment invisible/simple entities counter.
+		game.Root.iEntsCnt++
+	
+		// Check if argument 'path' also contains a threadlabel specification.
+		if (typeof local.path == "const array") {
+			local.class.filePath = local.path[1];
+			// Obtains from given path, the filename only.
+			local.class.fileName = waitthread __GetFilename local.path[1];
+			
+			local.class.initThread = local.path[2];
+		} else {
+			local.class.filePath = local.path;
+			// Obtains from given path, the filename only.
+			local.class.fileName = waitthread __GetFilename local.path;
+			
+			// Default initialization threadlabel;
+			local.class.initThread = "__init";	
+		}
+		
+		// The parent class of which this is subclass.
+		if (self) {
+			local.class.parent = self.targetname;
+		// This class appears to be a root class.
+		} else { 
+			local.class.parent = "System";
+		}
+		
+		// $System is the one and only root class.
+		local.class.isRoot = false;
+		
+		// .msize designates the 'Method Size' (i.e. number of public methods) of the class.
+		local.class.mSize = 0;
+		// .psize designates the 'Property Size' (i.e. number of properties) of the class.
+		local.class.pSize = 6;
+		
+		// TEMPORARY !!!!
+		local.class.fileMD5 = md5file local.class.fileName;
+		
+		// If necessary, this will automatically execute the class' initialization thread
+		// and finalize this class' creation sequence.
+		if !(local.dontInit) {
+			local.class thread local.class.filePath::local.class.initThread;
+		}
+	} else {
+		if (level.DEBUG) {
+			conprintf "\n ~^~^~^~ FATAL_ERROR[REBORN_FRAMEWORK::#DefineClass]: Class entity \"" local.name "\" already exists! ~^~^~^~ \n\n"; 
+		}
+		local.result = !local.result;
+	}
+end local.result;
+
+__GetFilename local.path:
+	local.filename = "";
+	for (local.i = (local.path.size - 1); local.i >= 0; local.i--) {
+		if (local.path[local.i] == "/") {
+			for (local.j = local.i; local.j < local.path.size; local.j++) {
+				local.filename += string(local.path[local.j]);
+			}
+			break;
+		}
+	}
+end local.filename;
+
+/********************************************************************************************************
+									P	R	E	S	P	A	W	N
+******************************************************************************************************* */
+Prespawn:
+	
+
+end;
+
+/********************************************************************************************************
+										S	P	A	W	N
+******************************************************************************************************* */
+/// Listeners can now be spawned.
+Spawn:
+
+end;
+/********************************************************************************************************
+								P	O	S	T	T	H	I	N	K
+******************************************************************************************************* */
+Postthink:
+
+end;
+/********************************************************************************************************
+							P	L	A	Y	E	R	S	T	A	R	T
+******************************************************************************************************* */
+Playerstart:
+
+end;
+
+
+
+
+
+
+
+
+
+
+
+
+
+/** 
+functions => PascalCase
+vars & global vars => camelCase
+constant vars => CAPS
+filenames => lowercase (and underscores)
+*/
+/**
+	mod_config -> .ini in main/ there must be .pk3 with same name
+		=> mod -> mapspecific/all -> specified when the mod needs to be executed. Is implicitly dominant, while mod may run on every mod, its scripts/gametypes may not and likewise its scripts & gametypes will not run on maps when script is not activated
+			|=> scripts -> [mapspecific/all -> specifies availability; (if mapspecific) will not run on incompatible maps; can be deliberately disabled in maprotation]
+			|=> gametypes -> [mapspecific/all -> specifies availability; (if mapspecific) will not run on incompatible maps, can be deliberately chosen/disabled in maprotation]
+		(all -> mod/gametype can still decide on mapspecifics; gametypes are part of the mod, they cannot represent the mod as a whole)
+			|=> option to 'require' a certain version of one of the internal libraries and will not load when a version different from the specified version is loaded.
+	map_rotation -> chooses which gametypes & mods to load on which map, specific mods can be disabled on all or specific maps.
+		=> for bot4, slip in a maprotation ini/cfg that disables all mods except bot4, fill in a mod_config ini and make sure
+		=> bot4 will only use maprotation settings as default and will override those settings as it sees fit
+	event handler ->
+	..?
+*/

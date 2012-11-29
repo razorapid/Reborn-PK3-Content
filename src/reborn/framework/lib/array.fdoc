@@ -1,0 +1,3 @@
+// .fdoc format for documentation on framework script files & .hdoc for general (more user-friendly) documentation
+// This is both for easy reference but also to provide it live through the console. Copy&pasting a section of the 
+// official documentation will automatically deformat the text and make it ready for parsing. 

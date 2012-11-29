@@ -1,0 +1,14 @@
+// reads/reads&(de)compiles hud data
+// reads&parses ini, cfg files
+// reads/reads&(de)compiles tiki files
+// ...
+// reads/reads&(de)compiles data for entities based on input vars: minumum _thread and thread with flags (for the properties that need checking&compiling) 
+// reads&(de)compiles&stores data from bsp...
+// 		HEAVY DUTY PROCESS!
+// 		may want to start at end of bsp file and go backwards... search for map_time
+//		Once found, find data on ladders, doors (! alwaysway), worldspawn, spawnpoints etc..
+// 		Also find and add all bsp-spawned entities (with targetname) that are accounted for in free-edicts cap, to a global ent list. => used for entity detection via touch/vicinity (only solid ents are checked though)
+// 		count all bsp-spawned renderedEnts and invisibleEnts
+
+// func_parse => also functions to parse tiki files, config files...?
+// loadable presets? 

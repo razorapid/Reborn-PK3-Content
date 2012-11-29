@@ -1,0 +1,406 @@
+/**
+ Medal of Honor: Allied Assault v1.12 REBORN  -  Morpheus Script
+ ================================================================
+ STRING INFORMATION LIBRARY; 			Multiplayer Bots 4.0 BETA 
+ ================================================================
+ BY Sor
+ VERSION 1.1 (25/10/2012)
+ =-------------------------------------------------------------=		
+ Copyright (c) 2008-2014  Lenny Knockx
+ All rights reserved.
+ =-------------------------------------------------------------=
+ Permission to use, copy, modify, and/or distribute this software 
+ for any purpose with or without fee is hereby granted, provided 
+ that the above copyright notice and this permission notice appear
+ in all copies.
+ ---------------
+ THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL 
+ WARRANTIES WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED 
+ WARRANTIES OF MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL 
+ THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT, OR 
+ CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM 
+ LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, 
+ NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR 
+ IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+ =-------------------------------------------------------------=
+ CONTACT: 	http://www.x-null.net/forums/member.php?185-Sor
+ WEBSITE: 	http://www.x-null.net | www.mohaairborne.co.cc
+ ================================================================
+*/
+BadCharData:
+	local.hashArray = makeArray
+	"/"
+	"\\"
+	"?"
+	"%"
+	"*"
+	":"
+	"|"
+	"\""
+	">"
+	"<"
+	" "
+	endArray;
+end (waitthread global/bot4/func/func_array.scr::convertHashtoConstArray local.hashArray); //(waitthread $scr.func.convertHashtoConst local.hashArray)
+
+DecimalData:
+	local.hashArray = makeArray
+	"0"
+	"1"
+	"2"
+	"3"
+	"4"
+	"5"
+	"6"
+	"7"
+	"8"
+	"9"
+	endArray;
+end (waitthread global/bot4/func/func_array.scr::convertHashtoConstArray local.hashArray); //(waitthread $scr.func.convertHashtoConst local.hashArray)
+
+DecimalDataMasks:
+	local.tmp["0"] = 0;
+	local.tmp["1"] = 1;
+	local.tmp["2"] = 2;
+	local.tmp["3"] = 3;
+	local.tmp["4"] = 4;
+	local.tmp["5"] = 5;
+	local.tmp["6"] = 6;
+	local.tmp["7"] = 7;
+	local.tmp["8"] = 8;
+	local.tmp["9"] = 9;
+end local.tmp; //(waitthread $scr.func.convertHashtoConst local.hashArray)
+
+SafeCharData:
+	local.hashArray = makeArray
+	"a"       
+	"b"       
+	"c"        
+	"d"       
+	"e"       
+	"f"        
+	"g"       
+	"h"       
+	"i"        
+	"j"        
+	"k"       
+	"l"        
+	"m"      
+	"n"       
+	"o"       
+	"p"       
+	"q"       
+	"r"        
+	"s"        
+	"t"        
+	"u"       
+	"v"       
+	"w"       
+	"x"       
+	"y"       
+	"z"  
+	"A"  	
+	"B"  
+	"C"   
+	"D"   
+	"E"   
+	"F"   
+	"G"   
+	"H"   
+	"I"    
+	"J"    
+	"K"   
+	"L"    
+	"M"  
+	"N"   
+	"O"   
+	"P"   
+	"Q"   
+	"R"    
+	"S"   
+	"T"   
+	"U"   	
+	"V"  
+	"W"  
+	"X"  
+	"Y"   
+	"Z" 
+	"0"
+	"1"
+	"2"
+	"3"
+	"4"
+	"5"
+	"6"
+	"7"
+	"8"
+	"9"
+	"."
+	"-"
+	"_"
+	";"
+	endArray;
+end (waitthread global/bot4/func/func_array.scr::convertHashtoConstArray local.hashArray); //(waitthread $scr.func.convertHashtoConst local.hashArray)
+
+LowerCaseData:
+	local.hashArray = makearray
+	"a"          
+	"b"          
+	"c"         
+	"d"         
+	"e"          
+	"f"          
+	"g"         
+	"h"         
+	"i"          
+	"j"          
+	"k"         
+	"l"         
+	"m"         
+	"n"   
+	"o"   
+	"p" 
+	"q" 
+	"r"
+	"s"
+	"t"
+	"u" 
+	"v" 
+	"w" 
+	"x" 
+	"y"
+	"z"
+	endarray
+end (waitthread global/bot4/func/func_array.scr::convertHashtoConstArray local.hashArray); //(waitthread $scr.func.convertHashtoConst local.hashArray)
+
+UpperCaseData:
+	local.hashArray = makearray
+	"A"
+	"B"
+	"C"
+	"D"
+	"E"
+	"F"
+	"G"
+	"H"
+	"I"
+	"J"
+	"K"
+	"L"
+	"M"
+	"N"
+	"O"
+	"P"
+	"Q"
+	"R"
+	"S"
+	"T"
+	"U"
+	"V"
+	"W"
+	"X"
+	"Y"
+	"Z"
+	endArray
+end (waitthread global/bot4/func/func_array.scr::convertHashtoConstArray local.hashArray); //(waitthread $scr.func.convertHashtoConst local.hashArray)
+
+TitleExceptions:
+	local.hashArray = makeArray
+	"for"
+	"and"
+	"nor"
+	"but"
+	"or"
+	"yet"
+	"so"
+	"both"
+	"either"
+	"neither"
+	"because"
+	"if"
+	"after"
+	"when"
+	"although"
+	"while"
+	"of"
+	"to"
+	"in"
+	"on"
+	"with"
+	"as"
+	"by"
+	"at"
+	"from"
+	"the"
+	"a"
+	"an"
+	endArray;
+end (waitthread global/bot4/func/func_array.scr::convertHashtoConstArray local.hashArray); //(waitthread $scr.func.convertHashtoConst local.hashArray)
+
+CharData local.selection:
+	// lowercase -> UPPERCASE
+	if ((local.selection == NIL) || (local.selection == 0)) {
+		local.tmp["a"] = "A";
+		local.tmp["b"] = "B";
+		local.tmp["c"] = "C";
+		local.tmp["d"] = "D";
+		local.tmp["e"] = "E";
+		local.tmp["f"] = "F";
+		local.tmp["g"] = "G";
+		local.tmp["h"] = "H";
+		local.tmp["i"] = "I";
+		local.tmp["j"] = "J";
+		local.tmp["k"] = "K";
+		local.tmp["l"] = "L";
+		local.tmp["m"] = "M";
+		local.tmp["n"] = "N";
+		local.tmp["o"] = "O";
+		local.tmp["p"] = "P";
+		local.tmp["q"] = "Q";
+		local.tmp["r"] = "R";
+		local.tmp["s"] = "S";
+		local.tmp["t"] = "T";
+		local.tmp["u"] = "U";
+		local.tmp["v"] = "V";
+		local.tmp["w"] = "W";
+		local.tmp["x"] = "X";
+		local.tmp["y"] = "Y";
+		local.tmp["z"] = "Z";
+	}
+	// UPPERCASE -> lowercase
+	if ((local.selection == NIL) || (local.selection == 1)) {
+		local.tmp["A"] = "a";
+		local.tmp["B"] = "b";
+		local.tmp["C"] = "c";
+		local.tmp["D"] = "d";
+		local.tmp["E"] = "e";
+		local.tmp["F"] = "f";
+		local.tmp["G"] = "g";
+		local.tmp["H"] = "h";
+		local.tmp["I"] = "i";
+		local.tmp["J"] = "j";
+		local.tmp["K"] = "k";
+		local.tmp["L"] = "l";
+		local.tmp["M"] = "m";
+		local.tmp["N"] = "n";
+		local.tmp["O"] = "o";
+		local.tmp["P"] = "p";
+		local.tmp["Q"] = "q";
+		local.tmp["R"] = "r";
+		local.tmp["S"] = "s";
+		local.tmp["T"] = "t";
+		local.tmp["U"] = "u";
+		local.tmp["V"] = "v";
+		local.tmp["W"] = "w";
+		local.tmp["X"] = "x";
+		local.tmp["Y"] = "y";
+		local.tmp["Z"] = "z";
+	}
+end local.tmp;
+
+ASCIIData:
+	local.tmp[2] = "STX";
+	local.tmp[3] = "ETX";
+	local.tmp[9] = "\t";
+	local.tmp[10] = "\n";
+	local.tmp[13] = "CR"
+	local.tmp[27] = "ESC";
+	
+	local.tmp[32] = " ";
+	local.tmp[33] = "!";
+	local.tmp[34] = "\"";
+	local.tmp[35] = "#";
+	local.tmp[36] = "$";
+	local.tmp[37] = "%";
+	local.tmp[38] = "&";
+	local.tmp[39] = "'";
+	local.tmp[40] = "(";
+	local.tmp[41] = ")";
+	local.tmp[42] = "*";
+	local.tmp[43] = "+";
+	local.tmp[44] = ",";
+	local.tmp[45] = "-";
+	local.tmp[46] = ".";
+	local.tmp[47] = "/";
+	local.tmp[48] = "0";
+	local.tmp[49] = "1";
+	local.tmp[50] = "2";
+	local.tmp[51] = "3";
+	local.tmp[52] = "4";
+	local.tmp[53] = "5";
+	local.tmp[54] = "6";
+	local.tmp[55] = "7";
+	local.tmp[56] = "8";
+	local.tmp[57] = "9";
+	local.tmp[58] = ":";
+	local.tmp[59] = ";";
+	local.tmp[60] = "<";
+	local.tmp[61] = "=";
+	local.tmp[62] = ">";
+	local.tmp[63] = "?";
+	
+	local.tmp[64] = "@";
+	local.tmp[65] = "A";
+	local.tmp[66] = "B";
+	local.tmp[67] = "C";
+	local.tmp[68] = "D";
+	local.tmp[69] = "E";
+	local.tmp[70] = "F";
+	local.tmp[71] = "G";
+	local.tmp[72] = "H";
+	local.tmp[73] = "I";
+	local.tmp[74] = "J";
+	local.tmp[75] = "K";
+	local.tmp[76] = "L";
+	local.tmp[77] = "M";
+	local.tmp[78] = "N";
+	local.tmp[79] = "O";
+	local.tmp[80] = "P";
+	local.tmp[81] = "Q";
+	local.tmp[82] = "R";
+	local.tmp[83] = "S";
+	local.tmp[84] = "T";
+	local.tmp[85] = "U";
+	local.tmp[86] = "V";
+	local.tmp[87] = "W";
+	local.tmp[88] = "X";
+	local.tmp[89] = "Y";
+	local.tmp[90] = "Z";
+	local.tmp[91] = "[";
+	local.tmp[92] = "\\";
+	local.tmp[93] = "]";
+	local.tmp[94] = "^";
+	local.tmp[95] = "_";
+	
+	local.tmp[96] = "`";
+	local.tmp[97] = "a";
+	local.tmp[98] = "b";
+	local.tmp[99] = "c";
+	local.tmp[100] = "d";
+	local.tmp[101] = "e";
+	local.tmp[102] = "f";
+	local.tmp[103] = "g";
+	local.tmp[104] = "h";
+	local.tmp[105] = "i";
+	local.tmp[106] = "j";
+	local.tmp[107] = "k";
+	local.tmp[108] = "l";
+	local.tmp[109] = "m";
+	local.tmp[110] = "n";
+	local.tmp[111] = "o";
+	local.tmp[112] = "p";
+	local.tmp[113] = "q";
+	local.tmp[114] = "r";
+	local.tmp[115] = "s";
+	local.tmp[116] = "t";
+	local.tmp[117] = "u";
+	local.tmp[118] = "v";
+	local.tmp[119] = "w";
+	local.tmp[120] = "x";
+	local.tmp[121] = "y";
+	local.tmp[122] = "z";
+	local.tmp[123] = "{";
+	local.tmp[124] = "|";
+	local.tmp[125] = "}";
+	local.tmp[126] = "~";
+end local.tmp;

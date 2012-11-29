@@ -1,0 +1,2145 @@
+/**
+ Medal of Honor: Allied Assault v1.12 REBORN  -  Morpheus Script
+ ================================================================
+ STRING FUNCTIONS LIBRARY; 				Multiplayer Bots 4.0 BETA 
+ ================================================================
+ BY Sor	WITH THANKS TO Elgan
+ VERSION 1.4 (30/10/2012)
+ =-------------------------------------------------------------=		
+ Copyright (c) 2008-2014  Lenny Knockx
+ All rights reserved.
+ =-------------------------------------------------------------=
+ Permission to use, copy, modify, and/or distribute this software 
+ for any purpose with or without fee is hereby granted, provided 
+ that the above copyright notice and this permission notice appear
+ in all copies.
+ ---------------
+ THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL 
+ WARRANTIES WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED 
+ WARRANTIES OF MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL 
+ THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT, OR 
+ CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM 
+ LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, 
+ NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR 
+ IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+ =-------------------------------------------------------------=
+ CONTACT: 	http://www.x-null.net/forums/member.php?185-Sor
+ WEBSITE: 	http://www.x-null.net | www.mohaairborne.co.cc
+ ================================================================
+*/
+/* TASKS:
+	VerifyFormat => rewrite!! (all args in one array & check for stringtype)
+				 => arguments: string prefix suffix args[0] args[1] args[1] ... args[X<12]
+					=> all arguments must be of stringtype (incl. char); if string=NIL, abort; if args.size <= 0, abort;
+					=> prefix is the optional prefix that must be present, set NIL to disable
+					=> args[0] is the seperator that must be present at least once, or if there are pairs, behind last pair block symbol
+					=> suffix is the optional prefix that must be present, set NIL to disable
+					=> args[0<X<11] with X being any arg but the first are the optional format arguments. they can exist of only 1 char or esc sequence.
+					
+					If argument ends in ":s" (OR if arg size is 2 because of const array arg::"n") then it is treated as a seperator.
+					Char is check on a pair ({}[]()<> => opposite of input is determined; if not a bracket, the next instance of that char will be 
+					treated as closing bracket). The argument right after the pair is treated as seperator inside it (NIL=> disable). 
+					If pair seperator is a pair as well, the next arg is the seperator inside both pairs and so on...unless second pair is designated with ":s" then
+					it is treated as a pair and as the seperator for the first pair while the next argument will be treated as the seperator for the second pair.
+					Obviously there doesn't have to be a pair seperator, setting NIL before next pair disables it by default. Pairs are 'blocked' when the are
+					in subsequent order. Pair groups are seperated by the main seperator, and avoid invalid pair branching. Non-pair arguments are searched for in
+					the predetermined order (based on all arguments) in the specified string. (=> or just you know :n to pair to designate that it has no seperator)
+					Uneven pairs, missing pairs (if detected), no main seperator... all cause terminate the sequence and returns false. 
+					
+					/'* *'/ pair is found, its contents will be skipped. Arguments being a const array of 2 different arguments are treated as custom pairs.
+					arg[1] = str to find. MAX 3 chars & if it consists of 2 arguments (array with [0] & [1]) then they are treated as a pair if designated 'p'
+					arg[2] = designator. "s"=seperator; "p"=pair; "a"=prefix; "z"=suffix; "q"=pair seperator; 
+				=> edit original VerifyFormat to only verify filepaths (1) and filenames (2) and rename it to VerifyPath
+	write FormatInt <int> <scientific?> <#chars align> and FormatFloat <float> <digits> <#chars align>
+		(C) Currency: . . . . . . . . ($123.00)
+		(D) Decimal:. . . . . . . . . -123
+		(E) Scientific: . . . . . . . -1.234500E+002
+		(F) Fixed point:. . . . . . . -123.45
+		(G) General:. . . . . . . . . -123
+			(default):. . . . . . . . -123 (default = 'G')
+		(N) Number: . . . . . . . . . -123.00
+		(P) Percent:. . . . . . . . . -12,345.00 %
+		(R) Round-trip: . . . . . . . -123.45
+		(X) Hexadecimal:. . . . . . . FFFFFF85
+		=> binary? positive? number of decimals to show? number of digits to show?
+	ASCII alternative for SplitStr;InStr;SearchStr;ToUpper;ToLower;TrimLeft;TrimRight;TrimStr;ToTitle;VerifyFormat;IsCharDataSafe since it might be necessary with the arguments passed on by scmd (like Veers reported) 
+	TAKE CHAR INTO ACCOUNT WHEN COMPARING: string(chkstring) if chkstring.size == 1
+	CharToLower & CharToUpper functions
+	$Str.ToInt, $Str.ToFloat, $Str.ToBool (regular bool cast only returns int 0 or 1. Str: output 1 only if 1, and NOT true)
+	Make InStr & SearchStr always output an array, & other functions like that as well.
+	.ConstStrToStr (converts specified constant string into flexible string)
+	write IsNumerical <string> which returns if string consists of only numbers and maximum one dot; also returns if it a string version of an int or a float.
+	update SearchStr to properly process wildcards (save position where first wildcard is applied.)
+	write & finish func_array; update definitions.scr; update main thread below 
+	apply ASCII comparing to this library
+*/
+__init local.ascii local.dev: 
+	// TEMPORARY!!
+	level.DEBUG = 3;
+	game.dataEnt2 = SimpleEntity;
+	//
+	
+	// Create class object for reference...
+	if !($Str) {
+		level.funcStr = spawn game.dataEnt2 "targetname" "Str";
+	}
+	//temp? make definitions.scr define all subdirectories/paths.
+	local.path = "reborn/" //"global/bot4/";	
+	if (local.ascii) {
+		local.fileName = "string_ascii.func";
+	} else {
+		local.fileName = "string.func";
+	}
+	
+	if (local.dev) {
+		local.labelPrefix = "_";
+	} else {
+		local.labelPrefix = "";
+	}
+	
+	// Register & cross-reference function shortcuts..
+	level.funcStr.SplitStr = 		(local.path + "func/" + local.fileName)::(local.labelPrefix + "SplitStr");
+	level.funcStr.InStr = 			(local.path + "func/" + local.fileName)::(local.labelPrefix + "InStr");
+	level.funcStr.SearchStr = 		(local.path + "func/" + local.fileName)::(local.labelPrefix + "SearchStr");
+	level.funcStr.RemoveStr = 		(local.path + "func/" + local.fileName)::(local.labelPrefix + "RemoveStr");
+	level.funcStr.ReplaceStr = 		(local.path + "func/" + local.fileName)::(local.labelPrefix + "ReplaceStr");
+	level.funcStr.ConcatenateStr = 	(local.path + "func/" + local.fileName)::(local.labelPrefix + "ConcatenateStr");
+	level.funcStr.CompareStr = 		(local.path + "func/" + local.fileName)::(local.labelPrefix + "CompareStr");
+	level.funcStr.ToUpper = 		(local.path + "func/" + local.fileName)::(local.labelPrefix + "ToUpper");
+	level.funcStr.ToLower = 		(local.path + "func/" + local.fileName)::(local.labelPrefix + "ToLower");
+	level.funcStr.ValidateFormat = 	(local.path + "func/" + local.fileName)::(local.labelPrefix + "ValidateFormat");
+	level.funcStr.Left = 			(local.path + "func/" + local.fileName)::(local.labelPrefix + "Left");
+	level.funcStr.Right = 			(local.path + "func/" + local.fileName)::(local.labelPrefix + "Right");
+	level.funcStr.CutLeft = 		(local.path + "func/" + local.fileName)::(local.labelPrefix + "CutLeft");
+	level.funcStr.CutRight = 		(local.path + "func/" + local.fileName)::(local.labelPrefix + "CutRight");
+	level.funcStr.LeftOf = 			(local.path + "func/" + local.fileName)::(local.labelPrefix + "LeftOf");
+	level.funcStr.RightOf = 		(local.path + "func/" + local.fileName)::(local.labelPrefix + "RightOf");
+	level.funcStr.CutLeftOf = 		(local.path + "func/" + local.fileName)::(local.labelPrefix + "CutLeftOf");
+	level.funcStr.CutRightOf = 		(local.path + "func/" + local.fileName)::(local.labelPrefix + "CutRightOf");
+	level.funcStr.CutRange = 		(local.path + "func/" + local.fileName)::(local.labelPrefix + "CutRange");
+	level.funcStr.SubString = 		(local.path + "func/" + local.fileName)::(local.labelPrefix + "SubString");
+	level.funcStr.CutStr = 			(local.path + "func/" + local.fileName)::(local.labelPrefix + "CutStr");
+	level.funcStr.SubStr = 			(local.path + "func/" + local.fileName)::(local.labelPrefix + "SubStr");
+	level.funcStr.TransformStr =	(local.path + "func/" + local.fileName)::(local.labelPrefix + "TransformStr");
+	level.funcStr.IsWhat = 			(local.path + "func/" + local.fileName)::"IsWhat";
+	level.funcStr.Remove = 			(local.path + "func/" + local.fileName)::"Remove";
+	level.funcStr.Replace = 		(local.path + "func/" + local.fileName)::"Replace";
+	level.funcStr.ToTitle = 		(local.path + "func/" + local.fileName)::"ToTitle"
+	level.funcStr.ReverseStr = 		(local.path + "func/" + local.fileName)::"ReverseStr";
+	level.funcStr.TrimStr = 		(local.path + "func/" + local.fileName)::"TrimStr";
+	level.funcStr.TrimLeft = 		(local.path + "func/" + local.fileName)::"TrimLeft";
+	level.funcStr.TrimRight = 		(local.path + "func/" + local.fileName)::"TrimRight";
+	level.funcStr.CharToInt = 		(local.path + "func/" + local.fileName)::"CharToInt";
+	level.funcStr.IntToChar = 		(local.path + "func/" + local.fileName)::"IntToChar";
+	level.funcStr.CutterStr = 		(local.path + "func/" + local.fileName)::"CutterStr";
+	level.funcStr.MakeLn = 			(local.path + "func/" + local.fileName)::"MakeLn";
+	level.funcStr.StripLn = 		(local.path + "func/" + local.fileName)::"StripLn";
+	level.funcStr.AddDblQuotes = 	(local.path + "func/" + local.fileName)::"AddDblQuotes";
+	level.funcStr.CommentStr = 		(local.path + "func/" + local.fileName)::"CommentStr";
+	level.funcStr.UncommentStr = 	(local.path + "func/" + local.fileName)::"UncommentStr";
+	level.funcStr.AddTabs = 		(local.path + "func/" + local.fileName)::"AddTabs";
+	level.funcStr.DelTabs = 		(local.path + "func/" + local.fileName)::"DelTabs";
+	level.funcStr.IsCharDataSafe = 	(local.path + "func/" + local.fileName)::"IsCharDataSafe";
+	level.funcStr.MakeCharDataSafe = (local.path + "func/" + local.fileName)::"MakeCharDataSafe";
+	
+	//Internal functions, but they are available for those who need them:
+	level.funcStr.IsString = 		(local.path + "func/" + local.fileName)::"__IsString";
+	level.funcStr.IsStringType = 	(local.path + "func/" + local.fileName)::"__IsStringType";
+	
+	level.funcStr.lib = (local.path + "lib/string.lib") //path to info library; change later!
+	level.funcStr.msize = 45;							//45 methods registered in this library
+end level.funcStr;
+
+__info:
+	local.inf["library"] = "lib/string.slib";	//filepath in reborn/framework/
+	local.inf["namespace"] = "string";			//filename without extension	
+	local.inf["title"] = "STRING FUNCTIONS LIBRARY";
+	local.inf["version"] = "1.4";
+	local.inf["authors"][0] = "Sor";
+end local.inf;
+
+/** ==========================================================================================
+ IsWhat Function
+ ---------------------------------------------------------------------------------------------
+ DESCR|: 	Determines whether a string exists, is empty or is uninitialized.
+ INPUT|: 	<STRING string>
+ OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
+				1 => normal string
+				0 => empty string
+				-1 => character string
+				NIL => error: uninitialized/inexistent string
+ =========================================================================================== */
+IsWhat local.string:
+	/* Error & Exception handling */
+	if !(waitthread __IsStringType local.chkString) {
+		if (level.DEBUG > 0) {
+			conprintf "\n ~^~^~^~ FATAL_ERROR|BOT4_ENGINE[lib/string.slib::IsWhat]: Specified input <arg1> is not a string type! ~^~^~^~ \n\n";
+		}
+		end;
+	}
+	/* Main logic */
+	switch (local.string.size) {
+		case 0:
+			local.result = 0;
+		break;
+		case 1:
+			if (typeof local.string == "char") {
+				local.result = -1;
+			} else { 
+				local.result = 1;
+			}
+		break;
+		default:
+			local.result = 1;
+		break;
+	}
+end local.result;
+
+/** ==========================================================================================
+ SplitStr Function
+ ---------------------------------------------------------------------------------------------
+ DESCR|: 	Splits specified string into a constant array of words according to specified spacers.
+ INPUT|: 	<STRING string> <STRING spacer>
+ OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
+				array => of found words; use .size property to get the word count, if
+						 the array's size is 1 then the string has not been split.
+				NIL => error: invalid input
+ =========================================================================================== */
+_SplitStr local.string local.spacer: goto internal1;
+SplitStr local.string local.spacer:
+	/* Error & Exception handling */
+	if ( !(local.string) || !(waitthread __IsString local.string)) {
+		if (level.DEBUG > 0) {
+			conprintf "\n ~^~^~^~ FATAL_ERROR|BOT4_ENGINE[lib/string.slib::SplitStr]: Specified string <arg1> is either inexistent or not a string type! ~^~^~^~ \n\n";
+		}
+		end;
+	} 
+	if ( !(local.spacer) || !(waitthread __IsStringType local.spacer)) {
+		if (level.DEBUG > 1) {
+			conprintf "~^~^~^~ EXCEPTION|BOT4_ENGINE[lib/string.slib::SplitStr]: Specified spacer <arg2> is invalid! Parameter has defaulted. ~^~^~^~ \n";
+		}
+		local.spacer = " ";
+	}
+	
+	/* Main logic */
+	internal1:
+	local.strSize = local.string.size
+	
+	local.word = 1;
+	local.result[local.word] = "";
+	for (local.i = 0; local.i < local.strSize; local.i++) {
+		if (local.spacer == local.string[local.i]) {
+			if !(local.string[(local.i + 1)] == local.spacer) {
+				if(local.result[local.word] != "") {
+					local.word++;
+					local.result[local.word] = "";
+				}
+			}
+			continue;
+		}
+		//add the string to the word
+		local.result[local.word] += local.string[local.i];
+	}
+end local.result;
+
+/** ==========================================================================================
+ InStr Function
+ ---------------------------------------------------------------------------------------------
+ DESCR|: 	Searches specified string for the string or char to be found. Outputs the starting 
+			and ending position(s) in the string.
+ INPUT|: 	<STRING string> <STRING chkString> [INT startPos] [INT seekMode]
+ OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
+				array => [1]= starting pos of found str/char; [2]= corresponding ending pos.
+				array => if seekMode is 1 then [X][1]= starting pos of X instance of found
+						 str/char; [X][2]= corresponding ending pos. Size property will 
+						 indicate how many instances were found. 
+				0 => is the array size if nothing is found (same for both seek modes).
+				NIL => error: invalid input
+ =========================================================================================== */
+_InStr local.string local.chkString local.startPos local.seekMode: 	local.strSize = local.string.size; local.chkStrSize = local.chkString.size; goto internal2;
+InStr local.string local.chkString local.startPos local.seekMode:
+	local.strSize = local.string.size; 
+	local.chkStrSize = local.chkString.size;
+	
+	/* Error & Exception handling */
+	if ( !(local.string) || !(waitthread __IsString local.string)) {
+		if (level.DEBUG > 0) {
+			conprintf "\n ~^~^~^~ FATAL_ERROR|BOT4_ENGINE[lib/string.slib::InStr]: Specified string <arg1> is either inexistent or not a string type! ~^~^~^~ \n\n";
+		}
+		end;
+	}
+	if ( !(local.chkString) || !(waitthread __IsStringType local.chkString)) {
+		if (level.DEBUG > 0) {
+			conprintf "\n ~^~^~^~ FATAL_ERROR|BOT4_ENGINE[lib/string.slib::InStr]: Specified checkString <arg2> is either inexistent or not a string type! ~^~^~^~ \n\n";
+		}
+		end;
+	} else if (local.chkStrSize > local.strSize) {
+		if (level.DEBUG > 0) {
+			conprintf "\n ~^~^~^~ FATAL_ERROR|BOT4_ENGINE[lib/string.slib::InStr]: Specified chkString <arg2> is longer than the searchString <arg1>! ~^~^~^~ \n\n";
+		}
+		end;
+	}
+	if ( (local.startPos == NIL) || !(typeof local.startPos == "int") || (local.startPos < 0) ) {
+		if (level.DEBUG > 1) {
+			conprintf "~^~^~^~ EXCEPTION|BOT4_ENGINE[lib/string.slib::InStr]: Specified starting position <arg3> is invalid! Parameter has defaulted. ~^~^~^~ \n";
+		}
+		local.startPos = 0;
+	} else if (local.startPos >= local.strSize) {
+		if (level.DEBUG > 0) {
+			conprintf "\n ~^~^~^~ FATAL_ERROR|BOT4_ENGINE[lib/string.slib::InStr]: Specified start position <arg3> is out of range for specified string <arg1>! ~^~^~^~ \n\n";
+		}
+		end;
+	} else if (local.chkStrSize > (local.strSize - local.startPos)) {
+		if (level.DEBUG > 0) {
+			conprintf "\n ~^~^~^~ FATAL_ERROR|BOT4_ENGINE[lib/string.slib::InStr]: Specified chkString <arg2> is longer than the searchable range (string.size <arg1> - start position <arg3>)! ~^~^~^~ \n\n";
+		}
+		end;
+	}
+	
+	/* Main logic */
+	internal2:
+	
+	local.fsize = 0;
+	local.instance = 0;
+	local.result[1] = NIL;
+	for (local.i = local.startPos; local.i < local.strSize; local.i++) {
+		if (local.string[local.i] == local.chkString[local.fsize]) {
+			local.fsize++;
+			
+			if (local.fsize == 1) {
+				local.pos = local.i;
+			}
+			
+			if ( (local.fsize == local.chkStrSize) && (local.pos != NIL) ) {
+				if (local.seekMode) {
+					local.instance++;
+					local.endPos = local.i; 
+					local.result[local.instance] = local.pos::local.endPos;
+
+					// found all instances?
+					if (local.chkStrSize > (local.strSize - (local.i + 1))) {
+						break;
+					}
+					goto EOLreset
+				} else {
+					local.endPos = local.i;
+					local.result = local.pos::local.endPos;
+					break;
+				}
+			}
+			continue;
+		} 
+		
+		if ( (local.chkStrSize > 1) && (local.string[local.i] == local.chkString[0]) ) { 
+			local.i--;
+		}
+		
+		// reset for next loop
+		EOLreset:
+		local.fsize = 0;
+		local.pos = NIL;
+		local.endPos = NIL;
+	}
+	
+	if (local.seekMode && level.DEBUG > 2) {
+		conprintf (">>>>>> BOT4_ENGINE[lib/string.slib::InStr]: " + local.instance + " instances found of specified to-be-searched string: \"" + local.chkString + "\" <<<<<< \n");
+	}
+end local.result;
+
+/** ==========================================================================================
+ SearchStr Function
+ ---------------------------------------------------------------------------------------------
+ DESCR|: 	Searches specified string for the string or char to be found. Outputs the starting 
+			and ending position(s) in the string. Optionally, character cases can be ignored.
+			Wildcard searches are enabled by default (*); the wildcard symbol can be changed,
+			however it must be only one character in length. 
+			Don't search for asterisk-character or set this option to empty string in order 
+			to disable this feature.
+ INPUT|: 	<STRING string> <STRING chkString> [INT seekMode] [INT caseInsensitive] [CHAR wcard]
+ OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
+				array => [1]= starting pos of found str/char; [2]= corresponding ending pos.
+				array => if seekMode is 1 then [X][1]= starting pos of X instance of found
+						 str/char; [X][2]= corresponding ending pos. Size property will 
+						 indicate how many instances were found. 
+				0 => is the array size if nothing is found (same for both seek modes).
+				NIL => error: invalid input
+ =========================================================================================== */
+_SearchStr local.string local.chkString local.seekMode local.caseInsensitive local.wcard: 	local.strSize = local.string.size; local.chkStrSize = local.chkString.size; goto internal3;
+SearchStr local.string local.chkString local.seekMode local.caseInsensitive local.wcard:
+	local.strSize = local.string.size; 
+	local.chkStrSize = local.chkString.size;
+	
+	/* Error & Exception handling */
+	if ( !(local.string) || !(waitthread __IsString local.string) ) {
+		if (level.DEBUG > 0) {
+			conprintf "\n ~^~^~^~ FATAL_ERROR|BOT4_ENGINE[lib/string.slib::SearchStr]: Specified string <arg1> is either inexistent or not a string type! ~^~^~^~ \n\n";
+		}
+		end;
+	}
+	if ( !(local.chkString) || !(waitthread __IsStringType local.chkString) ) {
+		if (level.DEBUG > 0) {
+			conprintf "\n ~^~^~^~ FATAL_ERROR|BOT4_ENGINE[lib/string.slib::SearchStr]: Specified checkString <arg2> is either inexistent or not a string type! ~^~^~^~ \n\n";
+		}
+		end;
+	} else if (local.chkStrSize > local.strSize) {
+		if (level.DEBUG > 0) {
+			conprintf "\n ~^~^~^~ FATAL_ERROR|BOT4_ENGINE[lib/string.slib::SearchStr]: Specified chkString <arg2> is longer than the searchString <arg1>! ~^~^~^~ \n\n";
+		}
+		end;
+	} 
+	
+	/* Main logic */
+	internal3:
+	if ( (local.wcard == NIL) || (local.wcard.size > 1) || !(waitthread __IsStringType local.wcard)) {
+		local.wcard = "*";
+	}
+	
+	if (local.chkString[0] == local.wcard) {
+		if (level.DEBUG > 0) {
+			conprintf "\n ~^~^~^~ ERROR|BOT4_ENGINE[lib/string.slib::SearchStr]: Specified chkString <arg2> cannot start with a wildcard! ~^~^~^~ \n";
+		}
+		end;
+	}
+
+	// search loop init
+	local.fsize = 0;
+	local.instance = 0;
+	local.result[1] = NIL;
+	
+	for (local.i = 0; local.i < local.strSize; local.i++) {
+		local.char = local.string[local.i];
+		local.chkChar = local.chkString[local.fsize];
+		
+		//Check
+		local.check = 0;
+		if (local.char == local.chkChar || local.chkChar == local.wcard) {
+			local.check = 1;
+		} else if (local.caseInsensitive && ((charToInt(local.char) + 32) == (charToInt(local.chkChar)) || (charToInt(local.char)) == (charToInt(local.chkChar) + 32))) {
+			local.check = 1;
+		}
+		
+		// Process
+		if (local.check) {
+			local.fsize++;
+			
+			if (local.fsize == 1) {
+				local.pos = local.i;
+			}
+			
+			// instance found:
+			if ( (local.fsize == local.chkStrSize) && (local.pos != NIL) ) {
+				if (local.seekMode) {
+					local.instance++;
+					local.endPos = local.i; 
+					local.result[local.instance] = local.pos::local.endPos;
+					
+					// found all instances?
+					if (local.chkStrSize > (local.strSize - (local.i + 1))) {
+						break;
+					}
+					goto resetEOL
+				} else {
+					local.endPos = local.i;
+					local.result = local.pos::local.endPos;
+					break;
+				}
+			} 
+			continue;
+		} 
+		
+		if (local.chkStrSize > 1 && local.char == local.chkString[0]) { 
+			local.i--;
+		}
+		
+		// reset for next loop
+		resetEOL:
+		local.fsize = 0;
+		local.pos = NIL;
+		local.endPos = NIL;
+	}
+	
+	if (local.seekMode && level.DEBUG > 2) {
+		conprintf (">>>>>> BOT4_ENGINE[lib/string.slib::SearchStr]: " + local.instance + " instances found of specified to-be-searched string: \"" + local.chkString + "\" <<<<<< \n");
+	}
+end local.result;
+
+/** ==========================================================================================
+ Remove Function
+ ---------------------------------------------------------------------------------------------
+ DESCR|: 	Searches and removes one, or optionally all instances of a, specified string/char 
+			in the specified main string. Function makes use of 'SearchStr' function as
+			opposed to 'InStr', thus provides the same extended searching functionality.
+ INPUT|: 	<STRING string> <STRING toBeRemoved> [INT allInstances] [INT caseInsensitive]
+			[CHAR wcard]
+ OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
+				string => processed string
+				NIL => error: invalid input
+ =========================================================================================== */
+Remove local.string local.toBeRemoved local.allInstances local.caseInsensitive local.wcard: 
+end (waitthread Replace local.string local.toBeRemoved "" local.allInstances local.caseInsensitive local.wcard);
+
+/** ==========================================================================================
+ RemoveStr Function
+ ---------------------------------------------------------------------------------------------
+ DESCR|: 	Searches and removes one, or optionally all instances of a, specified string/char 
+			in the specified main string.
+ INPUT|: 	<STRING string> <STRING toBeRemoved> [INT allInstances]
+ OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
+				string => processed string
+				NIL => error: invalid input
+ =========================================================================================== */
+_RemoveStr local.string local.toBeRemoved local.allInstances: goto internal4;
+RemoveStr local.string local.toBeRemoved local.allInstances:
+	/* Error & Exception handling */
+	if ( !(local.string) || !(waitthread __IsString local.string)) {
+		if (level.DEBUG > 0) {
+			conprintf "\n ~^~^~^~ FATAL_ERROR|BOT4_ENGINE[lib/string.slib::Remove]: Specified string <arg1> is either inexistent or not a string type! ~^~^~^~ \n\n";
+		}
+		end;
+	}
+	if ( !(local.toBeRemoved) || !(waitthread __IsStringType local.toBeRemoved)) { 
+		if (level.DEBUG > 0) {
+			conprintf "\n ~^~^~^~ FATAL_ERROR|BOT4_ENGINE[lib/string.slib::Remove]: Specified stringToBeRemoved <arg2> is either inexistent or not a string type! ~^~^~^~ \n\n";
+		}
+		end;
+	}
+	
+	/* Main logic */
+	internal4:
+end (waitthread ReplaceStr local.string local.toBeRemoved "" local.allInstances);
+
+/** ==========================================================================================
+ Replace Function
+ ---------------------------------------------------------------------------------------------
+ DESCR|: 	Searches and replaces one or optionally all instances of a specified string/char 
+			with a specified replacement string/char in the specified main string. 
+			Function makes use of 'SearchStr' function as opposed to 'InStr', thus provides 
+			the same extended searching functionality.
+ INPUT|: 	<STRING string> <STRING toBeReplaced> <STRING replacedBy> [INT allInstances] 
+			[INT caseInsensitive] [CHAR wcard]
+ OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
+				string => processed string
+				NIL => error: invalid input
+ =========================================================================================== */
+Replace local.string local.toBeReplaced local.replacedBy local.allInstances local.caseInsensitive local.wcard: 
+	if ((local.replacedBy == NIL) || !(waitthread __IsStringType local.replacedBy)) {
+		if (level.DEBUG > 0) {
+			conprintf "\n ~^~^~^~ FATAL_ERROR|BOT4_ENGINE[lib/string.slib::Replace]: Specified stringReplacedBy <arg3> is either inexistent or not a string type! ~^~^~^~ \n\n";
+		}
+		end;
+	}
+	local.positions = waitthread SearchStr local.string local.toBeReplaced local.allInstances local.caseInsensitive local.wcard;
+goto internal6
+
+/** ==========================================================================================
+ ReplaceStr Function
+ ---------------------------------------------------------------------------------------------
+ DESCR|: 	Searches and replaces one or optionally all instances of a specified string/char 
+			with a specified replacement string/char in the specified main string.
+ INPUT|: 	<STRING string> <STRING toBeReplaced> <STRING replacedBy> [INT allInstances]
+ OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
+				string => processed string
+				NIL => error: invalid input
+ =========================================================================================== */
+_ReplaceStr local.string local.toBeReplaced local.replacedBy local.allInstances: goto internal5;
+ReplaceStr local.string local.toBeReplaced local.replacedBy local.allInstances:
+	/* Error & Exception handling */
+	if ( !(local.string) || !(waitthread __IsString local.string)) {
+		if (level.DEBUG > 0) {
+			conprintf "\n ~^~^~^~ FATAL_ERROR|BOT4_ENGINE[lib/string.slib::ReplaceStr]: Specified string <arg1> is either inexistent or not a string type! ~^~^~^~ \n\n";
+		}
+		end;
+	} else 	if ( !(local.toBeReplaced) || !(waitthread __IsStringType local.toBeReplaced)) {
+		if (level.DEBUG > 0) {
+			conprintf "\n ~^~^~^~ FATAL_ERROR|BOT4_ENGINE[lib/string.slib::ReplaceStr]: Specified stringtoBeReplaced <arg2> is either inexistent or not a string type! ~^~^~^~ \n\n";
+		}
+		end;
+	} else if ( (local.replacedBy == NIL) || !(waitthread __IsStringType local.replacedBy)) {
+		if (level.DEBUG > 0) {
+			conprintf "\n ~^~^~^~ FATAL_ERROR|BOT4_ENGINE[lib/string.slib::ReplaceStr]: Specified stringReplacedBy <arg3> is either inexistent or not a string type! ~^~^~^~ \n\n";
+		}
+		end;
+	}
+	
+	/* Main logic */
+	internal5:
+	local.positions = waitthread _InStr local.string local.toBeReplaced 0 local.allInstances;
+
+	internal6:
+	if (local.positions == NIL) {
+		if (level.DEBUG > 0) {
+			conprintf "~^~^~^~ ERROR|BOT4_ENGINE[lib/string.slib::Replace]: Helper function 'InStr' was abnormally terminated! ~^~^~^~ \n";
+		}
+		end;
+	} else if (local.positions.size > 0) {
+		local.result = "";
+		if (local.allInstances) {
+			// first position; left
+			local.leftStr = waitthread _LeftOf local.string local.positions[1][1];
+			
+			for (local.i = 1; local.i <= local.positions.size; local.i++) {
+				if (local.i == local.positions.size) {
+					// last pos
+					local.rightStr = waitthread _RightOf local.string local.positions[local.i][2];
+					local.terminate = 1;
+				} else {
+					// or not?
+					local.rightStr = waitthread _SubString local.string (local.positions[local.i][2] + 1) local.positions[(local.i + 1)][1];
+				}
+
+				local.result += (local.leftStr + local.replacedBy + local.rightStr);
+				
+				if (local.terminate == 1) {
+					break;
+				}
+				local.leftStr = "";
+				local.rightStr = "";
+			}
+		} else {
+			local.result += ((waitthread _LeftOf local.string local.positions[1]) + local.replacedBy + (waitthread _RightOf local.string local.positions[2]));
+		}
+	} else {
+		if (level.DEBUG > 1) {
+			conprintf ("~^~^~^~ EXCEPTION|BOT4_ENGINE[lib/string.slib::Replace]: No instance of \"" + local.toBeReplaced + "\" was found. ~^~^~^~ \n");
+		}
+		local.result = local.string;
+	} 
+end local.result;
+
+/** ==========================================================================================
+ ConcatenateStr Function
+ ---------------------------------------------------------------------------------------------
+ DESCR|: 	Combines specified array of strings into one connected string, with option spacer
+			between each string
+ INPUT|: 	<{ARRAY/CONST ARRAY:STRING} strings> <STRING spacer>
+ OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
+				string => concatenation of all strings found in specified array
+				NIL => error: invalid input
+ =========================================================================================== */
+_ConcatenateStr local.strings local.spacer: goto internal7;
+ConcatenateStr local.strings local.spacer:
+	/* Error & Exception handling */
+	// temporary; improve later with func_array.
+	if ( (local.strings == NIL) || ((typeof local.strings != "array") && (typeof local.strings != "const array")) || (local.strings.size <= 0) ) {
+		if (level.DEBUG > 0) {
+			conprintf "\n ~^~^~^~ FATAL_ERROR|BOT4_ENGINE[lib/string.slib::ConcatenateStr]: Invalid array of strings <arg1> specified!  ~^~^~^~ \n\n";
+		}
+		end;
+	}
+	
+	if ((local.spacer == NIL) || !(waitthread __IsStringType local.spacer))  {
+		local.spacer = "";
+	}
+	
+	/* Main logic */
+	internal7:
+	
+	local.result = local.strings[1];
+	for (local.i = 2; local.i <= local.strings.size; local.i++) {
+		local.result += (local.spacer + local.strings[local.i]);
+	}
+end local.result;
+
+/** ==========================================================================================
+ CompareStr Function
+ ---------------------------------------------------------------------------------------------
+ DESCR|: 	Determines whether the first specified string equals the other specified string, 
+			on ASCII level. Optionally, letter casing can be ignored.
+ INPUT|: 	<STRING string1> <STRING string2> [INT caseInsensitive]
+ OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
+				1 => same
+				0 => not the same
+				NIL => error: invalid input
+ =========================================================================================== */
+_CompareStr local.string1 local.string2 local.caseInsensitive: goto internal8;
+CompareStr local.string1 local.string2 local.caseInsensitive: 
+	/* Error & Exception handling */
+	if !(waitthread __IsString local.string1) {
+		if (level.DEBUG > 0) {
+			conprintf "\n ~^~^~^~ FATAL_ERROR|BOT4_ENGINE[lib/string.slib::CompareStr]: Specified string <arg1> is not a string type! ~^~^~^~ \n\n";
+		}
+		end;
+	} if !(waitthread __IsString local.string2) {
+		if (level.DEBUG > 0) {
+			conprintf "\n ~^~^~^~ FATAL_ERROR|BOT4_ENGINE[lib/string.slib::CompareStr]: Specified string <arg2> is not a string type! ~^~^~^~ \n\n";
+		}
+		end;
+	} 
+	
+	/* Main logic */
+	internal8:
+	
+	local.result = 1;
+	local.strSize = local.string1.size
+
+	//Only bother in this situation
+	if (local.strSize == local.string2.size) {
+		for (local.i = 0; local.i < local.strSize; local.i++) {
+			local.char1 = (charToInt(local.string1[local.i]))
+			local.char2 = (charToInt(local.string2[local.i]))
+			
+			if (local.char1 != local.char2) {
+				// Should case be ignored?
+				if (local.caseInsensitive) {
+					// Every upper- and lowercase equivalent lies exactly 32 characters apart in the ASCII table.
+					if ( ((local.char1 + 32) == local.char2) || (local.char1 == (local.char2 + 32)) ) {
+						continue;
+					}
+				}
+				local.result = 0;
+				break;
+			}
+		}
+	} else {
+		local.result = 0;
+	}
+end local.result;
+
+/** ==========================================================================================
+ ToTitle Function
+ ---------------------------------------------------------------------------------------------
+ DESCR|: 	Converts specified string into standard English title-format. 
+ INPUT|: 	<STRING string>
+ OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
+				string => processed string
+				NIL => error: invalid input
+ =========================================================================================== */
+ToTitle local.string:
+	/* Error & Exception handling */
+	if ( !(local.string) || !(waitthread __IsString local.string)) {
+		if (level.DEBUG > 0) {
+			conprintf "\n ~^~^~^~ FATAL_ERROR|BOT4_ENGINE[lib/string.slib::ToUpper]: Specified string <arg1> is either inexistent or not a string type! ~^~^~^~ \n\n";
+		}
+		end;
+	}
+	
+	/* Main logic */
+	//load necessary data
+	local.lowerCase = waitthread level.funcStr.lib::CharData 0;
+	local.exceptions = waitthread level.funcStr.lib::TitleExceptions;
+	
+	local.spacer = " ";
+	//get rid of interfering CAPS..
+	local.string = waitthread _ToLower local.string;
+	//we're going to do this word per word
+	local.word = waitthread _SplitStr local.string local.spacer;
+	
+	for (local.i = 1; local.i <= local.word.size; local.i++) {
+		//Sentences always start capitalized anyway..
+		if (local.i != 1) {
+			for (local.j = 1; local.j <= local.exceptions.size; local.j++) {
+				if (local.word[local.i] == local.exceptions[local.j]) {
+					goto tEOL;
+				}
+			}
+		}
+		local.char = string(local.word[local.i][0])
+		local.convert = local.lowerCase[local.char]
+		if (local.convert) {
+			local.word[local.i][0] = local.convert;
+		}
+		tEOL:
+	}
+	//re-combine to string:
+end (waitthread _ConcatenateStr local.word local.spacer);
+
+/** ==========================================================================================
+ ToUpper Function
+ ---------------------------------------------------------------------------------------------
+ DESCR|: 	Converts all lowercase characters to uppercase characters for a specified string; 
+ 			unless the optional position indexes are set, then only those positions will be 
+			converted (if necessary).
+ INPUT|: 	<STRING string> [{INT/CONSTARRAY:INT} index(es)]
+ OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
+				string => processed string
+				NIL => error: invalid input
+ =========================================================================================== */
+_ToUpper local.string local.index: goto internal9;
+ToUpper local.string local.index:
+	/* Error & Exception handling */
+	if ( !(local.string) || !(waitthread __IsStringType local.string)) {
+		if (level.DEBUG > 0) {
+			conprintf "\n ~^~^~^~ FATAL_ERROR|BOT4_ENGINE[lib/string.slib::ToUpper]: Specified string <arg1> is either inexistent or not a string type! ~^~^~^~ \n\n";
+		}
+		end;
+	}
+
+	/* Main logic */
+	internal9:
+	
+	local.lowerCase = waitthread level.funcStr.lib::CharData 0;
+	
+	// Indexes specified?
+	if (local.index != NIL) {
+		// One instance conversion;
+		if (!(typeof local.index == "const array") && !(typeof local.index == "array"))  {
+			local.char = local.string[local.index]
+			
+			// check if index is not out of range
+			if (local.char != NIL) {
+				local.canConvertToUpper = local.lowerCase[(string(local.char))];
+				if (local.canConvertToUpper != NIL) {
+					local.string[local.index] = local.canConvertToUpper;
+				}
+			}
+		// Multiple instances conversion;
+		} else {
+			for (local.j = 1; local.j <= local.index.size; local.j++) {
+				local.char = local.string[local.index[local.j]];
+				
+				// check if index is not out of range
+				if (local.char != NIL) {
+					local.canConvertToUpper = local.lowerCase[(string(local.char))];
+					if (local.canConvertToUpper != NIL) { 
+						local.string[local.index[local.j]] = local.canConvertToUpper;
+					}
+				}
+			}
+		}
+	// Full conversion;
+	} else {
+		for (local.i = 0; local.i < local.string.size; local.i++) {
+			local.char = string(local.string[local.i])
+			local.canConvertToUpper = local.lowerCase[local.char];
+			
+			if (local.canConvertToUpper != NIL) { 
+				local.string[local.i] = local.canConvertToUpper;
+			}
+		}	
+	}
+end local.string
+
+/** ==========================================================================================
+ ToLower Function
+ ---------------------------------------------------------------------------------------------
+ DESCR|: 	Converts all uppercase characters to lowercase characters for a specified string; 
+ 			unless the optional position indexes are set, then only those positions will be 
+			converted (if necessary).
+ INPUT|: 	<STRING string> [{INT/CONSTARRAY:INT} index(es)]
+ OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
+				string => processed string
+				NIL => error: invalid input
+ =========================================================================================== */
+_ToLower local.string local.index: goto internal10;
+ToLower local.string local.index:
+	/* Error & Exception handling */
+	if ( !(local.string) || !(waitthread __IsStringType local.string)) {
+		if (level.DEBUG > 0) {
+			conprintf "\n ~^~^~^~ FATAL_ERROR|BOT4_ENGINE[lib/string.slib::ToLower]: Specified string <arg1> is either inexistent or not a string type! ~^~^~^~ \n\n";
+		}
+		end;
+	}
+/*	Use func_array functions to correctly check and parse local.index; 
+	arrays starting at 0 are converted to const arrays; 
+	hash arrays and other multidimensional arrays are converted to const arrays;
+	if (local.index != NIL) {
+	}*/
+	
+	/* Main logic */
+	internal10:
+	
+	local.upperCase = waitthread level.funcStr.lib::CharData 1;
+	
+	// Indexes specified?
+	if (local.index != NIL) {
+		// One instance conversion;
+		if (!(typeof local.index == "const array") && !(typeof local.index == "array")) { /*(local.index.size == 1)*/
+			local.char = local.string[local.index]
+			
+			// check if index is not out of range
+			if (local.char != NIL) {
+				local.canConvertToLower = local.upperCase[(string(local.char))];
+				if (local.canConvertToLower != NIL) {
+					local.string[local.index] = local.canConvertToLower;
+				}
+			}
+		// Multiple instances conversion;
+		} else {
+			for (local.j = 1; local.j <= local.index.size; local.j++) {
+				local.char = local.string[local.index[local.j]];
+				
+				// check if index is not out of range
+				if (local.char != NIL) {
+					local.canConvertToLower = local.upperCase[(string(local.char))];
+					if (local.canConvertToLower != NIL) { 
+						local.string[local.index[local.j]] = local.canConvertToLower;
+					}
+				}
+			}
+		}
+	// Full conversion;
+	} else {
+		for (local.i = 0; local.i < local.string.size; local.i++) {
+			local.char = string(local.string[local.i])
+			local.canConvertToLower = local.upperCase[local.char];
+			
+			if (local.canConvertToLower != NIL) { 
+				local.string[local.i] = local.canConvertToLower;
+			}
+		}	
+	}
+end local.string
+
+/** ==========================================================================================
+ ReverseStr Function
+ ---------------------------------------------------------------------------------------------
+ DESCR|: 	Reverses the order of the characters of the specified string.
+ INPUT|: 	<STRING string>
+ OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
+				string => processed string
+				NIL => error: invalid input
+ =========================================================================================== */
+ReverseStr local.string:
+	/* Error & Exception handling */
+	if ( !(local.string) || !(waitthread __IsString local.string)) {
+		if (level.DEBUG > 0) {
+			conprintf "\n ~^~^~^~ FATAL_ERROR|BOT4_ENGINE[lib/string.slib::ReverseStr]: String <arg1> does not exist! ~^~^~^~ \n\n";
+		}
+		end;
+	} 
+
+	/* Main logic */
+	local.result = "";
+	for (local.i = (local.string.size - 1); local.i >= 0; local.i--) {
+		local.result += local.string[local.i];
+	}
+end local.result;
+
+/** ==========================================================================================
+ TrimStr Function
+ ---------------------------------------------------------------------------------------------
+ DESCR|: 	Removes trailing spaces from the specified string.
+ INPUT|: 	<STRING string>
+ OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
+				string => processed string
+				NIL => error: invalid input
+ =========================================================================================== */
+TrimStr local.string:
+	/* Error & Exception handling */
+	if ( !(local.string) || !(waitthread __IsString local.string)) {
+		if (level.DEBUG > 0) {
+			conprintf "\n ~^~^~^~ FATAL_ERROR|BOT4_ENGINE[lib/string.slib::TrimStr]: String <arg1> does not exist! ~^~^~^~ \n\n";
+		}
+		end;
+	} 
+
+	/* Main logic */
+	// left side
+	local.strSize = local.string.size;
+	for (local.i = 0; local.i < local.strSize; local.i++) {
+		if (local.string[local.i] != " ") {
+			local.startPos = local.i;
+			break;
+		}
+	}
+	// right side
+	for (local.i = (local.strSize - 1); local.i >= 0; local.i--) {
+		if (local.string[local.i] != " ") {
+			local.endPos = local.i;
+			break;
+		}
+	}
+	
+	// form trimmed string
+	local.trim = local.endPos + 1 - local.startPos
+	if (local.trim != local.strSize) {
+		local.result = "";
+		for (local.i = local.startPos; local.i <= local.endPos; local.i++) {
+			local.result += local.string[local.i];
+		}
+	} else {
+		if (level.DEBUG > 2) {
+			conprintf (">>>>>> BOT4_ENGINE[lib/string.slib::TrimStr]: No trailing spaces were found; original string is returned.  <<<<<< \n");
+		}
+		local.result = local.string;
+	}
+end local.result;
+/** ==========================================================================================
+ TrimLeft Function
+ ---------------------------------------------------------------------------------------------
+ DESCR|: 	Removes trailing spaces from left side of the specified string.
+ INPUT|: 	<STRING string>
+ OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
+				string => processed string
+				NIL => error: invalid input
+ =========================================================================================== */
+TrimLeft local.string:
+	/* Error & Exception handling */
+	if ( !(local.string) || !(waitthread __IsString local.string)) {
+		if (level.DEBUG > 0) {
+			conprintf "\n ~^~^~^~ FATAL_ERROR|BOT4_ENGINE[lib/string.slib::TrimLeft]: String <arg1> does not exist! ~^~^~^~ \n\n";
+		}
+		end;
+	} 
+
+	/* Main logic */
+	local.strSize = local.string.size;
+	for (local.i = 0; local.i < local.strSize; local.i++) {
+		if (local.string[local.i] != " ") {
+			local.startPos = local.i;
+			break;
+		}
+	}
+	if (local.startPos != 0) {
+		local.result = "";
+		for (local.i = local.startPos; local.i < local.strSize; local.i++) {
+			local.result += local.string[local.i];
+		}
+	} else {
+		local.result = local.string;
+	}
+end local.result;
+
+/** ==========================================================================================
+ TrimRight Function
+ ---------------------------------------------------------------------------------------------
+ DESCR|: 	Removes trailing spaces from right side of the specified string.
+ INPUT|: 	<STRING string>
+ OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
+				string => processed string
+				NIL => error: invalid input
+ =========================================================================================== */
+TrimRight local.string:
+	/* Error & Exception handling */
+	if ( !(local.string) || !(waitthread __IsString local.string)) {
+		if (level.DEBUG > 0) {
+			conprintf "\n ~^~^~^~ FATAL_ERROR|BOT4_ENGINE[lib/string.slib::TrimRight]: String <arg1> does not exist! ~^~^~^~ \n\n";
+		}
+		end;
+	} 
+
+	/* Main logic */
+	for (local.i = (local.string.size - 1); local.i >= 0; local.i--) {
+		if (local.string[local.i] != " ") {
+			local.endPos = local.i;
+			break;
+		}
+	}
+	if (local.endPos != 0) {
+		local.result = "";
+		for (local.i = 0; local.i <= local.endPos; local.i++) {
+			local.result += local.string[local.i];
+		}
+	} else {
+		local.result = local.string;
+	}
+end local.result;
+
+/** ==========================================================================================
+ ValidateFormat Function
+ ---------------------------------------------------------------------------------------------
+ DESCR|: 	Validates specified string based on specified criteria, namely special characters.
+			Optionally a prefix and suffix may be specified to improve the validation.
+ INPUT|: 	<STRING string> <STRING specialChar> [STRING prefix] [STRING suffix]
+ OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
+				1 => valid format
+				0 => invalid format
+				NIL => error: uninitialized/inexistent string
+ =========================================================================================== */
+_ValidateFormat local.string local.sChar local.prefix local.suffix: goto internal11;
+ValidateFormat local.string local.sChar local.prefix local.suffix:
+	/* Error & Exception handling */
+	if ( !(local.string) || !(waitthread __IsString local.string)) {
+		if (level.DEBUG > 0) {
+			conprintf "\n ~^~^~^~ FATAL_ERROR|BOT4_ENGINE[lib/string.slib::ValidateFormat]: Specified string <arg1> is either inexistent or not a string type! ~^~^~^~ \n\n";
+		}
+		end;
+	} if ( !(local.sChar) || !(waitthread __IsStringType local.sChar)) {
+		if (level.DEBUG > 0) {
+			conprintf "\n ~^~^~^~ FATAL_ERROR|BOT4_ENGINE[lib/string.slib::ValidateFormat]: No special characters to be evaluated are specified ~^~^~^~ \n\n";
+		}
+		end;
+	}
+	
+	/* Main logic */
+	internal11:
+	
+	local.startPos = 0;
+	local.endPos = local.string.size - 1;
+	
+	local.result = 1;
+	
+	// Check if start of string complies
+	if (local.prefix) {
+		local.startPos = (local.prefix.size - 1);
+		for (local.i = 0; local.i < local.prefix.size; local.i++) {
+			if (local.prefix[local.i] != local.string[local.i]) {
+				local.result = 0;
+				break;
+			}
+		}
+	}
+	// Check if end of string complies
+	if (local.result && local.suffix) {
+		local.endPos = (local.string.size - local.suffix.size);
+		local.j = 0;
+		for (local.i = local.endPos; local.i < local.string.size; local.i++) {
+			if (local.string[local.i] != local.suffix[local.j]) {
+				local.result = 0;
+				break;
+			}
+			local.j++;
+		}
+	}
+	// Check order & position of the special character(s)
+	if (local.result != 0) {
+		local.sPos = waitthread _InStr local.string local.sChar 0 1;
+		if (local.sPos[1][1] <= local.startPos) {
+			local.result = 0;
+		}
+		if (local.sPos[local.sPos.size][2] >= local.endPos) {
+			local.result = 0;
+		}
+	}
+end local.result
+
+/** ==========================================================================================
+ Left Function
+ ---------------------------------------------------------------------------------------------
+ DESCR|: 	Copies, and returns a string of, the specified range of characters from the left
+			side of the specified string. 
+ INPUT|: 	<STRING string> <INT numOfChars>
+ OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
+				string => processed string
+				NIL => error: invalid input
+ =========================================================================================== */
+_Left local.string local.char: goto internal12;
+Left local.string local.char: 
+	/* Error & Exception handling */
+	if ( !(local.string) || !(waitthread __IsString local.string)) {
+		if (level.DEBUG > 0) {
+			conprintf "\n ~^~^~^~ FATAL_ERROR|BOT4_ENGINE[lib/string.slib::Left]: String <arg1> does not exist! ~^~^~^~ \n\n";
+		}
+		end;
+	} 
+	
+	if ( !(local.char) || !(typeof local.char == "int") ) {	
+		if (level.DEBUG > 0) {
+			conprintf "\n ~^~^~^~ FATAL_ERROR|BOT4_ENGINE[lib/string.slib::Left]: Invalid number of characters <arg2>! ~^~^~^~ \n\n";
+		}
+		end;
+	} else if (local.char <= 0) {
+		if (level.DEBUG > 1) {
+			conprintf "~^~^~^~ ERROR|BOT4_ENGINE[lib/string.slib::Left]: Specified number of characters <arg2> is out of range! Adjusting to closest admissible range.. ~^~^~^~ \n";
+		}
+		local.result = "";
+		end local.result;
+	} else if (local.char >= local.string.size) {
+		if (level.DEBUG > 1) {
+			conprintf "~^~^~^~ ERROR|BOT4_ENGINE[lib/string.slib::Left]: Specified number of characters <arg2> is out of range! Adjusting to closest admissible range.. ~^~^~^~ \n";
+		}
+		local.result = local.string;
+		end local.result;
+	}
+	
+	/* Main logic */
+	internal12:
+	
+	local.result = "";
+	for (local.i = 0; local.i < local.char; local.i++) {
+		local.result += local.string[local.i];
+	}
+end local.result;
+
+/** ==========================================================================================
+ Right Function
+ ---------------------------------------------------------------------------------------------
+ DESCR|: 	Copies, and returns a string of, the specified range of characters from the right
+			side of the specified string.
+ INPUT|: 	<STRING string> <INT numOfChars>
+ OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
+				string => processed string
+				NIL => error: invalid input
+ =========================================================================================== */
+_Right local.string local.char: goto internal13;
+Right local.string local.char:
+	/* Error & Exception handling */
+	if ( !(local.string) || !(waitthread __IsString local.string)) {
+		if (level.DEBUG > 0) {
+			conprintf "\n ~^~^~^~ FATAL_ERROR|BOT4_ENGINE[lib/string.slib::Right]: String <arg1> does not exist! ~^~^~^~ \n\n";
+		}
+		end;
+	} 
+	if ( !(local.char) || !(typeof local.char == "int") ) {	
+		if (level.DEBUG > 0) {
+			conprintf "\n ~^~^~^~ FATAL_ERROR|BOT4_ENGINE[lib/string.slib::Right]: Invalid number of characters <arg2>! ~^~^~^~ \n\n";
+		}
+		end;
+	} else if (local.char <= 0) {
+		if (level.DEBUG > 1) {
+			conprintf "~^~^~^~ ERROR|BOT4_ENGINE[lib/string.slib::Right]: Specified number of characters <arg2> is out of range! Adjusting to closest admissible range.. ~^~^~^~ \n";
+		}
+		local.result = "";
+		end local.result;
+	} else if (local.char >= local.string.size) {
+		if (level.DEBUG > 1) {
+			conprintf "~^~^~^~ ERROR|BOT4_ENGINE[lib/string.slib::Right]: Specified number of characters <arg2> is out of range! Adjusting to closest admissible range.. ~^~^~^~ \n";
+		}
+		local.result = local.string;
+		end local.result;
+	}
+	
+	/* Main logic */
+	internal13:
+	
+	local.strSize = local.string.size;
+	local.result = "";
+	for (local.i = (local.strSize - local.char); local.i < local.strSize; local.i++) {
+		local.result += local.string[local.i];
+	}
+end local.result;
+
+/** ==========================================================================================
+ CutLeft Function
+ ---------------------------------------------------------------------------------------------
+ DESCR|: 	Cuts/removes specified amount of characters from left side of the specified string
+			and returns the result.
+ INPUT|: 	<STRING string> <INT numOfChars>
+ OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
+				string => processed string
+				NIL => error: invalid input
+ =========================================================================================== */
+_CutLeft local.string local.char: goto internal14; 
+CutLeft local.string local.char:
+	/* Error & Exception handling */
+	if ( !(local.string) || !(waitthread __IsString local.string)) {
+		if (level.DEBUG > 0) {
+			conprintf "\n ~^~^~^~ FATAL_ERROR|BOT4_ENGINE[lib/string.slib::CutLeft]: String <arg1> does not exist! ~^~^~^~ \n\n";
+		}
+		end;
+	} 
+	if ( !(local.char) || !(typeof local.char == "int") || (local.char < 0) ) {	
+		if (level.DEBUG > 0) {
+			conprintf "\n ~^~^~^~ FATAL_ERROR|BOT4_ENGINE[lib/string.slib::CutLeft]: Invalid number of characters <arg2>! ~^~^~^~ \n\n";
+		}
+		end;
+	} else if (local.char >= local.string.size) {
+		if (level.DEBUG > 1) {
+			conprintf "~^~^~^~ EXCEPTION|BOT4_ENGINE[lib/string.slib::CutLeft]: Specified number of characters <arg2> is beyond removable range. ~^~^~^~ \n";
+		}
+		local.result = "";
+		end local.result;
+	}
+	
+	/* Main logic */
+	internal14:
+end (waitthread _RightOf local.string (waitthread __ConvertCharToPos local.char));
+
+/** ==========================================================================================
+ CutRight Function
+ ---------------------------------------------------------------------------------------------
+ DESCR|: 	Cuts/removes specified amount of characters from right side of the specified string
+			and returns the result.
+ INPUT|: 	<STRING string> <INT numOfChars>
+ OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
+				string => processed string
+				NIL => error: invalid input
+ =========================================================================================== */
+_CutRight local.string local.char: goto internal15;
+CutRight local.string local.char:
+	/* Error & Exception handling */
+	if ( !(local.string) || !(waitthread __IsString local.string)) {
+		if (level.DEBUG > 0) {
+			conprintf "\n ~^~^~^~ FATAL_ERROR|BOT4_ENGINE[lib/string.slib::CutRight]: String <arg1> does not exist! ~^~^~^~ \n\n";
+		}
+		end;
+	} 
+	if ( !(local.char) || !(typeof local.char == "int") || (local.char < 0) ) {	
+		if (level.DEBUG > 0) {
+			conprintf "\n ~^~^~^~ FATAL_ERROR|BOT4_ENGINE[lib/string.slib::CutRight]: Invalid number of characters <arg2>! ~^~^~^~ \n\n";
+		}
+		end;
+	} else if (local.char >= local.string.size) {
+		if (level.DEBUG > 1) {
+			conprintf "~^~^~^~ EXCEPTION|BOT4_ENGINE[lib/string.slib::CutRight]: Specified number of characters <arg2> is beyond removable range. ~^~^~^~ \n";
+		}
+		local.result = "";
+		end local.result;
+	}
+	
+	/* Main logic */
+	internal15:
+end (waitthread _LeftOf local.string (waitthread __ConvertCharToPos local.char local.string.size));
+
+/** ==========================================================================================
+ LeftOf Function
+ ---------------------------------------------------------------------------------------------
+ DESCR|: 	Copies and returns the text left of the specified position in the specified string.
+ INPUT|: 	<STRING string> <INT strPosition>
+ OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
+				string => processed string
+				NIL => error: invalid input
+ =========================================================================================== */ 
+_LeftOf local.string local.pos: goto internal16;
+LeftOf local.string local.pos:
+	/* Error & Exception handling */
+	if ( !(local.string) || !(waitthread __IsString local.string)) {
+		if (level.DEBUG > 0) {
+			conprintf "\n ~^~^~^~ FATAL_ERROR|BOT4_ENGINE[lib/string.slib::LeftOf]: String <arg1> does not exist! ~^~^~^~ \n\n";
+		}
+		end;
+	}  
+	if ( (local.pos == NIL) || !(typeof local.pos == "int") ) {
+		if (level.DEBUG > 0) {
+			conprintf "\n ~^~^~^~ FATAL_ERROR|BOT4_ENGINE[lib/string.slib::LeftOf]: String position <arg2> is invalid or out of range! ~^~^~^~ \n\n";
+		}
+		end;
+	} else if (local.pos < 0) {
+		if (level.DEBUG > 1) {
+			conprintf "~^~^~^~ ERROR|BOT4_ENGINE[lib/string.slib::LeftOf]: Specified string position <arg2> is out of range! Adjusting to closest admissible range.. ~^~^~^~ \n";
+		}
+		local.result = "";
+		end local.result;
+	} else if (local.pos >= local.string.size) {
+		if (level.DEBUG > 1) {
+			conprintf "~^~^~^~ ERROR|BOT4_ENGINE[lib/string.slib::LeftOf]: Specified string position <arg2> is out of range! Adjusting to closest admissible range.. ~^~^~^~ \n";
+		}
+		local.result = local.string;
+		end local.result;
+	}
+	
+	/* Main logic */
+	internal16:
+
+	local.result = "";
+	for (local.i = 0; local.i < local.pos; local.i++) {
+		local.result += local.string[local.i];
+	}
+end local.result;
+
+/** ==========================================================================================
+ RightOf Function
+ ---------------------------------------------------------------------------------------------
+ DESCR|: 	Copies and returns the text left of the specified position in the specified string.
+ INPUT|: 	<STRING string> <INT strPosition> 
+ OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
+				string => processed string
+				NIL => error: invalid input
+ =========================================================================================== */ 
+_RightOf local.string local.pos: goto internal17;
+RightOf local.string local.pos:
+	/* Error & Exception handling */
+	if ( !(local.string) || !(waitthread __IsString local.string)) {
+		if (level.DEBUG > 0) {
+			conprintf "\n ~^~^~^~ FATAL_ERROR|BOT4_ENGINE[lib/string.slib::RightOf]: String <arg1> does not exist! ~^~^~^~ \n\n";
+		}
+		end;
+	}  
+	if ( (local.pos == NIL) || !(typeof local.pos == "int") ) {
+		if (level.DEBUG > 0) {
+			conprintf "\n ~^~^~^~ FATAL_ERROR|BOT4_ENGINE[lib/string.slib::RightOf]: String position <arg2> is invalid or out of range! ~^~^~^~ \n\n";
+		}
+		end;
+	} else if (local.pos >= local.string.size) {
+		if (level.DEBUG > 1) {
+			conprintf "~^~^~^~ ERROR|BOT4_ENGINE[lib/string.slib::RightOf]: Specified string position <arg2> is out of range! Adjusting to closest admissible range.. ~^~^~^~ \n";
+		}
+		local.result = "";
+		end local.result;
+	} else if (local.pos < 0) {
+		if (level.DEBUG > 1) {
+			conprintf "~^~^~^~ ERROR|BOT4_ENGINE[lib/string.slib::RightOf]: Specified string position <arg2> is out of range! Adjusting to closest admissible range.. ~^~^~^~ \n";
+		}
+		local.result = local.string;
+		end local.result;
+	}
+	
+	/* Main logic */
+	internal17:
+	
+	local.strSize = local.string.size;
+	local.result = "";
+	for (local.i = (local.pos + 1); local.i < local.strSize; local.i++) {
+		local.result += local.string[local.i];
+	}
+end local.result;
+
+/** ==========================================================================================
+ CutLeftOf Function
+ ---------------------------------------------------------------------------------------------
+ DESCR|: 	Cuts/removes all characters left of the specified stringPosition in the specified
+			string and returns the result.
+ INPUT|: 	<STRING string> <INT strPosition>
+ OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
+				string => processed string
+				NIL => error: invalid input
+ =========================================================================================== */
+_CutLeftOf local.string local.pos: goto internal18;
+CutLeftOf local.string local.pos:
+	/* Error & Exception handling */
+	if ( !(local.string) || !(waitthread __IsString local.string)) {
+		if (level.DEBUG > 0) {
+			conprintf "\n ~^~^~^~ FATAL_ERROR|BOT4_ENGINE[lib/string.slib::CutLeftOf]: String <arg1> does not exist! ~^~^~^~ \n\n";
+		}
+		end;
+	}  
+	if ( (local.pos == NIL) || !(typeof local.pos == "int") ) {
+		if (level.DEBUG > 0) {
+			conprintf "\n ~^~^~^~ FATAL_ERROR|BOT4_ENGINE[lib/string.slib::CutLeftOf]: String position <arg2> is invalid or out of range! ~^~^~^~ \n\n";
+		}
+		end;
+	} else if (local.pos >= local.string.size) {
+		if (level.DEBUG > 1) {
+			conprintf "~^~^~^~ ERROR|BOT4_ENGINE[lib/string.slib::CutLeftOf]: Specified string position <arg2> is out of range! Adjusting to closest admissible range.. ~^~^~^~ \n";
+		}
+		local.result = "";
+		end local.result;
+	} else if (local.pos < 0) {
+		if (level.DEBUG > 1) {
+			conprintf "~^~^~^~ ERROR|BOT4_ENGINE[lib/string.slib::CutLeftOf]: Specified string position <arg2> is out of range! Adjusting to closest admissible range.. ~^~^~^~ \n";
+		}
+		local.result = local.string;
+		end local.result;
+	}
+	
+	/* Main logic */
+	internal18:
+end (waitthread _Right local.string (waitthread __ConvertPosToChar local.pos local.string.size));
+
+/** ==========================================================================================
+ CutRightOf Function
+ ---------------------------------------------------------------------------------------------
+ DESCR|: 	Cuts/removes all characters left of the specified stringPosition in the specified
+			string and returns the result.
+ INPUT|: 	<STRING string> <INT strPosition>
+ OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
+				string => processed string
+				NIL => error: invalid input
+ =========================================================================================== */
+_CutRightOf local.string local.pos: goto internal19;
+CutRightOf local.string local.pos:
+	/* Error & Exception handling */
+	if ( !(local.string) || !(waitthread __IsString local.string)) {
+		if (level.DEBUG > 0) {
+			conprintf "\n ~^~^~^~ FATAL_ERROR|BOT4_ENGINE[lib/string.slib::CutRightOf]: String <arg1> does not exist! ~^~^~^~ \n\n";
+		}
+		end;
+	}  
+	if ( (local.pos == NIL) || !(typeof local.pos == "int") ) {
+		if (level.DEBUG > 0) {
+			conprintf "\n ~^~^~^~ FATAL_ERROR|BOT4_ENGINE[lib/string.slib::CutRightOf]: String position <arg2> is invalid or out of range! ~^~^~^~ \n\n";
+		}
+		end;
+	} else if (local.pos < 0) {
+		if (level.DEBUG > 1) {
+			conprintf "~^~^~^~ ERROR|BOT4_ENGINE[lib/string.slib::CutRightOf]: Specified string position <arg2> is out of range! Adjusting to closest admissible range.. ~^~^~^~ \n";
+		}
+		local.result = "";
+		end local.result;
+	} else if ( (local.pos >= local.string.size) ) {
+		if (level.DEBUG > 1) {
+			conprintf "~^~^~^~ ERROR|BOT4_ENGINE[lib/string.slib::CutRightOf]: Specified string position <arg2> is out of range! Adjusting to closest admissible range.. ~^~^~^~ \n";
+		}
+		local.result = local.string;
+		end local.result;
+	}
+	
+	/* Main logic */
+	internal19:
+end (waitthread _Left local.string (waitthread __ConvertPosToChar local.pos));
+
+/** ==========================================================================================
+ CutRange Function
+ ---------------------------------------------------------------------------------------------
+ DESCR|: 	Removes part of the string that starts at the specified 'from'-stringPosition
+			to optionally the 'to'-stringPosition, while not including 'to' itself.
+ INPUT|: 	<STRING string> <INT strPositionFrom> [INT strPositionTo] [STRING formatSpacer]
+ OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
+				string => processed string
+				NIL => error: invalid input
+ =========================================================================================== */
+_CutRange local.string local.startPos local.endPos local.spacer: goto internal20;
+CutRange local.string local.startPos local.endPos local.spacer:
+	/* Error & Exception handling */
+	if ( !(local.string) || !(waitthread __IsString local.string)) {
+		if (level.DEBUG > 0) {
+			conprintf "\n ~^~^~^~ FATAL_ERROR|BOT4_ENGINE[lib/string.slib::CutRange]: String <arg1> does not exist! ~^~^~^~ \n\n";
+		}
+		end;
+	}  
+	
+	if ( (local.startPos == NIL) || !(typeof local.startPos == "int") ) {
+		if (level.DEBUG > 0) {
+			conprintf "\n ~^~^~^~ FATAL_ERROR|BOT4_ENGINE[lib/string.slib::CutRange]: Invalid strPositionFrom <arg2>. ~^~^~^~ \n\n";
+		}
+		end;
+	} else if (local.startPos >= local.string.size) {
+		if (level.DEBUG > 1) {
+			conprintf "~^~^~^~ ERROR|BOT4_ENGINE[lib/string.slib::CutRange]: Specified strPositionFrom <arg2> is out of range! Adjusting to closest admissible range.. ~^~^~^~ \n";
+		}
+		local.result = "";
+		end local.result;
+	} else if (local.startPos < 0) {
+		if (level.DEBUG > 1) {
+			conprintf "~^~^~^~ ERROR|BOT4_ENGINE[lib/string.slib::CutRange]: Specified strPositionFrom <arg2> is out of range! Adjusting to closest admissible range.. ~^~^~^~ \n";
+		}
+		local.pos = 0;
+	}
+	
+	if ( (local.endPos == NIL) || !(typeof local.endPos == "int") || (local.endPos > local.string.size) || (local.endPos < local.startPos) ) {
+		if (level.DEBUG > 1) {
+			conprintf "~^~^~^~ EXCEPTION|BOT4_ENGINE[lib/string.slib::CutRange]: Specified strPositionTo <arg3> is invalid! Parameter has defaulted. ~^~^~^~ \n";
+		}
+		local.endPos = (local.string.size - 1);
+	}
+	
+	internal20:
+	
+	if ( !(local.spacer) || !(waitthread __IsStringType local.spacer)) {
+		local.spacer = ""
+	}
+	
+	local.left = waitthread _LeftOf local.string local.startPos
+	local.right = waitthread _Right local.string (waitthread __ConvertPosToChar local.endPos local.string.size)
+end (local.left + local.spacer + local.right)
+
+/** ==========================================================================================
+ SubString Function
+ ---------------------------------------------------------------------------------------------
+ DESCR|: 	Extracts part of the string that starts at the specified 'from'-stringPosition
+			to optionally the 'to'-stringPosition, while not including 'to' itself.
+ INPUT|: 	<STRING string> <INT strPositionFrom> [INT strPositionTo]
+ OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
+				string => processed string
+				NIL => error: invalid input
+ =========================================================================================== */
+_SubString local.string local.startPos local.endPos: goto internal21;
+SubString local.string local.startPos local.endPos:
+	/* Error & Exception handling */
+	if ( !(local.string) || !(waitthread __IsString local.string)) {
+		if (level.DEBUG > 0) {
+			conprintf "\n ~^~^~^~ FATAL_ERROR|BOT4_ENGINE[lib/string.slib::SubString]: String <arg1> does not exist! ~^~^~^~ \n\n";
+		}
+		end;
+	}  
+	
+	if ( (local.startPos == NIL) || !(typeof local.startPos == "int") ) {
+		if (level.DEBUG > 0) {
+			conprintf "\n ~^~^~^~ FATAL_ERROR|BOT4_ENGINE[lib/string.slib::SubString]: Invalid strPositionFrom <arg2>. ~^~^~^~ \n\n";
+		}
+		end;
+	} else if (local.startPos >= local.string.size) {
+		if (level.DEBUG > 1) {
+			conprintf "~^~^~^~ ERROR|BOT4_ENGINE[lib/string.slib::SubString]: Specified strPositionFrom <arg2> is out of range! Adjusting to closest admissible range.. ~^~^~^~ \n";
+		}
+		local.result = "";
+		end local.result;
+	} else if (local.startPos < 0) {
+		if (level.DEBUG > 1) {
+			conprintf "~^~^~^~ EXCEPTION|BOT4_ENGINE[lib/string.slib::SubString]: Specified strPositionFrom <arg2> is invalid! Adjusting to closest admissible range.. ~^~^~^~ \n";
+		}
+		local.pos = 0;
+	}
+	
+	if ( (local.endPos == NIL) || !(typeof local.endPos == "int") || (local.endPos > local.string.size) || (local.endPos <= local.startPos) ) {
+		if (level.DEBUG > 1) {
+			conprintf "~^~^~^~ EXCEPTION|BOT4_ENGINE[lib/string.slib::SubString]: Specified strPositionTo <arg3> is invalid! Parameter has defaulted. ~^~^~^~ \n";
+		}
+		local.endPos = local.string.size;
+	} 
+	
+	/* Main logic */
+	internal21:
+	
+	local.result = "";
+	for (local.i = local.startPos; local.i < local.endPos; local.i++) {
+		local.result += local.string[local.i];
+	}
+end local.result;
+
+/** ==========================================================================================
+ CutStr Function
+ ---------------------------------------------------------------------------------------------
+ DESCR|: 	Removes part of the string that starts at the specified stringPosition and
+			ends a specified length (in characters) further; by default this length is one.
+ INPUT|: 	<STRING string> <INT strPositionFrom> [INT characterLength] [STRING formatSpacer]
+ OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
+				string => processed string
+				NIL => error: invalid input
+ =========================================================================================== */
+_CutStr local.string local.pos local.char local.spacer: goto internal22;
+CutStr local.string local.pos local.char local.spacer:
+	/* Error & Exception handling */
+	if ( !(local.string) || !(waitthread __IsString local.string)) {
+		if (level.DEBUG > 0) {
+			conprintf "\n ~^~^~^~ FATAL_ERROR|BOT4_ENGINE[lib/string.slib::CutStr]: String <arg1> does not exist! ~^~^~^~ \n\n";
+		}
+		end;
+	}  
+	if ( (local.pos == NIL) || !(typeof local.pos == "int") ) {
+		if (level.DEBUG > 0) {
+			conprintf "\n ~^~^~^~ FATAL_ERROR|BOT4_ENGINE[lib/string.slib::CutStr]: Invalid strPositionFrom <arg2>. ~^~^~^~ \n\n";
+		}
+		end;
+	} else if (local.pos >= local.string.size) {
+		if (level.DEBUG > 1) {
+			conprintf "~^~^~^~ ERROR|BOT4_ENGINE[lib/string.slib::CutStr]: Specified strPositionFrom <arg2> is out of range! Adjusting to closest admissible range.. ~^~^~^~ \n";
+		}
+		local.result = "";
+		end local.result;
+	} else if (local.pos < 0) {
+		if (level.DEBUG > 1) {
+			conprintf "~^~^~^~ EXCEPTION|BOT4_ENGINE[lib/string.slib::CutStr]: Specified strPositionFrom <arg2> is invalid! Adjusting to closest admissible range.. ~^~^~^~ \n";
+		}
+		local.pos = 0;
+	}
+	
+	if ( !(local.char) || !(typeof local.char == "int") || (local.char <= 0) ) {
+		if (level.DEBUG > 1) {
+			conprintf "~^~^~^~ EXCEPTION|BOT4_ENGINE[lib/string.slib::CutStr]: Specified length (in characters) <arg3> is invalid! Parameter has defaulted. ~^~^~^~ \n";
+		}
+		local.char = 1;
+	} else if ( (local.pos + local.char) >= local.string.size) {
+		if (level.DEBUG > 1) {
+			conprintf "~^~^~^~ EXCEPTION|BOT4_ENGINE[lib/string.slib::CutStr]: Specified length (in characters) <arg2> is invalid! Adjusting to closest admissible range.. ~^~^~^~ \n";
+		}
+		local.char = (waitthread __ConvertPosToChar local.pos local.string.size);
+	}
+	
+	internal22:
+	
+	if ( !(local.spacer) || !(waitthread __IsStringType local.spacer)) {
+		local.spacer = ""
+	}
+	
+	local.endPos = local.pos + local.char
+	local.left = waitthread _LeftOf local.string local.pos;
+	local.right = waitthread _Right local.string (waitthread __ConvertPosToChar local.endPos local.string.size); 
+end (local.left + local.spacer + local.right); 
+
+/** ==========================================================================================
+ SubStr Function
+ ---------------------------------------------------------------------------------------------
+ DESCR|: 	Extracts part of the string that starts at the specified stringPosition and
+			ends a specified length (in characters) further; by default this length is one.
+ INPUT|: 	<STRING string> <INT strPositionFrom> [INT characterLength]
+ OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
+				string => processed string
+				NIL => error: invalid input
+ =========================================================================================== */
+_SubStr local.string local.pos local.char: goto internal23;
+SubStr local.string local.pos local.char:
+	/* Error & Exception handling */
+	if ( !(local.string) || !(waitthread __IsString local.string)) {
+		if (level.DEBUG > 0) {
+			conprintf "\n ~^~^~^~ FATAL_ERROR|BOT4_ENGINE[lib/string.slib::SubStr]: string <arg1> does not exist! ~^~^~^~ \n\n";
+		}
+		end;
+	}  
+	
+	if ( (local.pos == NIL) || !(typeof local.pos == "int") ) {
+		if (level.DEBUG > 0) {
+			conprintf "\n ~^~^~^~ FATAL_ERROR|BOT4_ENGINE[lib/string.slib::SubStr]: invalid strPositionFrom <arg1>. ~^~^~^~ \n\n";
+		}
+		end;
+	} else if (local.pos >= local.string.size) {
+		if (level.DEBUG > 1) {
+			conprintf "~^~^~^~ ERROR|BOT4_ENGINE[lib/string.slib::SubStr]: Specified strPositionFrom <arg2> is out of range! Adjusting to closest admissible range.. ~^~^~^~ \n";
+		}
+		local.result = "";
+		end local.result;
+	} else if (local.pos < 0) {
+		if (level.DEBUG > 1) {
+			conprintf "~^~^~^~ EXCEPTION|BOT4_ENGINE[lib/string.slib::SubStr]: Specified strPositionFrom <arg2> is invalid! Adjusting to closest admissible range.. ~^~^~^~ \n";
+		}
+		local.pos = 0;
+	}
+	
+	if ( !(local.char) || !(typeof local.char == "int") || (local.char <= 0) ) {
+		if (level.DEBUG > 1) {
+			conprintf "~^~^~^~ EXCEPTION|BOT4_ENGINE[lib/string.slib::SubStr]: Specified length (in characters) <arg3> is invalid! Parameter has defaulted. ~^~^~^~ \n";
+		}
+		local.char = 1;
+	} else if ( (local.pos + local.char) >= local.string.size) {
+		if (level.DEBUG > 1) {
+			conprintf "~^~^~^~ EXCEPTION|BOT4_ENGINE[lib/string.slib::SubStr]: Specified length (in characters) <arg2> is invalid! Adjusting to closest admissible range.. ~^~^~^~ \n";
+		}
+		local.char = (waitthread __ConvertPosToChar local.pos local.string.size);
+	}
+	
+	/* Main logic */
+	internal23:
+	
+	local.strSize = local.pos + local.char;
+	local.result = "";
+	for (local.i = local.pos; local.i < local.strSize; local.i++) {
+		local.result += local.string[local.i];
+	}
+end local.result;
+
+/** ==========================================================================================
+ CharToInt Function
+ ---------------------------------------------------------------------------------------------
+ DESCR|: 	Converts specified string into a normalArray of all its characters' ASCII numbers.
+ INPUT|: 	<STRING string>
+ OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
+				array => array (starting from index 0) of all chars
+				NIL => error: invalid input
+ =========================================================================================== */
+CharToInt local.string:
+	/* Error & Exception handling */
+	if ( !(local.string) || !(waitthread __IsStringType local.string)) {
+		if (level.DEBUG > 0) {
+			conprintf "\n ~^~^~^~ FATAL_ERROR|BOT4_ENGINE[lib/string.slib::CharToInt]: Specified string <arg1> is either inexistent or not a string type! ~^~^~^~ \n\n";
+		}
+		end;
+	} 
+	
+	/* Main logic */
+	local.strSize = local.string.size;
+	for (local.i = 0; local.i < local.strSize; local.i++) {
+		local.result[local.i] = charToInt(local.string[local.i]);
+	}
+end local.result;
+
+/** ==========================================================================================
+ IntToChar Function
+ ---------------------------------------------------------------------------------------------
+ DESCR|: 	Converts specified Array of ASCII numbers into string.
+ INPUT|: 	<ARRAY array>
+ OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
+				string => processed string
+				NIL => error: invalid input
+ =========================================================================================== */
+IntToChar local.array:
+	/* Error & Exception handling */
+	if ( !(local.array) || ((typeof local.array != "array") && (typeof local.array != "const array")) ) {
+		if (level.DEBUG > 0) {
+			conprintf "\n ~^~^~^~ FATAL_ERROR|BOT4_ENGINE[lib/string.slib::IntToChar]: Specified array <arg1> is either inexistent or invalid! ~^~^~^~ \n\n";
+		}
+		end;
+	}
+	
+	local.charData = waitthread level.funcStr.lib::ASCIIData;
+	
+	local.start = (typeof local.array == "const array");
+	local.arraySize = local.array.size + local.start;
+	
+	local.result = "";
+	for (local.i = local.start; local.i < local.arraySize; local.i++) {
+		local.result += local.charData[local.array[local.i]];
+	}
+end local.result;
+
+/** ==========================================================================================
+ TransformStr Function
+ ---------------------------------------------------------------------------------------------
+ DESCR|: 	Converts specified characters in specified string to other characters. The array
+			must be an object array wherein the stringbox there's the character to be 
+			converted and its value is the character to be converted to.
+ INPUT|: 	<STRING string> <ARRAY charMapping>
+ OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
+				string => processed string
+				NIL => error: invalid input
+ =========================================================================================== */
+_TransformStr local.string local.mapping local.caseInsensitive: goto internal24;
+TransformStr local.string local.mapping local.caseInsensitive:
+	/* Error & Exception handling */
+	if ( !(local.string) || !(waitthread __IsString local.string)) {
+		if (level.DEBUG > 0) {
+			conprintf "\n ~^~^~^~ FATAL_ERROR|BOT4_ENGINE[lib/string.slib::ConvertStr]: string <arg1> does not exist! ~^~^~^~ \n\n";
+		}
+		end;
+	} if ( !(local.mapping) || ((typeof local.mapping != "array") && (typeof local.mapping != "const array")) ) {
+		if (level.DEBUG > 0) {
+			conprintf "\n ~^~^~^~ FATAL_ERROR|BOT4_ENGINE[lib/string.slib::ConvertStr]: Specified array <arg2> is either inexistent or invalid! ~^~^~^~ \n\n";
+		}
+		end;
+	}
+	
+	internal24:
+	if (local.caseInsensitive) {
+		local.charCase = waitthread level.funcStr.lib::CharData 1
+	}
+	
+	local.result = "";
+	local.strSize = local.string.size;
+	for (local.i = 0; local.i < local.strSize; local.i++) {
+		local.char = string(local.string[local.i]);
+		println local.char
+		if (local.mapping[local.char]) {
+			local.result += local.mapping[local.char];
+			continue;
+		} else if (local.caseInsensitive && local.charCase[local.char] && local.mapping[local.charCase[local.char]]) {
+			local.result += local.mapping[local.charCase[local.char]]
+			continue;
+		}
+		local.result += local.string[local.i];
+	}
+end local.result
+
+/** ==========================================================================================
+ CutterStr Function
+ ---------------------------------------------------------------------------------------------
+ DESCR|: 	Cuts specified string up into an normalArray of all its characters.
+ INPUT|: 	<STRING string>
+ OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
+				array => array (starting at index 0) of all chars
+				NIL => error: invalid input
+ =========================================================================================== */
+CutterStr local.string:
+	/* Error & Exception handling */
+	if ( !(local.string) || !(waitthread __IsString local.string)) {
+		if (level.DEBUG > 0) {
+			conprintf "\n ~^~^~^~ FATAL_ERROR|BOT4_ENGINE[lib/string.slib::MakeLn]: string <arg1> does not exist! ~^~^~^~ \n\n";
+		}
+		end;
+	} 
+
+	/* Main logic */
+	local.strSize = local.string.size
+	local.j = 1;
+	for (local.i = 0; local.i < local.strSize; local.i++) {
+		local.result[local.j] = local.string[local.i];
+		local.j++;
+	}
+end local.result;
+
+/** ==========================================================================================
+ MakeLn Function
+ ---------------------------------------------------------------------------------------------
+ DESCR|: 	Function will make line out of specified string. Optionally you can choose to
+			how many newlines to add at the front and/or at the back of the string.
+ INPUT|: 	<STRING string> [INT back] [INT front]
+ OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
+				string => processed string
+				NIL => error: invalid input
+ =========================================================================================== */
+MakeLn local.string local.back local.front:
+	/* Error & Exception handling */
+	if ( !(local.string) || !(waitthread __IsString local.string)) {
+		if (level.DEBUG > 0) {
+			conprintf "\n ~^~^~^~ FATAL_ERROR|BOT4_ENGINE[lib/string.slib::MakeLn]: string <arg1> does not exist! ~^~^~^~ \n\n";
+		}
+		end;
+	} 
+
+	/* Main logic */
+	// default
+	if ((local.back == NIL) && !(local.front)) {
+		local.result = local.string + "\n";
+	} else {
+		local.newLine = "\n";
+		local.result = local.string;
+		
+		// custom options..
+		if (local.back != NIL) {
+			for (local.i = 1; local.i <= local.back; local.i++) {
+				local.result += local.newLine;
+			}
+		} 
+		if (local.front != NIL) {
+			for (local.i = 1; local.i <= local.front; local.i++) {
+				local.result = local.newLine + local.result;
+			}
+		}
+	}
+end local.result;
+
+/** ==========================================================================================
+ StripLn Function
+ ---------------------------------------------------------------------------------------------
+ DESCR|: 	Strips specified string of newline ("\n") markers.
+ INPUT|: 	<STRING string>
+ OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
+				string => processed string
+				NIL => error: invalid input
+ =========================================================================================== */
+StripLn local.string:
+	/* Error & Exception handling */
+	if ( !(local.string) || !(waitthread __IsString local.string)) {
+		if (level.DEBUG > 0) {
+			conprintf "\n ~^~^~^~ FATAL_ERROR|BOT4_ENGINE[lib/string.slib::StripLn]: string <arg1> does not exist! ~^~^~^~ \n\n";
+		}
+		end;
+	}
+	/* Main logic */
+end (waitthread _ReplaceStr local.string "\n" "" 1);
+
+/** ==========================================================================================
+ AddDblQuotes Function
+ ---------------------------------------------------------------------------------------------
+ DESCR|: 	Adds double quotes to both ends of the specified string
+ INPUT|: 	<STRING string> [INT option]
+ OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
+				string => processed string
+				NIL => error: invalid input
+ =========================================================================================== */
+AddDblQuotes local.string local.option:
+	/* Error & Exception handling */
+	if ( !(local.string) || !(waitthread __IsString local.string)) {
+		if (level.DEBUG > 0) {
+			conprintf "\n ~^~^~^~ FATAL_ERROR|BOT4_ENGINE[lib/string.slib::AddDblQuotes]: string <arg1> does not exist! ~^~^~^~ \n\n";
+		}
+		end;
+	} 
+	/* Main logic */
+	switch (local.option) {
+		case 0:
+			local.result = (local.string + "\"");
+		break;
+		case 1:
+			local.result = ("\"" + local.string);
+		break;
+		default:
+			local.result = ("\"" + local.string + "\"");
+		break;
+	}
+end local.result
+
+/** ==========================================================================================
+ CommentStr Function
+ ---------------------------------------------------------------------------------------------
+ DESCR|: 	Comments specified string out according to the specified manner (options: 0-3)
+ INPUT|: 	<STRING string> [INT type]
+ OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
+				string => processed string
+				NIL => error: invalid input
+ =========================================================================================== */
+CommentStr local.string local.type:
+	/* Error & Exception handling */
+	if ( !(local.string) || !(waitthread __IsString local.string)) {
+		if (level.DEBUG > 0) {
+			conprintf "\n ~^~^~^~ FATAL_ERROR|BOT4_ENGINE[lib/string.slib::EscSeq]: string <arg1> does not exist! ~^~^~^~ \n\n";
+		}
+		end;
+	}
+	if !(local.type) {
+		local.type = 0;
+	}
+	
+	/* Main logic */
+	switch (int(local.type)) {
+		case 1:
+			local.result = ("/**" + local.string + "*/");
+		break;
+		case 2:
+			local.result = ("//" + local.string);
+		break;
+		case 3:
+			local.result = ("///" + local.string);
+		break;
+		default:
+			local.result = ("/*" + local.string + "*/");
+		break;
+	}
+end local.result;
+
+/** ==========================================================================================
+ UncommentStr Function
+ ---------------------------------------------------------------------------------------------
+ DESCR|: 	Removes all (or the specified type of) comment sequences from specified string.
+ INPUT|: 	<STRING string> [INT type]
+ OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
+				string => processed string
+				NIL => error: invalid input
+ =========================================================================================== */
+UncommentStr local.string local.type:
+	/* Error & Exception handling */
+	if ( !(local.string) || !(waitthread __IsString local.string)) {
+		if (level.DEBUG > 0) {
+			conprintf "\n ~^~^~^~ FATAL_ERROR|BOT4_ENGINE[lib/string.slib::EscSeq]: string <arg1> does not exist! ~^~^~^~ \n\n";
+		}
+		end;
+	}
+	if (local.type) {
+		local.type = int(local.type);
+	}
+	
+	/* Main logic */
+	local.result = local.string;
+	switch (local.type) {
+		case 0:
+			local.result = waitthread _ReplaceStr local.result "/*" "" 1;
+			local.result = waitthread _ReplaceStr local.result "*/" "" 1;
+		break;
+		case 1:
+			local.result = waitthread _ReplaceStr local.result "/**" "" 1;
+			local.result = waitthread _ReplaceStr local.result "*/" "" 1;
+		break;
+		case 2:
+			local.result = waitthread _ReplaceStr local.result "//" "" 1;
+		break;
+		case 3:
+			local.result = waitthread _ReplaceStr local.result "///" "" 1;
+		break;
+		default:
+			local.result = waitthread _ReplaceStr local.result "*/" "" 1;
+			if (local.result != local.string) {
+				local.string = local.result;
+				local.result = waitthread _ReplaceStr local.result "/**" "" 1;
+				if (local.result == local.string) {
+					local.result = waitthread _ReplaceStr local.result "/*" "" 1;
+				}
+			} else {
+				local.result = waitthread _ReplaceStr local.result "///" "" 1;
+				if (local.result == local.string) {
+					local.result = waitthread _ReplaceStr local.result "//" "" 1;
+				}
+			}
+		break;
+	}
+end local.result;
+
+/** ==========================================================================================
+ AddTabs Function
+ ---------------------------------------------------------------------------------------------
+ DESCR|: 	By default a tab is added at the end of the specified string; optionally the 
+			specified string can be tabbed a specified number of times at the end or start.
+ INPUT|: 	<STRING string> [{INT:+/-} option]
+ OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
+				string => processed string
+				NIL => error: invalid input
+ =========================================================================================== */
+AddTabs local.string local.option:
+	/* Error & Exception handling */
+	if ( !(local.string) || !(waitthread __IsString local.string)) {
+		if (level.DEBUG > 0) {
+			conprintf "\n ~^~^~^~ FATAL_ERROR|BOT4_ENGINE[lib/string.slib::EscSeq]: string <arg1> does not exist! ~^~^~^~ \n\n";
+		}
+		end;
+	} 
+	/* Main logic */
+	if !(local.option) {
+		local.result = (local.string + "\t");
+	} else {
+		if (local.option > 0) {
+			local.num = local.option;
+			local.front = "";
+			local.back = "\t";
+		} else if (local.option < 0) {
+			local.num = abs(local.option);
+			local.front = "\t";
+			local.back = "";
+		}
+		
+		local.result = local.string;
+		for (local.i = 1; local.i <= local.num; local.i++) {
+			local.result = (local.front + local.result + local.back);
+		}
+	}
+end local.result;
+
+/** ==========================================================================================
+ DelTabs Function
+ ---------------------------------------------------------------------------------------------
+ DESCR|: 	Strips specified string of all tabs and indent sequences.
+ INPUT|: 	<STRING string>
+ OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
+				string => processed string
+				NIL => error: invalid input
+ =========================================================================================== */
+DelTabs local.string:
+	/* Error & Exception handling */
+	if ( !(local.string) || !(waitthread __IsString local.string)) {
+		if (level.DEBUG > 0) {
+			conprintf "\n ~^~^~^~ FATAL_ERROR|BOT4_ENGINE[lib/string.slib::EscSeq]: string <arg1> does not exist! ~^~^~^~ \n\n";
+		}
+		end;
+	} 
+	/* Main logic */
+end (waitthread _ReplaceStr local.string "\t" "" 1);
+
+/** ==========================================================================================
+ IsCharDataSafe Function
+ ---------------------------------------------------------------------------------------------
+ DESCR|: 	Checks string for characters that invalid when used in filenames, or optionally
+			filepaths.
+ INPUT|: 	<STRING string> [INT type]
+ OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
+				int => 0:notSafe and 1:safe
+				NIL => error: invalid input
+ =========================================================================================== */
+IsCharDataSafe local.string local.type:
+	if ( !(local.string) || !(waitthread __IsString local.string)) {
+		if (level.DEBUG > 0) {
+			conprintf "\n ~^~^~^~ ERROR|BOT4_ENGINE[lib/string.slib::IsCharDataSafe]: Fatal error: the string does not exist! ~^~^~^~ \n\n";
+		}
+		end;
+	}
+
+	local.blacklist = waitthread level.funcStr.lib::BadCharData;
+	
+	if (local.type) {
+		local.start = 2;
+	} else {
+		local.start = 1;
+	}
+	
+	local.result = 1;
+	local.strSize = local.string.size;
+	for (local.i = 0; local.i < local.strSize; local.i++) {
+		for (local.j = local.start; local.j <= local.blacklist.size; local.j++) {
+			if (local.string[local.i] == local.blacklist[local.j]) {
+				local.result = 0;
+				goto EXIT;
+			}
+		}
+	}
+	EXIT:
+end local.result
+
+/** ==========================================================================================
+ MakeCharDataSafe Function
+ ---------------------------------------------------------------------------------------------
+ DESCR|: 	Checks string for characters that invalid when used in filenames, or optionally
+			filepaths, and removes them.
+ INPUT|: 	<STRING string> [INT type]
+ OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
+				string => processed string
+				NIL => error: invalid input
+ =========================================================================================== */
+MakeCharDataSafe local.string local.type:
+	if ( !(local.string) || !(waitthread __IsString local.string)) {
+		if (level.DEBUG > 0) {
+			conprintf "\n ~^~^~^~ ERROR|BOT4_ENGINE[lib/string.slib::MakeCharDataSafe]: Fatal error: the string does not exist! ~^~^~^~ \n\n";
+		}
+		end;
+	}
+
+	local.blacklist = waitthread level.funcStr.lib::BadCharData
+	
+	if (local.type) {
+		local.start = 2;
+	} else {
+		local.start = 1;
+	}
+	
+	local.result = "";
+	local.strSize = local.string.size;
+	for (local.i = 0; local.i < local.strSize; local.i++) {
+		for (local.j = local.start; local.j <= local.blacklist.size; local.j++) {
+			if (local.string[local.i] == local.blacklist[local.j]) {
+				goto EOL;
+			}
+		}
+		local.result += local.string[local.i];
+		EOL:
+	}
+end local.result
+
+__IsString local.string:
+end ((typeof local.string == "const string") || (typeof local.string == "string"));
+
+__IsStringType local.string:
+end ((typeof local.string == "const string") || (typeof local.string == "string") || (typeof local.string == "char"));
+
+__ConvertPosToChar local.pos local.strSize:
+	// inverted: calculates number of characters offsetted from the end of the string (right side)
+	if (local.strSize) {
+		local.result = (local.strSize - local.pos);
+	// normal: calculates number of characters offsetted from the start of the string (left side)
+	} else {
+		local.result = local.pos + 1;
+	}
+end local.result;
+
+__ConvertCharToPos local.char local.strSize:
+	// inverted: local.char is the number of characters count from the end of the string
+	if (local.strSize) {
+		local.result = (local.strSize - local.char);
+	// normal..
+	} else {
+		local.result = local.char - 1;
+	}
+end local.result;

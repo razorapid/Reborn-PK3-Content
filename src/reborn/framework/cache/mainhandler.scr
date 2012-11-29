@@ -1,0 +1,60 @@
+// => use subdirectories for type of cache.
+// script/ for Morpheus Script cache, which can be executed directly
+// ini/ for .ini format cache, which needs to be parsed first
+// cfg/ for .cfg format cache, which needs to be parsed first
+// xml/ for .xml format cache, which needs to be parsed first
+//normal directories for mixes of both or other caches.
+//
+// While compiling cache data, give option to add information per section that is written with it.
+// Also have the requirement to add titles to table storage, and the requirement to give a sectionname
+// to each block of data that's being compiled for caching.
+/// -> or no title requirement, so user can also reference the right column via its supposed index?
+
+// Add $ScriptMaster and use as only&global ent to cache all models and sounds.
+
+__init:
+
+
+end level.Cache;
+
+__info:
+
+end;
+
+__EngineCache:
+	level.ScriptMaster = spawn ScriptMaster;
+	$Cache.ScriptMaster = level.ScriptMaster;
+	
+	// Execute accumulated resource cache.
+	$Cache.ScriptMaster waitthread __MdlCache;
+	// Execute accumulated sound cache.
+	$Cache.ScriptMaster waitthread __SndCache;
+end;
+
+__MdlCache:
+	local.path = ($System.cache + "auto/mdl/");
+	local.exec = flist local.path 0;
+		
+	// For some reason if directory is empty flist returns the directory path.
+	if (local.exec != local.path) {
+		for (local.i = 0; local.i < local.exec.size; local.i++) {
+			// Parse files, which should only contain model paths without quotes. File is loaded into buffer,
+			// cut up according to '\n' spacer and each path is passed on during execution: self cache <path>
+		}
+	} 
+end;
+
+__SndCache:
+	local.path = ($System.cache + "auto/snd/");
+	local.exec = flist local.path 0;
+		
+	// For some reason if directory is empty flist returns the directory path.
+	if (local.exec != local.path) {
+		for (local.i = 0; local.i < local.exec.size; local.i++) {
+			// Parse files, which should only contain arguments that are passed to alias/aliascache;
+			// then cut up into array according to '\n' spacer and each line of arguments is parsed
+			// for a second time. This time NIL entries are filled with default values before the 
+			// actual cache.
+		}
+	} 
+end;
