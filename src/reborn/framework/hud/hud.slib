@@ -1,6 +1,35 @@
 // HUD functions
 // all sorts, but primarily for HUD main menu and submenu's
 /*
+0 KP_INS
+1 KP_END
+2 KP_DOWNARROW
+3 KP_PGDN
+4 KP_LEFTARROW
+5 KP_5 
+6 KP_RIGHTARROW
+7 KP_HOME
+8 KP_UPARROW
+9 KP_PGUP
+. KP_DEL
+/ KP_SLASH
+- KP_MINUS
++ KP_PLUS
+Enter KP_ENTER
+
+set cl_ctrlbindings "1"
+set cl_altbindings "1"
+
+=>
+bind
+altbind
+ctrlbind
+& double keypress
+
+Fire, sec Fire & enter. => menu navigation? Fire = next menu/tab; sec. Fire = previous menu/tab; ENTER = turn off menu mode
+ALT & CTRL bind the numpad keys; should give 3x more abilities for the same amount of keys
+*/
+/*
 Menu Handler: recognize menu links, if one leaves, all processes active in the previous menu are terminated and the menu is deactivated
 -> setupthread (should be handled individually either at connection or at activation)
 -> updatethread (seperately called)
@@ -16,20 +45,72 @@ Menu Handler: recognize menu links, if one leaves, all processes active in the p
 -> set deactivation threads 
 prevMenu var
 prevTab var
-
-Player has property array that contains most internal threads run on him. These are sent to debug where their scripts are paused while player is in menu mode.
 */
 main:
 
 
 
 end
+/* Remove access testing? After MouseTest, immediate execute the control thread by which I can activate the code step by step.
+	Pause thread each time a specified variable has changed. Thread only continues on developer's remote signal.
+*/
+MouseTest:
+	if (self) {
+		// Reset specified player's viewangles...
+		self stufftext "centerview";
+		
+		// Did client's console receive our stufftexted command? 
+		if (self.viewangles == ( 0 0 0 )) {
+		
+			// Locks the viewangles. This is temporary.
+			self physics_off;
+			//self nodamage;
+			
+			// Viewangles(0,0,0) is the center pixel on the screen, of the crosshair and the center point of the gunbarrel.
+			// Convert viewangles to euler coordinates based on player's position:
+			local.centreOrigin = (self gettagposition "eyes bone") * (self.forwardvector * 32);
+			
+			// Consider this the centre point to draw a rectangle around. This rectangle will be the projected 'screen' where
+			// the the player's crosshair can operate our simulated mouse. For an aspect ratio, we going for phi because we can't detect player's aspect ratio.
+			local.setsize[0] = ((local.centreOrigin[0] * $Math.PHI) (local.centreOrigin[1] * $Math.PHI) (local.centreOrigin[2] * $Math.PHI));
+			local.setsize[1] = ((local.centreOrigin[0] * -$Math.PHI) (local.centreOrigin[1] * -$Math.PHI) (local.centreOrigin[2] * -$Math.PHI));
+			
+			// Get max viewangles the player may have now. Do it now while the corner haven't still been converted to setsize.
+			local.maxViewAngles[0][0] = vector_toAngles (local.setsize[0][0]);
+			local.maxViewAngles[0][1] = vector_toAngles (local.setsize[0][1]);
+			local.maxViewAngles[1][0] = vector_toAngles (local.setsize[1][0]);
+			local.maxViewAngles[1][1] = vector_toAngles (local.setsize[1][1]);
+			
+			// Convert to setsize...
+			local.setsize[0][0] -= local.centreOrigin[0];
+			local.setsize[0][1] -= local.centreOrigin[1];
+			local.setsize[0][2] -= local.centreOrigin[2];
+			local.setsize[1][0] -= local.centreOrigin[0];
+			local.setsize[1][1] -= local.centreOrigin[1];
+			local.setsize[1][2] -= local.centreOrigin[2];
+			
+			// Create clickbox:
+			self.Menu["ClickBox"] = spawn script_origin targetname "MenuClickBox";
+			self.Menu["ClickBox"].origin = local.centreOrigin;
+			self.Menu["ClickBox"].player = self;
+			self.Menu["ClickBox"] setsize local.setsize[1] local.setsize[0];
+			
+		}
+	}
+end;
 
 /**
 Server-side mouse interface:
-Once menu opens, centerview player (& calibrate). Take snapshot and project resolution 1920x1080 to 3D fov data. Immobilize & immune player.
-Transform viewangles to convergence point (i.e. crosshair.. so perhaps trace from eyebone then?) and if it is within the resolution fov then custom-hud mouse 
+Once menu opens, centerview player (& calibrate). Take snapshot and project resolution 1920x1080 to 3D fov data. Freeze & immune player.
+Transform viewangles to convergence point (i.e. crosshair) and if it is within the resolution fov then custom-hud mouse 
 will appear at correct 2D position on screen and the player can move it by moving his mouse ;-) => need to tweak speed & smoothness.
+There are two alternatives that are always available according to user preference. Using left/right/up/down to move the mouse and
+ENTER (or something else) to click. Secondly, you use predefined keys to switch tabs, items, menus etc... (this should be fairly clean, 
+like 'if this then that')
+
+THIS! http://stackoverflow.com/questions/5276315/graphics-equation-to-convert-3d-point-to-2d-projection
+AND THIS! http://stackoverflow.com/questions/8633034/basic-render-3d-perspective-projection-onto-2d-screen-with-camera-without-openg
+My suspicions were correct, I have to use matrixes.
 
 Buttons & interactive hud-elements have a 2D setsize set, thus mouse-over & fireheld above an interactive element's position will trigger it. =D
 

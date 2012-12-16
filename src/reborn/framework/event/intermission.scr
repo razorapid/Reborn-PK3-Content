@@ -2,11 +2,11 @@
 
 main local.type:
 	if (level.eventSys) {
-		for (local.i = 0; local.i < level.eventSys.list["intermission"].size; local.i++) {
-			if (typeof level.eventSys.list["intermission"][local.i] == "const array") {
-				thread level.eventSys.list["intermission"][local.i] local.type;
+		for (local.i = 0; local.i < level.eventSys.script["intermission"].size; local.i++) {
+			if (typeof level.eventSys.script["intermission"][local.i] == "const array") {
+				thread level.eventSys.script["intermission"][local.i] local.type;
 			} else {
-				exec level.eventSys.list["intermission"][local.i] local.type;
+				exec level.eventSys.script["intermission"][local.i] local.type;
 			}
 		}
 	}

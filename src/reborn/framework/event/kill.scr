@@ -2,11 +2,11 @@
 
 main local.attacker local.damage local.inflictor local.position local.direction local.normal local.knockback local.damageflags local.meansofdeath local.location local.player:
 	if (level.eventSys) {
-		for (local.i = 0; local.i < level.eventSys.list["kill"].size; local.i++) {
-			if (typeof level.eventSys.list["kill"][local.i] == "const array") {
-				thread level.eventSys.list["kill"][local.i] local.attacker local.damage local.inflictor local.position local.direction local.normal local.knockback local.damageflags local.meansofdeath local.location local.player;
+		for (local.i = 0; local.i < level.eventSys.script["kill"].size; local.i++) {
+			if (typeof level.eventSys.script["kill"][local.i] == "const array") {
+				thread level.eventSys.script["kill"][local.i] local.attacker local.damage local.inflictor local.position local.direction local.normal local.knockback local.damageflags local.meansofdeath local.location local.player;
 			} else {
-				exec level.eventSys.list["kill"][local.i] local.attacker local.damage local.inflictor local.position local.direction local.normal local.knockback local.damageflags local.meansofdeath local.location local.player;
+				exec level.eventSys.script["kill"][local.i] local.attacker local.damage local.inflictor local.position local.direction local.normal local.knockback local.damageflags local.meansofdeath local.location local.player;
 			}
 		}
 	}

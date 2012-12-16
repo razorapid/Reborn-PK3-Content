@@ -2,11 +2,11 @@
 
 main local.player local.command local.args:
 	if (level.eventSys) {
-		for (local.i = 0; local.i < level.eventSys.list["servercommand"].size; local.i++) {
-			if (typeof level.eventSys.list["servercommand"][local.i] == "const array") {
-				thread level.eventSys.list["servercommand"][local.i] local.player local.command local.args;
+		for (local.i = 0; local.i < level.eventSys.script["servercommand"].size; local.i++) {
+			if (typeof level.eventSys.script["servercommand"][local.i] == "const array") {
+				thread level.eventSys.script["servercommand"][local.i] local.player local.command local.args;
 			} else {
-				exec level.eventSys.list["servercommand"][local.i] local.player local.command local.args;
+				exec level.eventSys.script["servercommand"][local.i] local.player local.command local.args;
 			}
 		}
 	}

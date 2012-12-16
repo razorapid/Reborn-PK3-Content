@@ -1,0 +1,27 @@
+
+__init:
+
+end level.Condition;
+
+__info:
+
+end local.inf;
+
+
+// => rename to $Cond.TRUE alongside $Cond.IMPLI, $Cond.EQUIV & $Cond.XOR
+// => adaptive overloading (with arrays?)
+True local.var:
+	local.result = 0;
+	if (local.var != NIL && local.var != NULL && local.var.size > 0) {
+		switch (local.var) {
+			case false:
+			case "0":
+			break;	 // filters out all false values;
+			default: // case true; case 1; case "1"; all other cases (i.e. something)
+				if (local.var) {
+					local.result = 1;
+				}
+			break;
+		}
+	}
+end local.result;

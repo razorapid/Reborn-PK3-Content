@@ -1,0 +1,302 @@
+
+/** SKETCH MODE: for reference & prefab purposes only */
+
+/**
+	$System.Init() => by script & by console, preparations for framework startup next round are made, optionally this will instantly restart round/map/reload map or it will do nothing.
+	$System.Shutdown() => by script: reborn framework is unequivocally shutdown; by console, a warning is given and asks the admin to re-enter the command to proceed; make script appender add if() (checking one bool) to most internal threads and indent its contents by one more.
+	$System.LogMode()	=> no args:get; args:set
+	$System.DisableMod()
+	$System.EnableMod()
+	$System.DisableModComp()
+	$System.EnableModComp()
+	$System.mods => registered mods with their scripts.
+	$System.Runtime()	=> returns amount of minutes/hours the mod is running (or playing maps).
+	$System.version	=> framework version
+	$System.patch => v1.12 patch version
+	$System.ThisScript() => returns path of scriptfile of the ScriptThread this function was called from; path can only be returned if __path/__info is executed successfully. local.result = (parm.previousthread waitthread __path)
+							If NIL, then return NIL. $System.Synchronizing/$System.Maintenance can fix this or a willing/diligent modder.
+	$System.Help. => functions for printing help and info about reborn framework
+	// Server goes into maintenance mode, any user currently ingame, save for clientAdmins & rcon admin, is automatically kicked with moh errormessage 'Server is currently undergoing maintenance/synchronization. 
+	// REBORN Framework System Maintenance/Synchronization; ETA => XX:XX left', and consequently anyone who tries to connect during maintenance/synchronization.
+	$System.Synchronize() => initiates protocol that systematically runs through all detected maps, performing basic scanning and analyzing tasks and switching immediately to the next until all maps have been
+							scanned. This ranges from bsp-read, dimensions-calc, updates to cache, [map trace?], mapscript analysis... Only process where map's precache is checked against the entities found in bsp and
+							mapscript; it is accordingly updated. At the end it will go back to first map and start analysing all found scripts and updating the cache. Custom addons & hooks are scanned/analyzed.
+							Lastly, all internal scripts are MD5 checked. Advanced script analysis: anticipate registrations and events that need caching and do it beforehand so the registration takes little resources as
+							possible, updates scriptfiles with standard __info, parses mod config........... Keep tabs on things in seperate log and automatically shutdown running game instance when done. 
+	$System.Maintenance() => Flags processing for which subtasks of $System.Synchronize() to do and execute them.
+	$System.Schedule() => updates/sets (auto- or )scheduling for maintenance/synchro 
+	$System.Power() => override system power setting which results in the termination and deactivation (or possible re-activation) of background activity (scanning, parsing, logging) as well as other low priority internal functions
+						LOSS OF FUNCTIONALITY INEVITABLE.
+	$System.Tree()	=> reads main/ and all subdirectories and outputs object array with paths being dimensions and files entries.
+	$System.tree	=> if NIL, execute $System.Tree()
+	$System.Settings. => contains all public/customizable settings for framework
+	
+// settings that will act as arguments in internal functions should be parm. variables?					
+//waitthread $Map.GetMapBSPData(<mode:extract/count data> <flags: 1=world;2=info;4=renderedEnts;8=simpleEnts;16=allEnts;32=doors;64=windows;128=(path)nodes;256=spawnpoints;512=ladder info;1024=targetnamedEnts...> 
+//[INT output:all info or just the origin] [STRING specific searchStr?]) 
+
+// NEED FUNC TO STOP THE EXISTENCE OF MORE ENTITIES WITH TARGETNAMES OF FRAMEWORK CLASSES. ALSO INTERNAL THREAD WATCH TO PROTECT READ-ONLY VARIABLES AND, WHEN DISABLED, TO STOP ILLEGAL USAGE OF FRAMEWORK SCRIPTS (MD5?).
+*/
+PrePrespawn:
+	if ( !($System) && waitthread IsValidFramework) {	//locate & obtain this file's MD5 hash, extract 3 encrypted MD5 hash (i.e. double encryption) secretely scattered throughout this framework; 
+														//if those encryptions do not match up, abort; if they match up, decrypt them using this MD5 hash, if 1 of decryptions doesn't match, abort.
+														//use script obfuscator on encrypt & decrypt scripts???? Also renaming threadlabel, removing comments & making every variable used 1 char short.
+		// Initialize the Root class.
+		waitthread InitializeSystem;
+		// Initialize necessary libraries & functions..
+		thread InitializeLibraries;	
+		// Search, parse, cache & execute if necessary.
+		thread HandleModConfig; 	
+	} else {
+		// TERMINATE FRAMEWORK (use scriptthread ent of main thread?); internal thread watcher, and keeps going even when framework is disabled?
+	}
+	
+	// Goto Prespawn..
+	level waittill prespawn
+	thread Prespawn;
+end;
+
+//time saved at end of each round/map, that indicates the total running time of the framework. 
+//This cvar is purged when the system is forcefully shut down. This cvar is reset when timestamp
+//is 24h off when compared to the last record timestamp (seperated from actual time with ;-symbol
+//while being in cvar "frameworktime"??)
+Runtime:
+	local.totalTime = waitthread FrameworkTime;
+	
+	if (local.totalTime && typeof local.totalTime == "float") {
+		local.result = (waitthread $Time.ToFloatSeconds 0 $Sever.lastTimeStamp[1]) + (level.time - $System.time);
+	} else {
+		local.result = level.time - $System.time;
+	}
+end local.result;
+
+/// Firewall? Only allow calls from internal framework scripts? => security.func; checks local.data["scriptfile"] == 1 and returns true or false
+
+//CVAR frameworkTime:
+FrameworkTime:
+	// GetInternalCV() will check if specified cvar is a registered internal cvar, then
+	// its associated parseThread will be executed and it will supply this function with
+	// output data. GetInternalCV() is special function that also first initiates the 
+	// CVar library if that hadn't already been done. 
+	// GetCVar() will return getcvar command output, but if a registered parseThread was 
+	// associated with the specified cvar, then its output will be returned. Vice versa
+	// for SetCVar() and SetInternalCV() functions. CVars can also be associated with
+	// compileThreads that must return string types.
+	local.timeData = waitthread $CVar.GetInternalCV "frameworkTime";
+	
+	if (local.timeData.size > 1) {
+		// $Time.StandardFormat() function converts all other supported timetypes to HH::MM::SS. 0 is decimal seconds.
+		local.totalTime = waitthread $Time.StandardFormat 0 local.timeData[0];
+		$Sever.lastTimeStamp = local.timeData[1][0]::local.timeData[1][1];
+		// $Date.CompareCurrent <type format;0=standard> compares specified date with current date and returns the 
+		// difference in seconds.
+		local.noPlayTime = waitthread $Date.CompareCurrent 0 (local.stamp[2]::local.stamp[1]);
+		$Server.abscenceTime = local.noPlayTime - level.time - 90/*average map loading time*/;
+		//...
+	
+		// $Time.ToFloatSeconds() function converts all supported timetypes to X,X seconds. 0 is standard time format.
+		local.result = waitthread $Time.ToFloatSeconds 0 $Sever.lastTimeStamp[1];
+	} else if (local.timeData.size > 0) {
+	
+	// First time boot-up detected ;-)
+	} else {
+	
+	}
+end local.result;
+
+InitializeLibraries:
+	// Define most important/fundamental library classes.
+	$Library waitthread #DefineClass "String" ($System.libPath + "string.slib"); $Library.Str = $Str;
+	$Library waitthread #DefineClass "File" ($System.libPath + "file.slib"); $Library.File = $File;
+	$Library waitthread #DefineClass "Array" ($System.libPath + "array.slib"); $Library.Array = $Array;
+	$Library waitthread #DefineClass "Parse" ($System.libPath + "parse.slib"); $Library.Parse = $Parse;
+	$Library waitthread #DefineClass "Write" ($System.libPath + "write.slib"); $Library.Write = $Write;
+	$Library waitthread #DefineClass "Compile" ($System.libPath + "compile.slib"); $Library.Compile = $Compile;
+	$Library waitthread #DefineClass "Cache" ($System.cache + "mainhandler.scr"); $Library.Cache = $Cache;
+	// ...
+	
+	level waittill prespawn
+	// ...
+	
+	level waittill spawn
+	$System waitthread #DefineClass "HUD" ($System.hudPath + "HUD.slib"); game.Root.HUD = $HUD;
+	// ...
+	
+	level waittill postthink
+	$System waitthread #DefineClass "Client" ($System.clPath + "client.slib"); $Library.Client = $Client;
+	// ...
+end;
+
+// Extend parm. functionality in accordance with framework's functions; should classes define parm.vars themselves?
+DefineFrameworkParm:
+	//parm.
+end; 
+
+DefineInternalSystemSettings:
+	// temp!
+	level.DEBUG = 3;				//temp: either $System.debug or $Debug.mode!
+	$System.mode = true;			//0=client mode; 1=server mode; this is the primary setting to make certain libraries and functions operate with/without custom/client-side material. Also important for HUD system.
+									//New mods/gametypes/libraries need to support this for it to work, not just handling the var but providing an alternative functionality that works server-side. 
+									//This is more often than not a estethic thing and will disappear once the client patch is released to the public.
+									//Detect clienside? (Client 0 with ping 0) or serverside (time between waittill spawn and waittill playerstart > 3sec)? System.hook_mode can override this.
+									//OR check for "connecting to...", "starting MOHAA_server.exe" in start qconsole as well.
+	$System.hooks = true;			//Scripts/functions that ADD/REPLACE public functions existing in internal library classes, overlapping script content (override) will cause the first candidate to be chosen.
+	$System.overrides = false; 		//Scripts/functions that OVERRIDES whole internal libaries/classes files (usually to tinker with internal functions)
+	
+	// only for the pros who really have to... this should not be included in the official documentation. 
+	$System.forceOverride = false;	//this option turns on system overriding. This will forceload an internal library version that would not be loaded otherwise. (It has a special setting set in __info).
+	$System.forceHooking = false;	//this option turns on system hooking. This will forceload a hook-script that would not be loaded otherwise. 
+	
+	// system
+	$System.status = true;					// bool(true) - initializing and/or running; NIL/false - deactivated/shutdown
+	$System.powersave = false;				// bool(true) - powersaving on which puts extra delay on intensive low priority/background threads & several other background systems; bool(false) - powersaving off.
+	$System.powerPulseIncr = $System.PULSE;	// addition to loop delays due to powersaving
+	$System.stateFile = "mike.st"			// framework loads its own statefile.
+	$System.stateFileTorso = "mike_torso.st" //
+	$System.stateFileLegs = "mike_legs.st"	//
+	//...specifics like how many scripts, threads the framework $System has
+	
+	// security settings (still needed? or dumbed-down version for user?)
+	$System.encryption = true; 				//turns de-/encryption on (background sys) or off: checks and updates will be ignored
+	$System.encryptionDouble = true; 		//turns double encryption on. 
+	$System.decryption = 0;					//speed of decryption: 0 - fastest, 1 - reasonable, 2 - low priority
+	$System.decryptionDouble = true; 		//encryptionDouble must be enabled, this means the string is first encrypted by the standard means and then encrypted by itself, and so can only be unlocked by itself  
+	$System.encryptSensitiveData = true;	//whether or not to encrypt sensitive data (like IPs, player data, admin data...), they may also be double-encrypted.
+	$System.MD5Secure = true;				//false: secure most important threads with MD5 checks (entity, debug, server, game, map, framework...), true: extend the MD5 check to all internal framework files
+	$System.MD5Precache = true;				//whether or not to MD5 protect the global/dmprecache.scr script
+end;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/** CROSS-REFERENCE => level.NAME = $NAME (object-based)
+$scr => contains all script and (main/important) thread shortcuts => level.SCR
+$scr.scripttype => contains all types of script/thread shortcuts (like func, lib etc...) => level.SCRIPTTYPE
+$scr.scripttype.threadtype<.label> => contains all script/thread shortcuts belonging to a certain threadtype (like funcStrings, funcArrays etc..) => level.THREADTYPE
+Both the threadtype and corresponding labels (which are the actual, tangible references) ARE TO BE DEFINED IN THEIR OWN SCRIPTFILES.
+====> this also makes it possible for seperate script libraries (i.e. threadtype bundle) to be easily used with the same cross-reference scheme INDEPENDENTLY 
+----
+functions => PascalCase
+vars & global vars => camelCase
+important and prevelant vars => indicatorCASE
+filenames => lowercase (and underscores)
+definitions.scr => should let the seperate function libraries etc... make the dataEnt 
+*/
+/**	rename $Str function names without the redundant 'Str'
+	Main dynamic cvar "rf ..." with rf standing for reborn framework, or use something simpler like one symbol? like & 
+	.file & .version & .namespace & .title & .name & .MD5 universal to all classes?
+	$System.AI.jv_bots => jvbot engine (minimal)
+	$System.AI.Bots4. => Bot4 engine
+	$System.Library.Str.ToLower => $Lib.Str.ToLower => $Str.ToLower
+	$System.Library.Array.GetDimensions()
+	$System.Library.File.New()
+	$System.Library.path => reborn/lib/
+	$System.Library.Math. ...
+	$System.Library.Common. ...
+	$System.Library.Camera => ???
+	$System.Register.Map() => $Register.Map
+	$System.Register.File()
+	$System.Register.Sound()
+	$System.Register.HUD()
+	$System.Spawn. => collection of functions that correctly spawn most entities & spawning sequences & other stuff.
+	$System.Event. ...
+	$System.Client. ...
+	$System.HUD. ...
+	$System.Map => completely hijacks and simulates map rotation, map events (intermission, change, rounds, restarts), objectives & gametypes
+	$System.Map.file
+	$System.Map.Change() 
+	$System.Map.Reload()
+	$System.Map.Restart()
+	$System.Map.MsgCurrent()
+	$System.Map.MsgNext()
+	$System.Map.Messages() => systematic typewriter, scroll, colour etc... messages to display while map is running
+	$System.Map.Prints()	=> systematic iprintln, _no_locbold, locprint, centerprint messages to display while map is running
+	$System.Map.Locations. ... .Screenshot() function, will zoom out to z max above a certain (subsector)sector and screenshot it.
+	$System.Map.Rotation. ...
+	$System.Map.Round.Teamwin()
+	$System.Map.Round.AlliesWin()
+	$System.Map.Round.AxisWin()
+	$System.Map.Round.Draw()
+	$System.Map.Round.Restart() => 2 modes, basically like the bsptransition & leveltransition for mapchanges
+	$System.Map.Round.winScreen; .winHUD; .winner; ...
+	$System.Map.Dimensions() 
+	$System.Map.Worldspawn.NorthYaw() => $Worldspawn.NorthYaw
+	$System.Map.g_alliedobjective() => change cvar etc..
+	$System.Game.PatchVersion()
+	$System.Game.Date.Format() => $Date
+	$System.Game.GEvents. => list for functions of dynamic events such as fog, nighttime
+	$System.Game.Time.IgnoreClock() => $Time; $Time.Session(); $Time.Level(); $Time.Round(); write MakeReadOnly func that turns a var readonly; $Time.Left(); $Time.Ignore(); $Time.StartLevel(); $Time.StartRound()
+	$System.iEnts
+	$System.rEnts
+	$System.iEntCount
+	$System.rEntCount
+	$System.ChangeGametype()
+	$System.Server.Console.	=> print throughput handling & formatting; takes care of dynamic framework cvar and custom dyn. cvars; CVar functions...; register custom dynamic cvar
+	$System.Server.Accounts. => system for clients to register(using scmd?); password is encrypted by itself. Given password will only serve as a key to unlock the encryption; 
+								if the decrypted password is not the same as the given password, then access is denied (=> min. password policy). Player name is saved unencrypted
+								to quickly find the hash we need to decrypt. Player data is kept in script-format and object form for easy&fast execution. After use it is deleted.
+								This allows an virtually unlimited number of registrations and is executed faster because no file analysis need be done. Use playernames as scriptthread labels?
+								Server runtime cache? => keeps a contineously updated cache-table of all current clients with only basic data like: kills, deaths, name, IP address,
+								isAdmin0/1/2?, isLoggedIn?, ... (use player name without a fixed set of bad chars as object name & cache anchor?)
+	$System.Server.Admins.RCon. => functions to detect rcon admin (use different login/password cvar?), which automatically logs them in as ClientAdmin 'rconX' with maxed-out rights which the 
+							function will add to admins.cfg (and an extra one as well, because this probably needs mapchange to work). They're the only ones who can send serverevents
+							to other admins.
+	$System.Server.Admins.Client* => functions to improve ClientAdmin functionality, such as use of serverevents, ability to change password, ability to identify other logged-in admins, access to admin-spectator (, access to special menu?)
+	$System.Server.SvEvents. => list for functions of dynamic events such as punishing stuff, print3D, HUDevent....
+	$System.Server. ...
+	$System.Debug.LogCopy() => $Debug.LogExtract(); $Debug.LogLookUp()
+	$System.Debug.CustomLogs() => registers custom log & lines text that is to be searched in the console and outputted to that custom logfile. no args:get; args:set
+	$System.Debug.ConEvent() => registers lines of text that is to be searched in the console, if found the specified script will execute.
+	$System.Debug.Error() => produces desired error message in server console or optionally client console.
+	$System.Debug.Thread. => functions that debug, count, detect & control scriptthreads.
+	$System.Debug.Process. => functions that debug, count and terminate (if necessary) registered scriptthreads (usually heavy duty processes)
+	$System.Debug.mode 
+	$System.Debug.ScrParse => parses script for label/text/variable
+	$System.Debug.ScrAppend => appends script with specified text at predefined location by predefined flags of scriptthreads or occurances of something in scriptthreads or at top or bottom of script
+	$System.ShaderList() => .TextureList(); .SoundList(); .TIKIList() ...
+	$System.Sound.Cache()
+	$System.Sound.SCache()
+	$System.Sound.scriptMaster
+	$System.Sound.count
+	$System.Sound.SndEnt()
+	$System.Sound.sndEnts => ent array
+	$System.Sound.Dynamics()
+	$System.Cache. => settings/ dir contains all cached MD5s of default internal vars; if internal var used, only proceed if both MD5s match
+	SEPERATE THREAD/REGISTER:
+	to add help function to most functionClasses; 
+*/
+/**
+	mod_config -> .ini in main/ there must be .pk3 with same name
+		=> mod -> mapspecific/all -> specified when the mod needs to be executed. Is implicitly dominant, while mod may run on every mod, its scripts/gametypes may not and likewise its scripts & gametypes will not run on maps when script is not activated
+			|=> scripts -> [mapspecific/all -> specifies availability; (if mapspecific) will not run on incompatible maps; can be deliberately disabled in maprotation]
+			|=> gametypes -> [mapspecific/all -> specifies availability; (if mapspecific) will not run on incompatible maps, can be deliberately chosen/disabled in maprotation]
+		(all -> mod/gametype can still decide on mapspecifics; gametypes are part of the mod, they cannot represent the mod as a whole)
+			|=> option to 'require' a certain version of one of the internal libraries and will not load when a version different from the specified version is loaded.
+	map_rotation -> chooses which gametypes & mods to load on which map, specific mods can be disabled on all or specific maps.
+		=> for bot4, slip in a maprotation ini/cfg that disables all mods except bot4, fill in a mod_config ini and make sure
+		=> bot4 will only use maprotation settings as default and will override those settings as it sees fit
+	libraries -> ...
+	event handler ->
+	map functions ->
+	built-in dimensions&locations functions?
+	hud functions ->
+	array functions ->
+	string functions ->
+	game (and time/date) functions -> 
+	math functions (trimmed down of course) -> 
+	file functions (include a few in- and output sequences/algorithms to parse default data structs such as .ini...) ->
+	cache of default reborn/ files & their MD5 hash; reborn dmprecache is readonly and framework will refuse to run if the MD5 hash isn't equal to the default dmprecache.
+	cache of event/mod/map config & filepath and the MD5 hash of originally read config file; will read file and update cache (if necessary) when MD5 isn't equal
+	global/autorun/ folder => framework will automatically execute scripts in this folder
+*/

@@ -4,9 +4,9 @@
  DATASTRUCTURE FUNCTIONS LIBRARY; 			Script Framework BETA
  ================================================================
  BY Sor	
- VERSION 1.2.87 (18/11/2012)
+ VERSION 1.3.016 (10/12/2012)
  =-------------------------------------------------------------=		
- Copyright (c) 2009-2013  Lenny Knockx
+ Copyright (c) 2009-2014  Lenny Knockx
  All rights reserved.
  =-------------------------------------------------------------=
  Permission to use, copy, modify, and/or distribute this software 
@@ -28,7 +28,11 @@
  ================================================================
 */
 /*
-Reconcatenate	 (for dynamic arrays: indexes are realigned and entry gaps are closed; 2 methods: speedy but memory-costful (creating new array without gaps) or slower but memory-efficient (re-arranging the entries))
+-> str to int/float for GetExtFreq & GetExtValue helper threads;
+-> Need ObjectArray support for function "ConsistsOf"!
+-> use __EntryExists!
+
+Reconcatenate	 (for dynamic arrays: entry gaps are closed; 2 methods: speedy but memory-costful (creating new array without gaps) or slower but memory-efficient (re-arranging the entries))
 Concatenate 	 (joins arrays via a few general schemes: criss-cross, first-last, last-first, sorted etc...)
 #AppendArrays 		(array2 is added (at the end of) array1; for object arrays, redirect to MergeObjArrays() function)
 ShuffleArray		(randomly shuffles entries in specified array)
@@ -40,169 +44,281 @@ BubbleSortArray		(sort up array according to maximum 5 criteria (read: 5 array h
 					(how to perform in practice????????) (oh entries not equal in type are discarded from the end result.)
 ProcessArray => array (& optional 2nd array ;-))optional dimension, optional entries, arrayThread & varThread & bothThread => for helper thread.			
 */
-/** setting a variable to NULL does NOT make it empty!!!!! => take into account for UpdateDynArray?? EmptyArray? Reconcatenate?*/
-_Decompile group.string: goto internalBQ;
-Decompile group.string:
+
+/** For reference:
+	println local.o.size ==> prints -1 i.e. inexistent
+	local.o[0] = NIL;
+	println local.o.size; ==> prints 0 i.e. uninitialized
+	local.o[0] = NULL;
+	println local.o.size; ==> prints 1 i.e. apparently NOT empty?
+*/
+__EntryExists local.entry:
+end (local.entry.size > 0 && local.entry != NULL);
+
+// Then do Standard $Float & $Bool classes & functions...
+__init:
+	if (self && self == $Array) {
+		/// **TEMPORARILY DEPRECATED**
+		//parm.array = local CreateListener /**.start; .end;*/
+		if (local.dev) {
+			local.labelPrefix = "_";
+		} else {
+			local.labelPrefix = "";
+		}
+
+		self.Empty = 					self.fullPath::"Empty";
+		self.Type = 					self.fullPath::(local.labelPrefix + "Type");
+		self.ConsistsOf = 				self.fullPath::(local.labelPrefix + "ConsistsOf");
+		self.IsConsistent = 			self.fullPath::(local.labelPrefix + "IsConsistent");
+		self.IsConcatenated =			self.fullPath::(local.labelPrefix + "IsConcatenated");
+		self.IsMultiDimensional = 		self.fullPath::(local.labelPrefix + "IsMultiDimensional");
+		self.GetDimensions = 			self.fullPath::(local.labelPrefix + "GetDimensions");
+		self.Print = 					self.fullPath::(local.labelPrefix + "Print");
+		self.Compile = 					self.fullPath::(local.labelPrefix + "Compile");
+		self.Decompile = 				self.fullPath::(local.labelPrefix + "Decompile");
+		self.IsEntityArray = 			self.fullPath::(local.labelPrefix + "IsEntityArray");
+		self.IsObjectArray = 			self.fullPath::(local.labelPrefix + "IsObjectArray");
+		self.IsNrmArrayType = 			self.fullPath::(local.labelPrefix + "IsNormalArrayType");
+		self.IsIdxArrayType = 			self.fullPath::(local.labelPrefix + "IsIndexedArrayType");
+		self.IsHashArray = 				self.fullPath::(local.labelPrefix + "IsHashArray");
+		self.IsSystemArray = 			self.fullPath::(local.labelPrefix + "IsSystemArray");
+		self.IsUserArray = 				self.fullPath::(local.labelPrefix + "IsUserArray");
+		self.IsArrayType =				self.fullPath::(local.labelPrefix + "IsArrayType");
+		self.GetArrayIdx = 				self.fullPath::(local.labelPrefix + "GetArrayIdx");
+		self.GetLastIdx = 				self.fullPath::(local.labelPrefix + "GetLastIdx");
+		self.GetArraySizes = 			self.fullPath::(local.labelPrefix + "GetArraySizes");
+		self.GetHiValue = 				self.fullPath::(local.labelPrefix + "GetHiValue");
+		self.GetLowValue = 				self.fullPath::(local.labelPrefix + "GetLowValue");
+		self.GetExtValue = 				self.fullPath::(local.labelPrefix + "GetExtValue");
+		self.GetLowFreq = 				self.fullPath::(local.labelPrefix + "GetLowFreq");
+		self.GetHiFreq = 				self.fullPath::(local.labelPrefix + "GetHiFreq");
+		self.GetExtFreq = 				self.fullPath::(local.labelPrefix + "GetExtFreq");
+		self.GetVarFreq = 				self.fullPath::(local.labelPrefix + "GetVarFreq");
+		self.GetVarFreqs = 				self.fullPath::(local.labelPrefix + "GetVarFreqs");
+		self.GetTypeFreq =		 		self.fullPath::(local.labelPrefix + "GetTypeFreq");
+		self.GetTypeFreqs = 			self.fullPath::(local.labelPrefix + "GetTypeFreqs");
+		self.HashToNrmArray = 			self.fullPath::(local.labelPrefix + "HashToNrmArray");
+		self.ToNrmArray = 				self.fullPath::(local.labelPrefix + "ToNrmArray");
+		self.HashToIdxArray = 			self.fullPath::(local.labelPrefix + "HashToIdxArray");
+		self.ToIdxArray = 				self.fullPath::(local.labelPrefix + "ToIdxArray");
+		self.HashToAnyArray = 			self.fullPath::(local.labelPrefix + "HashToAnyArray");
+		self.ToAnyArray = 				self.fullPath::(local.labelPrefix + "ToIdxArray");
+		self.Create = 					self.fullPath::(local.labelPrefix + "Create");
+		self.CreateConst = 				self.fullPath::(local.labelPrefix + "CreateConst");
+		self.Some = 					self.fullPath::(local.labelPrefix + "Some");
+		self.Every = 					self.fullPath::(local.labelPrefix + "Every");
+		self.CompareStruct = 			self.fullPath::(local.labelPrefix + "CompareStruct");
+		self.Compare = 					self.fullPath::(local.labelPrefix + "Compare");
+		self.MakeConsistent = 			self.fullPath::(local.labelPrefix + "MakeConsistent");
+		self.Extract = 					self.fullPath::(local.labelPrefix + "Extract");
+		self.ExtractAll = 				self.fullPath::(local.labelPrefix + "ExtractAll");
+		self.To2DVec = 					self.fullPath::(local.labelPrefix + "To2DVec");			//to vector.func? Treat like casts, only check to continue; if error, return arg.. => less bullshit
+		self.To3DVec = 					self.fullPath::(local.labelPrefix + "To3DVec");			//
+		self.VecToConstArray = 			self.fullPath::(local.labelPrefix + "VecToConstArray"); //
+		self.Rename = 					self.fullPath::(local.labelPrefix + "Rename");
+		self.GetName = 					self.fullPath::(local.labelPrefix + "GetName");
+		self.DeleteEnts = 				self.fullPath::(local.labelPrefix + "DeleteEnts");
+		self.FindEnt = 					self.fullPath::(local.labelPrefix + "FindEnt");
+		self.MergeWithObjectArray = 	self.fullPath::(local.labelPrefix + "MergeWithObjectArray");
+		self.CreateObjectArrayOf = 		self.fullPath::(local.labelPrefix + "CreateObjectArrayOf");
+		self.AddToObjectArray = 		self.fullPath::(local.labelPrefix + "AddToObjectArray");
+		self.RemoveFromObjectArray = 	self.fullPath::(local.labelPrefix + "RemoveFromObjectArray");
+		self.MergeObjectArrays = 		self.fullPath::(local.labelPrefix + "MergeObjectArrays");
+	
+		// Class-specific properties and values:
+		self.seekRange = 1024;
+		
+		// There are 57 methods registered in this function library.
+		self.methodSize += 57;	
+		// There is 1 property registered in this function library.
+		self.propertySize += 1;
+	}
+end;
+
+__info:
+	local.inf["library"] = "lib/array.slib";	//filepath in reborn/framework/
+	local.inf["namespace"] = "Array";			//targetname of class this script is part of...	
+	local.inf["title"] = "DATASTRUCTURE FUNCTIONS LIBRARY";
+	local.inf["version"] = "1.3.016";
+	local.inf["lastmodified"] = "10/12/2012";
+	local.inf["authors"][0] = "Sor"
+end local.inf;
+
+/** ==========================================================================================
+ Decompile Function
+ ---------------------------------------------------------------------------------------------
+ DESCR|: 	Decompiles specified (compiled) string back into an array, so one can easily 
+			retrieve the original datastructure from a CVAR or from elsewhere.
+ INPUT|: 	<STRING compiledArray>
+ OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
+			*	array => decompiled string
+			*	NIL => error: uninitialized/invalid/inexistent array or nothing found.
+ =========================================================================================== */
+// Few logical errors can occur if an invalid string passes through the validation.
+// Whether or not this is possible, remains the question. In the mean time we should
+// terminate all processes in media res, print an error message and return NIL when it
+// does occur so we'll know this function needs to be attended yet again.
+// If, in __Decompile, local.j isn't numerical, can we send the original string to __#Decompile?
+_Decompile local.string: goto internalBQ;
+Decompile local.string:
 	/*Error & Exception handling*/
-	if (!group.string || !(waitthread $Str.IsString group.string)) {
+	if (!local.string || !(waitthread $Str.IsString local.string)) {
 		if (level.DEBUG) {
-			conprintf "\n ~^~^~^~ FATAL_ERROR[lib/decompile.slib::Array]: specified string <arg1> is either uninitialized or invalid. ~^~^~^~ \n\n";
+			conprintf "\n ~^~^~^~ FATAL_ERROR[lib/decompile.slib::Array]: specified string <arg1> is either uninitialized, inexistent or invalid. ~^~^~^~ \n\n";
+		}
+		end;
+	} if !(waitthread $Str.ValidatePairs local.string 0 "[" ";" "<") {
+		if (level.DEBUG) {
+			conprintf "\n ~^~^~^~ FATAL_ERROR[lib/decompile.slib::Array]: Illegal format detected! Specified string <arg1> is not a compiled array! ~^~^~^~ \n\n";
 		}
 		end;
 	}
-	// Verify format later...
 	
 	internalBQ:
 	
 	/*Main Logic*/
-	group.indicator = 0;
-	group.strSize = group.string.size;
-	for (local.indicator = 0; local.indicator < local.strSize; local.i++) {
-		switch (group.string[group.indicator]) {
-			case "[":
-				local.arrayStart = "";
-				for (local.i = (group.indicator + 1); local.i < group.strSize; local.i++) {
-					if (group.string[local.i] == ";") {
-						break;
-					}
-					local.arrayStart += group.string[local.i];
-				}
-			
-				if ((local.i - 1) == group.strSize) {
-					if (level.DEBUG) {
-						conprintf "\n ~^~^~^~ FATAL_ERROR[lib/decompile.slib::Array]: invalid syntax!! ~^~^~^~ \n\n";
-					}
-					end;
-				}
-			
-				// Do array stuff
-			
-			break;
-			case "<":
-			break;
-			case ",":
-			break;
-			default:
-			break;
+	// The compiled array happens to be an object array. So w'll deal with it appropriately.
+	if (local.string[1] == ";") {
+		group.info[0] = NIL;
+		local.result = (waitthread __#Decompile local.string);
+
+		if (group.info.size > 0) {
+			local.result["__info"] = group.info;
 		}
-	}
-	
-	// Clear group. vars..
-	group.string = NIL;
-	group.strSize = NIL;
-end local.result;
 
-
-/// Loop string till one finds a "]" and turn all processed
-/// data into real array entries by using this function.
-__PlotEntry local.array local.dimension local.startIdxs:
-
-end local.result;
-
-//-> str to int/float for GetExtFreq & GetExtValue helper threads;
-__init:
-	// TEMPORARY!!
-	level.DEBUG = 3;
-	game.dataEnt = Listener;
-	game.dataEnt2 = SimpleEntity;
-	//
-	
-	// Create class object for reference...
-	if !($Array) {
-		level.Array = local CreateListener; level.Array targetname "Array";
-		/// This is a seperate parameter channel, for global parameters like start and end; 
-		/// Basically... too much trouble to add them to each function. Please note, though,
-		/// that these parameters are cleared after each use to avoid conflicts!
-		
-		/// **TEMPORARILY DEPRECATED**
-		//parm.array = local CreateListener /**.start; .end;*/
-	}
-	
-	// => framework.scr::#DefineClass!
-	level.Array.filePath = "reborn/"
-	level.Array.fileName = "array.slib";
-	if (local.dev) {
-		local.labelPrefix = "_";
+		// Clear group. vars..
+		group.info = NIL;
 	} else {
-		local.labelPrefix = "";
+		local.result = (waitthread __Decompile local.string);
 	}
-	
-	level.Array.HashToNrmArray = 			(level.Array.filePath + level.Array.fileName)::(local.labelPrefix + "HashToNrmArray");
-	level.Array.ToNrmArray = 				(level.Array.filePath + level.Array.fileName)::(local.labelPrefix + "ToNrmArray");
-	level.Array.HashToIdxArray = 			(level.Array.filePath + level.Array.fileName)::(local.labelPrefix + "HashToIdxArray");
-	level.Array.ToIdxArray = 				(level.Array.filePath + level.Array.fileName)::(local.labelPrefix + "ToIdxArray");
-	level.Array.ToAnyArray = 				(level.Array.filePath + level.Array.fileName)::(local.labelPrefix + "ToIdxArray");
-	level.Array.HashToAnyArray = 			(level.Array.filePath + level.Array.fileName)::(local.labelPrefix + "HashToAnyArray");
-	level.Array.IsMultiDimensional = 		(level.Array.filePath + level.Array.fileName)::(local.labelPrefix + "IsMultiDimensional");
-	level.Array.GetDimensions = 			(level.Array.filePath + level.Array.fileName)::(local.labelPrefix + "GetDimensions");
-	level.Array.Print = 					(level.Array.filePath + level.Array.fileName)::(local.labelPrefix + "Print");
-	level.Array.IsEntityArray = 			(level.Array.filePath + level.Array.fileName)::(local.labelPrefix + "IsEntityArray");
-	level.Array.IsObjectArray = 			(level.Array.filePath + level.Array.fileName)::(local.labelPrefix + "IsObjectArray");
-	level.Array.IsNormalArrayType = 		(level.Array.filePath + level.Array.fileName)::(local.labelPrefix + "IsNormalArrayType");
-	level.Array.IsIndexedArrayType = 		(level.Array.filePath + level.Array.fileName)::(local.labelPrefix + "IsIndexedArrayType");
-	level.Array.IsHashArray = 				(level.Array.filePath + level.Array.fileName)::(local.labelPrefix + "IsHashArray");
-	level.Array.IsSystemArray = 			(level.Array.filePath + level.Array.fileName)::(local.labelPrefix + "IsSystemArray");
-	level.Array.IsUserArray = 				(level.Array.filePath + level.Array.fileName)::(local.labelPrefix + "IsUserArray");
-	level.Array.IsArrayType =				(level.Array.filePath + level.Array.fileName)::(local.labelPrefix + "IsArrayType");
-	level.Array.Type = 						(level.Array.filePath + level.Array.fileName)::(local.labelPrefix + "Type");
-	level.Array.HasType = 					(level.Array.filePath + level.Array.fileName)::(local.labelPrefix + "HasType");
-	level.Array.IsConsistent = 				(level.Array.filePath + level.Array.fileName)::(local.labelPrefix + "IsConsistent");
-	level.Array.IsConcatenated =			(level.Array.filePath + level.Array.fileName)::(local.labelPrefix + "IsConcatenated");
-	level.Array.GetArrayIdx = 				(level.Array.filePath + level.Array.fileName)::(local.labelPrefix + "GetArrayIdx");
-	level.Array.GetLastIdx = 				(level.Array.filePath + level.Array.fileName)::(local.labelPrefix + "GetLastIdx");
-	level.Array.GetArraySizes = 			(level.Array.filePath + level.Array.fileName)::(local.labelPrefix + "GetArraySizes");
-	level.Array.GetHiValue = 				(level.Array.filePath + level.Array.fileName)::(local.labelPrefix + "GetHiValue");
-	level.Array.GetLowValue = 				(level.Array.filePath + level.Array.fileName)::(local.labelPrefix + "GetLowValue");
-	level.Array.GetExtValue = 				(level.Array.filePath + level.Array.fileName)::(local.labelPrefix + "GetExtValue");
-	level.Array.GetLowFreq = 				(level.Array.filePath + level.Array.fileName)::(local.labelPrefix + "GetLowFreq");
-	level.Array.GetHiFreq = 				(level.Array.filePath + level.Array.fileName)::(local.labelPrefix + "GetHiFreq");
-	level.Array.GetExtFreq = 				(level.Array.filePath + level.Array.fileName)::(local.labelPrefix + "GetExtFreq");
-	level.Array.GetVarFreq = 				(level.Array.filePath + level.Array.fileName)::(local.labelPrefix + "GetVarFreq");
-	level.Array.GetVarFreqs = 				(level.Array.filePath + level.Array.fileName)::(local.labelPrefix + "GetVarFreqs");
-	level.Array.GetTypeFreq	=				(level.Array.filePath + level.Array.fileName)::(local.labelPrefix + "GetTypeFreq");
-	level.Array.GetTypeFreqs = 				(level.Array.filePath + level.Array.fileName)::(local.labelPrefix + "GetTypeFreqs");
-	level.Array.Create = 					(level.Array.filePath + level.Array.fileName)::(local.labelPrefix + "Create");
-	level.Array.To2DVec = 					(level.Array.filePath + level.Array.fileName)::(local.labelPrefix + "To2DVec");			//to vector.func? Treat like casts, only check to continue; if error, return arg.. => less bullshit
-	level.Array.To3DVec = 					(level.Array.filePath + level.Array.fileName)::(local.labelPrefix + "To3DVec");			//
-	level.Array.VecToConstArray = 			(level.Array.filePath + level.Array.fileName)::(local.labelPrefix + "VecToConstArray"); //
-	level.Array.Rename = 					(level.Array.filePath + level.Array.fileName)::(local.labelPrefix + "Rename");
-	level.Array.GetName = 					(level.Array.filePath + level.Array.fileName)::(local.labelPrefix + "GetName");
-	level.Array.DeleteEnts = 				(level.Array.filePath + level.Array.fileName)::(local.labelPrefix + "DeleteEnts");
-	level.Array.FindEnt = 					(level.Array.filePath + level.Array.fileName)::(local.labelPrefix + "FindEnt");
-	level.Array.Some = 						(level.Array.filePath + level.Array.fileName)::(local.labelPrefix + "Some");
-	level.Array.Every = 					(level.Array.filePath + level.Array.fileName)::(local.labelPrefix + "Every");
-	level.Array.CompareStruct = 			(level.Array.filePath + level.Array.fileName)::(local.labelPrefix + "CompareStruct");
-	level.Array.Compare = 					(level.Array.filePath + level.Array.fileName)::(local.labelPrefix + "Compare");
-	level.Array.MakeConsistent = 			(level.Array.filePath + level.Array.fileName)::(local.labelPrefix + "MakeConsistent");
-	level.Array.Extract = 					(level.Array.filePath + level.Array.fileName)::(local.labelPrefix + "Extract");
-	level.Array.ExtractAll = 				(level.Array.filePath + level.Array.fileName)::(local.labelPrefix + "ExtractAll");
-	level.Array.MergeWithObjectArray = 		(level.Array.filePath + level.Array.fileName)::(local.labelPrefix + "MergeWithObjectArray");
-	level.Array.CreateObjectArrayOf = 		(level.Array.filePath + level.Array.fileName)::(local.labelPrefix + "CreateObjectArrayOf");
-	level.Array.AddToObjectArray = 			(level.Array.filePath + level.Array.fileName)::(local.labelPrefix + "AddToObjectArray");
-	level.Array.RemoveFromObjectArray = 	(level.Array.filePath + level.Array.fileName)::(local.labelPrefix + "RemoveFromObjectArray");
-	level.Array.MergeObjectArrays = 		(level.Array.filePath + level.Array.fileName)::(local.labelPrefix + "MergeObjectArrays");
-	level.Array.Compile = 					(level.Array.filePath + level.Array.fileName)::(local.labelPrefix + "Compile");
+end local.result;
 
-	level.Array.Decompile = 				(level.Array.filePath + level.Array.fileName)::(local.labelPrefix + "Decompile");
-	level.Array.msize = 55;
-	
-	// Off-record; for internal use only..
-	level.Array.__Analyze =					(level.Array.filePath + level.Array.fileName)::"__AnalyzeArray";
-	level.Array.__Start =					(level.Array.filePath + level.Array.fileName)::"__ArrayStart";
-	level.Array.__Sizes =					(level.Array.filePath + level.Array.fileName)::"__ArraySize";
-	level.Array.__Keys =					(level.Array.filePath + level.Array.fileName)::"__UpdateKeys";
-	
-	// Class-specific properties and values:
-	level.Array.seekRange = 1024;
-end level.Array;
+__Decompile local.string local.result:
+	/// Process array... 
+	if (local.string[0] == "[") {
+		// Cut up string into appropriately sized blocks. The last parameter defines the end of the first pair's prefix 
+		// and as a consequence that prefix, which contains our start position, will be split off as well.
+		local.snippet = waitthread $Str.fullPath::_FormatSplit local.string "[" "`" ";";
 
-__info:
-	local.inf["library"] = "lib/array.slib";	//filepath in reborn/framework/
-	local.inf["namespace"] = "array";			//filename without extension	
-	local.inf["title"] = "DATASTRUCTURE FUNCTIONS LIBRARY";
-	local.inf["version"] = "1.2.87";
-	local.inf["authors"][0] = "Sor"
-end local.inf;
+		// Our pair's start position string has been extracted as well!
+		local.j = local.snippet[0];
+		local.snippet[0] = NIL;
+		
+		local.snipSize = local.snippet.size;
+		
+		// Check if start is numerical or not... If not, only use "start" and redirect all non-value types to the next dimension
+		if (waitthread $Str.IsNumeric local.j) {
+			local.j = (int local.j);
+		} /*else {
+			conprintf ("\nLOGICAL SCRIPTING ERROR::function(\"__Decompile\") local.j==" + local.j + "!\n\n");
+		}*/
+		
+		for (local.i = 1; local.i <= local.snipSize; local.i++) {
+			switch (local.snippet[local.i][0]) {
+				case "[":
+					// We've got an array
+					local.result[local.j] = waitthread __Decompile local.snippet[local.i] local.result[local.j];
+					local.j++;
+				break;
+				case "<":
+					// Value detected... obtain type..
+					local.type = local.snippet[local.i][1];
+					// Obtain value..
+					local.value = "";
+					local.snippetSize = local.snippet[local.i].size;
+					for (local.k = 3; local.k < local.snippetSize; local.k++) {
+						if (local.snippet[local.i][local.k] == "`") {
+							break;
+						}
+						local.value += local.snippet[local.i][local.k];
+					}
+					// Correctly cast the extracted value.
+					local.result[local.j] = waitthread (waitthread $Compile.infoLib::__CodeCast local.type) local.value;
+					local.j++;
+				break;
+				default:
+				break;
+			}
+		}
+	} else if (local.string[0] == "<")  {
+		// Value detected... obtain type..
+		local.type = local.string[1];
+		// Obtain value..
+		local.value = "";
+		local.strSize = local.string.size;
+		for (local.k = 3; local.k < local.strSize; local.k++) {
+			if (local.string[local.k] == "`") {
+				break;
+			}
+			local.value += local.string[local.k];
+		}
+
+		// Correctly cast the extracted value.
+		local.result = waitthread (waitthread $Compile.infoLib::__CodeCast local.type) local.value;
+	} /*else {
+		conprintf ("\nLOGICAL SCRIPTING ERROR::function(\"__Decompile\") local.string[0]==" + local.string[0] + "!\n\n");
+	}*/
+end local.result;
+__#Decompile local.string local.result: 
+	if (local.string[0] == "[") {
+		local.snippet = waitthread $Str.fullPath::_FormatSplit local.string "[" "`" ";";
+
+		local.j = local.snippet[0];
+		local.snippet[0] = NIL;
+		
+		local.snipSize = local.snippet.size;
+
+		 if (local.snipSize == 1) {
+			if (group.info.size > 0) {
+				if !(waitthread _Some group.info local.j) {
+					group.info[group.info.size] = local.j;
+				}
+			} else {
+				group.info[group.info.size] = local.j;
+			}
+
+			switch (local.snippet[1][0]) {
+				case "[":
+					local.result[local.j] = waitthread __#Decompile local.snippet[1] local.result[local.j];
+				break;
+				case "<":
+					local.type = local.snippet[1][1];
+
+					local.value = "";
+					local.snippetSize = local.snippet[1].size;
+					for (local.k = 3; local.k < local.snippetSize; local.k++) {
+						if (local.snippet[1][local.k] == "`") {
+							break;
+						}
+						local.value += local.snippet[1][local.k];
+					}
+
+					local.result[local.j] = waitthread (waitthread $Compile.infoLib::__CodeCast local.type) local.value;
+				break;
+				default:
+				break;
+			}
+		} else {
+			for (local.i = 1; local.i <= local.snipSize; local.i++) {
+				local.result = waitthread __#Decompile local.snippet[local.i] local.result;
+			}
+		}
+	} /*else {
+		conprintf ("\nLOGICAL SCRIPTING ERROR::function(\"__#Decompile\") local.string[0]==" + local.string[0] + "!\n\n");
+	}*/
+end local.result;
+
+/** ==========================================================================================
+ Empty Function
+ ---------------------------------------------------------------------------------------------
+ DESCR|: 	Returns empty or 'uninitialized' array of size 0 instead of -1.
+ INPUT|: 	/
+ OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
+			*	array => of size 0
+ =========================================================================================== */
+Empty:
+	local.result[0] = NIL;
+end local.result;
 
 /** ==========================================================================================
  Compile Function
@@ -211,8 +327,8 @@ end local.inf;
 			write it to a file and decompile it back to an array later.
  INPUT|: 	<ARRAY array>
  OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
-				string => compiled array
-				NIL => error: uninitialized/invalid/inexistent array or nothing found.
+			*	string => compiled array
+			*	NIL => error: uninitialized/invalid/inexistent array or nothing found.
  =========================================================================================== */
 _Compile local.array: goto internalBP;
 Compile local.array:
@@ -244,7 +360,7 @@ Compile local.array:
 		case "array":
 			group.result = "";
 			group.dimension = 0;
-			group.typeCodes = waitthread reborn/framework/lib/compile.lib::"__TypeCoding";
+			group.typeCodes = waitthread $Compile.infoLib::"__TypeCoding";
 			
 			waitthread __Compile local.array;
 			local.result = group.result;
@@ -263,7 +379,7 @@ Compile local.array:
 			}
 			group.result = "[;";
 			group.dimension = 0;
-			group.typeCodes = waitthread reborn/framework/lib/compile.lib::"__TypeCoding";
+			group.typeCodes = waitthread $Compile.infoLib::"__TypeCoding";
 			
 			waitthread __#Compile local.array;
 			group.result += ("]");
@@ -292,7 +408,7 @@ __Compile local.array:
 		local.arraySizes = waitthread __AnalyzeArray local.array;
 		if (local.arraySizes.size > 0) {
 			if (group.dimension != 1 && group.result[(group.result.size - 1)] != ";") {
-				group.result += (",");
+				group.result += ("`");
 			}
 			group.result += ("[" + local.arraySizes[1] + ";");
 		
@@ -315,18 +431,10 @@ __Compile local.array:
 			
 			// If value not first entry in array, add ",".
 			if (group.result[(group.result.size - 1)] != ";") {
-				local.prefix = ("," + local.prefix); 
+				local.prefix = ("`" + local.prefix); 
 			} 
 			
-			// If value is a string, add quotation marks. Like the brackets of stringified vectors,
-			// they are treated like pairs so users can still save strings that also use escaped quotes.
-			local.suffix = "";
-			if (waitthread $Str.IsString local.array) {
-				local.suffix = "\""
-				local.prefix += local.suffix
-			}
-			
-			group.result += (local.prefix + string(local.array) + local.suffix);
+			group.result += (local.prefix + string(local.array));
 		//}
 	}
 end;
@@ -337,8 +445,8 @@ __#Compile local.array local.key:
 		for (local.i = 0; local.i < group.keyArraySize; local.i++) {
 			local.key = (string group.keyArray[local.i]);
 			if (local.array[local.key].size > 0) {
-				if (group.dimension != 1 && group.result[(group.result.size - 1)] != ";") {
-					group.result += (",");
+				if (group.result[(group.result.size - 1)] != ";") {
+					group.result += ("`");
 				}
 				group.result += ("[" + local.key + ";");
 				waitthread __#Compile local.array[local.key] local.key;
@@ -360,18 +468,96 @@ __#Compile local.array local.key:
 				local.prefix = ("," + local.prefix); 
 			} 
 			
-			// If value is a string, add quotation marks. Like the brackets of stringified vectors,
-			// they are treated like pairs so users can still save strings that also use escaped quotes.
-			local.suffix = "";
-			if (waitthread $Str.IsString local.array) {
-				local.suffix = "\""
-				local.prefix += local.suffix
-			}
-			
-			group.result += (local.prefix + string(local.array) + local.suffix);
+			group.result += (local.prefix + string(local.array));
 		//}
 	}
 end;
+
+/** ==========================================================================================
+ CreateConst Function
+ ---------------------------------------------------------------------------------------------
+ DESCR|: 	Creates a constant array out of specified set of maximum fourteen values/arguments.
+ INPUT|: 	<ARRAY array> <TYPE arg0> [TYPE arg1...13]
+ OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
+			*	const array => processed array
+			*	NIL => error: uninitialized/invalid/inexistent array or nothing found.
+ =========================================================================================== */
+CreateConst local.arg0 local.arg1 local.arg2 local.arg3 local.arg4 local.arg5 local.arg6 local.arg7 local.arg8 local.arg9 local.arg10 local.arg11 local.arg12 local.arg13:
+	if (local.arg0 && local.arg0.size > 0) {
+	
+		if (local.arg1 && local.arg1.size > 0) {
+		
+			if (local.arg2 && local.arg2.size > 0) {
+			
+				if (local.arg3 && local.arg3.size > 0) {
+				
+					if (local.arg4 && local.arg4.size > 0) {
+					
+						if (local.arg5 && local.arg5.size > 0) {
+						
+							if (local.arg6 && local.arg6.size > 0) {
+							
+								if (local.arg7 && local.arg7.size > 0) {
+								
+									if (local.arg8 && local.arg8.size > 0) {
+									
+										if (local.arg9 && local.arg9.size > 0) {
+										
+											if (local.arg10 && local.arg10.size > 0) {
+											
+												if (local.arg11 && local.arg11.size > 0) {
+												
+													if (local.arg12 && local.arg12.size > 0) {
+													
+														if (local.arg13 && local.arg13.size > 0) {
+															local.result = local.arg0::local.arg1::local.arg2::local.arg3::local.arg4::local.arg5::local.arg6::local.arg7::local.arg8::local.arg9::local.arg10::local.arg11::local.arg12::local.arg13;
+															goto breakTo;																
+														}
+														local.result = local.arg0::local.arg1::local.arg2::local.arg3::local.arg4::local.arg5::local.arg6::local.arg7::local.arg8::local.arg9::local.arg10::local.arg11::local.arg12;
+														goto breakTo;														
+													}
+													local.result = local.arg0::local.arg1::local.arg2::local.arg3::local.arg4::local.arg5::local.arg6::local.arg7::local.arg8::local.arg9::local.arg10::local.arg11;
+													goto breakTo;
+												}
+												local.result = local.arg0::local.arg1::local.arg2::local.arg3::local.arg4::local.arg5::local.arg6::local.arg7::local.arg8::local.arg9::local.arg10;
+												goto breakTo;
+											}
+											local.result = local.arg0::local.arg1::local.arg2::local.arg3::local.arg4::local.arg5::local.arg6::local.arg7::local.arg8::local.arg9;
+											goto breakTo;
+										}
+										local.result = local.arg0::local.arg1::local.arg2::local.arg3::local.arg4::local.arg5::local.arg6::local.arg7::local.arg8;
+										goto breakTo;
+									}
+									local.result = local.arg0::local.arg1::local.arg2::local.arg3::local.arg4::local.arg5::local.arg6::local.arg7;
+									goto breakTo;
+								}
+								local.result = local.arg0::local.arg1::local.arg2::local.arg3::local.arg4::local.arg5::local.arg6;
+								goto breakTo;
+							}
+							local.result = local.arg0::local.arg1::local.arg2::local.arg3::local.arg4::local.arg5;
+							goto breakTo;
+						}
+						local.result = local.arg0::local.arg1::local.arg2::local.arg3::local.arg4;
+						goto breakTo;
+					}
+					local.result = local.arg0::local.arg1::local.arg2::local.arg3;
+					goto breakTo;
+				}
+				local.result = local.arg0::local.arg1::local.arg2;
+				goto breakTo;
+			}
+			local.result = local.arg0::local.arg1;
+			goto breakTo;
+		}
+		local.result[1] = local.arg0;
+	} else {
+		if (local.DEBUG) {
+			conprintf "\n ~^~^~^~ FATAL_ERROR[lib/decompile.slib::CreateConst]: no arguments specified! ~^~^~^~ \n\n";
+		}
+	}
+	
+	breakTo:
+end local.result;
 
 /** ==========================================================================================
  MergeObjectArrays Function
@@ -382,8 +568,8 @@ end;
 			implication that has.
  INPUT|: 	<ARRAY array> <STRING entry> <TYPE data> [INT overwrite]
  OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
-				array => processed object array
-				NIL => error: uninitialized/invalid/inexistent array or nothing found.
+			*	array => processed object array
+			*	NIL => error: uninitialized/invalid/inexistent array or nothing found.
  =========================================================================================== */
 _MergeObjectArrays local.objArray1 local.objArray2 local.overwrite: goto internalBO;
 MergeObjectArrays local.objArray1 local.objArray2 local.overwrite:
@@ -453,8 +639,8 @@ end local.result;
 			Optionally, the function can forcefully overwrite the entry if it already existed.
  INPUT|: 	<ARRAY array> <STRING entry> <TYPE data> [INT overwrite]
  OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
-				array => processed object array
-				NIL => error: uninitialized/invalid/inexistent array or nothing found.
+			*	array => processed object array
+			*	NIL => error: uninitialized/invalid/inexistent array or nothing found.
  =========================================================================================== */
 _AddToObjectArray local.objArray local.entry local.data local.overwrite: goto internalBN;
 AddToObjectArray local.objArray local.entry local.data local.overwrite:
@@ -505,8 +691,8 @@ end local.objArray;
 			the function can remove the entry from a specified dimension only.
  INPUT|: 	<ARRAY array> <STRING entry> [INT inDimension]
  OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
-				array => processed object array
-				NIL => error: uninitialized/invalid/inexistent array or nothing found.
+			*	array => processed object array
+			*	NIL => error: uninitialized/invalid/inexistent array or nothing found.
  =========================================================================================== */
 _RemoveFromObjectArray local.objArray group.entry group.spDimension: goto internalBM;
 RemoveFromObjectArray local.objArray group.entry group.spDimension:
@@ -608,8 +794,8 @@ end local.result;
 			then the value.
  INPUT|: 	<ARRAY array> <ARRAY:STRING(/ARRAY:HASH) str idx (& values)> [ARRAY:TYPE values]
  OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
-				array => processed object array
-				NIL => error: uninitialized/invalid/inexistent array or nothing found.
+			*	array => processed object array
+			*	NIL => error: uninitialized/invalid/inexistent array or nothing found.
  =========================================================================================== */
 _CreateObjectArrayOf local.objects local.values: goto internalAA;
 CreateObjectArrayOf local.objects local.values:
@@ -665,8 +851,8 @@ end local.result;
 			will reflect the both combined arrays.
  INPUT|: 	<ARRAY array> <OBJECT ARRAY object array> 
  OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
-				array => processed hybrid array
-				NIL => error: uninitialized/invalid/inexistent array or nothing found.
+			*	array => processed hybrid array
+			*	NIL => error: uninitialized/invalid/inexistent array or nothing found.
  =========================================================================================== */
 _MergeWithObjectArray local.array local.objArray: goto internalAB;
 MergeWithObjectArray local.array local.objArray:
@@ -702,8 +888,8 @@ end local.result;
 			can be one-dimensional constant arrays for multiple extraction queries.
  INPUT|: 	<ARRAY array> [INT mode] [STRING/ARRAY:STRING input]
  OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
-				array => index array containing all specified array's data
-				NIL => error: uninitialized/invalid/inexistent array or nothing found.
+			*	array => index array containing all specified array's data
+			*	NIL => error: uninitialized/invalid/inexistent array or nothing found.
  =========================================================================================== */
 _Extract local.array group.mode group.input: goto internalAC; 
 Extract local.array group.mode group.input:
@@ -834,8 +1020,8 @@ end;
 			optional entry in that dimension.
  INPUT|: 	<ARRAY array1> [INT dimension] [INT entry]
  OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
-				array => index array containing all specified array's data
-				NIL => error: uninitialized/invalid/inexistent array or nothing found.
+			*	array => index array containing all specified array's data
+			*	NIL => error: uninitialized/invalid/inexistent array or nothing found.
  =========================================================================================== */
 _ExtractAll local.array local.dimension local.entry: 
 end (waitthread _ToAnyArray local.array 1 1 local.dimension local.entry);
@@ -849,8 +1035,8 @@ end (waitthread ToAnyArray local.array 1 1 local.dimension local.entry);
  DESCR|: 	Compares two specified arrays and checks if they are equal.
  INPUT|: 	<ARRAY array1> <ARRAY array2>
  OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
-				int => 1=arrays are identical; 0=they're not
-				NIL => error: uninitialized/invalid/inexistent array or nothing found.
+			*	int => 1=arrays are identical; 0=they're not
+			*	NIL => error: uninitialized/invalid/inexistent array or nothing found.
  =========================================================================================== */
 _Compare local.array local.chkArray: goto internalAD;
 Compare local.array local.chkArray:
@@ -957,8 +1143,8 @@ end;
  DESCR|: 	Compares two specified arrays and checks if their datastructures are identical.
  INPUT|: 	<ARRAY array1> <ARRAY array2>
  OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
-				int => 1=array structures are identical; 0=they're not
-				NIL => error: uninitialized/invalid/inexistent array or nothing found.
+			*	int => 1=array structures are identical; 0=they're not
+			*	NIL => error: uninitialized/invalid/inexistent array or nothing found.
  =========================================================================================== */
 _CompareStruct local.array local.chkArray: goto internalAE;
 CompareStruct local.array local.chkArray:
@@ -1059,8 +1245,8 @@ end;
 			all starting indexes aligned.
  INPUT|: 	<ARRAY array> [INT start]
  OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
-				int => 1=array contains specified var; 0=it does not
-				NIL => error: uninitialized/invalid/inexistent array or nothing found.
+			*	int => 1=array contains specified var; 0=it does not
+			*	NIL => error: uninitialized/invalid/inexistent array or nothing found.
  =========================================================================================== */
 _MakeConsistent local.array local.start: goto internalAF;
 MakeConsistent local.array local.start:
@@ -1134,8 +1320,8 @@ end local.result;
 			array contains a variable of specified variable type.
  INPUT|: 	<ARRAY array> <TYPE var> <INT type>
  OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
-				int => 1=array contains specified var; 0=it does not
-				NIL => error: uninitialized/invalid/inexistent array or nothing found.
+			*	int => 1=array contains specified var; 0=it does not
+			*	NIL => error: uninitialized/invalid/inexistent array or nothing found.
  =========================================================================================== */
 _Some local.array group.var group.type: goto internalAG;
 Some local.array group.var group.type:
@@ -1303,8 +1489,8 @@ end;
 			array contains nothing but specified variable type.
  INPUT|: 	<ARRAY array> <TYPE var> <INT type>
  OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
-				int => 1=array consists entirely of specified var; 0=it does not
-				NIL => error: uninitialized/invalid/inexistent array or nothing found.
+			*	int => 1=array consists entirely of specified var; 0=it does not
+			*	NIL => error: uninitialized/invalid/inexistent array or nothing found.
  =========================================================================================== */
 _Every local.array group.var group.type: goto internalAH;
 Every local.array group.var group.type:
@@ -1464,15 +1650,15 @@ __#Every local.array:
 	}
 end;
 
-///=> [copy] these to entity.func
+///=> [copy] these to entity.slib
 /** ==========================================================================================
  FindEnt Function
  ---------------------------------------------------------------------------------------------
  DESCR|: 	Finds specified entity in specified entity array.
  INPUT|: 	<ARRAY entArray> <LISTENER ent>
  OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
-				int => index of ent in entArray; 0 if no such entity was found
-				NIL => error: uninitialized/invalid/inexistent array or nothing found.
+			*	int => index of ent in entArray; 0 if no such entity was found
+			*	NIL => error: uninitialized/invalid/inexistent array or nothing found.
  =========================================================================================== */
 _FindEnt local.entArray local.ent: goto internalAI;
 FindEnt local.entArray local.ent:
@@ -1518,8 +1704,8 @@ end local.result;
  DESCR|: 	Deletes specified entity or constant array of entities from specified entity array.
  INPUT|: 	<ARRAY entArray> <LISTENER ent/ARRAY:LISTENERS ents>
  OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
-				int => 0=operation successful; 1=operation failed 
-				NIL => error: uninitialized/invalid/inexistent array or nothing found.
+			*	int => 0=operation successful; 1=operation failed 
+			*	NIL => error: uninitialized/invalid/inexistent array or nothing found.
  =========================================================================================== */
 _DeleteEnts local.entArray local.ents: goto internalAJ;
 DeleteEnts local.entArray local.ents:
@@ -1568,7 +1754,7 @@ DeleteEnts local.entArray local.ents:
 					for (local.i = 1; local.i <= local.entArray.size; local.i++) {
 						if (local.ents[local.j] == local.entArray[local.i]) {
 							local.entArray[local.i] immediateremove;
-							if (local.ents[local.j] == NULL) { // !(local.end[local.j]) {
+							if (local.ents[local.j] == NULL) { 
 								break;
 							}
 						}
@@ -1597,8 +1783,8 @@ end local.result;
  DESCR|: 	Returns name of specified entity array.
  INPUT|: 	<ARRAY entArray>
  OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
-				string => name 
-				NIL => error: uninitialized/invalid/inexistent array or nothing found.
+			*	string => name 
+			*	NIL => error: uninitialized/invalid/inexistent array or nothing found.
  =========================================================================================== */
 _GetName local.entArray: goto internalAK;
 GetName local.entArray:
@@ -1619,11 +1805,10 @@ end (local.entArray[1].targetname);
  Rename Function
  ---------------------------------------------------------------------------------------------
  DESCR|: 	Renames specified array to specified targetname, converting it to an entity array.
-			This can also be used
  INPUT|: 	<ARRAY entArray> <STRING targetname>
  OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
-				string => name 
-				NIL => error: uninitialized/invalid/inexistent array or nothing found.
+			*	string => name 
+			*	NIL => error: uninitialized/invalid/inexistent array or nothing found.
  =========================================================================================== */
 _Rename local.array local.tName: goto internalAL;
 Rename local.array local.tName:
@@ -1705,8 +1890,8 @@ end local.result;
 			array. Optionally, there can be searched in a specified dimension only.
  INPUT|: 	<ARRAY array> <STRING type/TYPE var> [INT inDimension] 
  OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
-				int => number of instances the specified var was found (frequency)
-				NIL => error: uninitialized/invalid/inexistent array or nothing found.
+			*	int => number of instances the specified var was found (frequency)
+			*	NIL => error: uninitialized/invalid/inexistent array or nothing found.
  =========================================================================================== */
 _GetTypeFreq local.array group.type group.inDimension: goto internalAM;
 GetTypeFreq local.array group.type group.inDimension:
@@ -1842,8 +2027,8 @@ end;
 			Optionally, there can be searched in a specified dimension only.
  INPUT|: 	<ARRAY array> <TYPE var> [INT inDimension] 
  OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
-				int => number of instances the specified var was found (frequency)
-				NIL => error: uninitialized/invalid/inexistent array or nothing found.
+			*	int => number of instances the specified var was found (frequency)
+			*	NIL => error: uninitialized/invalid/inexistent array or nothing found.
  =========================================================================================== */
 _GetVarFreq local.array group.var group.inDimension: goto internalAN;
 GetVarFreq local.array group.var group.inDimension:
@@ -1959,16 +2144,26 @@ end;
  GetTypeFreqs Function
  ---------------------------------------------------------------------------------------------
  DESCR|: 	Scans array and makes a list of all variable type frequencies found in the
-			specified array.
- INPUT|: 	<ARRAY array> [INT allDimensions] 
+			specified array. 
+		
+			The function will return a hashArray where each rows [1] column corresponds with 
+			the type and the [2] column with that type's frequency. If outputFormat is set, 
+			then this function will return a frequency table where the indexes corresponds 
+			with the frequency and their values with the corresponding type(s).
+			
+ INPUT|: 	<ARRAY array> [INT allDimensions] [INT outputFormat]
  OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
-				array => [0] => [1] -> minimum/first freqArray entry
-								[2] -> maximum/last freqArray entry
-					  => [X] => [0-Y] -> X instances of following variabletypes found (freq)
-				NIL => error: uninitialized/invalid/inexistent array or nothing found.
+			* If output==0;
+				* array =>	[1-X] =>[1] => found variable type
+									[2] => corresponding frequency in specified array.
+			* Else if output==1;
+				* array => [0] 	=> [1] -> minimum/first freqArray entry
+								   [2] -> maximum/last freqArray entry
+						=> [X] 	=> [1-Y] -> X instances of following variabletypes found (freq)
+			*	NIL => error: uninitialized/invalid/inexistent array or nothing found.
  =========================================================================================== */
-_GetTypeFreqs local.array local.allDimensions: goto internalAO;
-GetTypeFreqs local.array local.allDimensions:
+_GetTypeFreqs local.array local.allDimensions local.output: goto internalAO;
+GetTypeFreqs local.array local.allDimensions local.output:
 	/*Error & Exception Handling*/
 	if (local.array == NIL || local.array.size <= 0) {
 		if (level.DEBUG) {
@@ -1998,14 +2193,14 @@ GetTypeFreqs local.array local.allDimensions:
 		case "array":
 			if !(local.allDimensions) {
 				local.freqTable[0] = NIL;
-				local.varTable[0] = NIL;
+				local.typeTable[0] = NIL;
 				local.arraySizes = waitthread __AnalyzeArray local.array;
 				
 				for (local.i = local.arraySizes[1]; local.i < local.arraySizes[2]; local.i++) {
-					local.varSize = local.varTable.size;
+					local.varSize = local.typeTable.size;
 					local.type = (waitthread Type local.array[local.i]);
 					for (local.j = 0; local.j < local.varSize; local.j++) {
-						if (local.varTable[local.j] == local.type) {
+						if (local.typeTable[local.j] == local.type) {
 							local.bingo = local.j;
 							break;
 						}
@@ -2017,15 +2212,15 @@ GetTypeFreqs local.array local.allDimensions:
 					} else {
 						local.k = local.freqTable.size;
 						local.freqTable[local.k] = 1;
-						local.varTable[local.k] = local.type;
+						local.typeTable[local.k] = local.type;
 					}
 				}
 			} else {
 				group.freqTable[0] = NIL;	//same entry for associated freq and var
-				group.varTable[0] = NIL;
+				group.typeTable[0] = NIL;
 				waitthread __GetTypeFreqs local.array local.start;
 				local.freqTable = group.freqTable;
-				local.varTable = group.varTable;
+				local.typeTable = group.typeTable;
 			}
 		break;
 		case "object array":
@@ -2038,7 +2233,7 @@ GetTypeFreqs local.array local.allDimensions:
 			}
 
 			group.freqTable[0] = NIL;
-			group.varTable[0] = NIL;
+			group.typeTable[0] = NIL;
 			group.dimension = 0;
 			
 			// too lazy to type it out for one dimension, so just edited the scanner function
@@ -2049,39 +2244,48 @@ GetTypeFreqs local.array local.allDimensions:
 
 			waitthread __#GetTypeFreqs local.array;
 			local.freqTable = group.freqTable;
-			local.varTable = group.varTable;
+			local.typeTable = group.typeTable;
 		break;
 		default:
 		break;
 	}
 	
 	// Compose frequency table; 
-	if (local.freqTable.size == local.varTable.size) {
+	if (local.freqTable.size == local.typeTable.size) {
 		local.arraySize = local.freqTable.size;
+		if (local.output) {
+			local.max = local.freqTable[0];
+			local.min = local.max;
+			for (local.i = 0; local.i < local.arraySize; local.i++) {
+				if (local.max < local.freqTable[local.i]) {
+					local.max = local.freqTable[local.i];
+				} else if (local.freqTable[local.i] < local.min) {
+					local.min = local.freqTable[local.i];
+				}
+			}
 
-		local.max = local.freqTable[0];
-		local.min = local.max;
-		for (local.i = 0; local.i < local.arraySize; local.i++) {
-			if (local.max < local.freqTable[local.i]) {
-				local.max = local.freqTable[local.i];
-			} else if (local.freqTable[local.i] < local.min) {
-				local.min = local.freqTable[local.i];
+			local.result[0] = local.min::local.max;
+			for (local.j = 0; local.j < local.arraySize; local.j++) {
+				if !(local.result[local.freqTable[local.j]]) {
+					local.result[local.freqTable[local.j]][1] = NIL;
+				}
+				local.result[local.freqTable[local.j]][(local.result[local.freqTable[local.j]].size + 1)] = local.typeTable[local.j];
+			}
+		} else {
+			local.result[1] = NIL;
+			for (local.j = 0; local.j < local.arraySize; local.j++) {
+				local.k = local.result.size + 1;
+				local.result[local.k][1] = local.typeTable[local.j];
+				local.result[local.k][2] = local.freqTable[local.j];
 			}
 		}
-		local.result[0] = local.min::local.max;
-		for (local.j = 0; local.j < local.arraySize; local.j++) {
-			if !(local.result[local.freqTable[local.j]]) {
-				local.result[local.freqTable[local.j]][0] = NIL;
-			}
-			local.result[local.freqTable[local.j]][local.result[local.freqTable[local.j]].size] = local.varTable[local.j];
-		}
-	} else {
-		conprintf "\nLOGICAL SCRIPTING ERROR::function(\"GetTypeFreqs\") freq size: " local.freqTable.size " var size: " local.varTable.size "!\n\n"
-	}
+	} /*else {
+		conprintf ("\nLOGICAL SCRIPTING ERROR::function(\"GetTypeFreqs\") freq size: " + local.freqTable.size + " var size: " + local.typeTable.size + "!\n\n");
+	}*/
 
 	// Clear group vars.
 	group.freqTable = NIL;
-	group.varTable = NIL;
+	group.typeTable = NIL;
 	group.allDimensions = NIL;
 	group.dimension = NIL;
 	group.keyArraySize = NIL;
@@ -2098,16 +2302,16 @@ __GetTypeFreqs local.array:
 			}
 		}
 	} else {
-		local.varSize = group.varTable.size;
+		local.varSize = group.typeTable.size;
 		for (local.i = 0; local.i < local.varSize; local.i++) {
-			if (group.varTable[local.i] == (typeof local.array)) {
+			if (group.typeTable[local.i] == (typeof local.array)) {
 				local.j = local.i;
 				goto __upFreq3;
 			}
 		}
 		local.j = group.freqTable.size;
 		group.freqTable[local.j] = 0;
-		group.varTable[local.j] = typeof local.array;
+		group.typeTable[local.j] = typeof local.array;
 		
 		__upFreq3:
 		group.freqTable[local.j]++;
@@ -2118,20 +2322,22 @@ __#GetTypeFreqs local.array local.start:
 		group.dimension++;
 		for (local.i = 0; local.i < group.keyArraySize; local.i++) { 
 			local.key = (string group.keyArray[local.i]);
-			waitthread __#GetTypeFreqs local.array[local.key];
+			if (local.array[local.key].size > 0) {
+				waitthread __#GetTypeFreqs local.array[local.key];
+			}
 		}
-		group.dimension--
+		group.dimension--;
 	} else {
-		local.varSize = group.varTable.size;
+		local.varSize = group.typeTable.size;
 		for (local.i = 0; local.i < local.varSize; local.i++) {
-			if (group.varTable[local.i] == (typeof local.array)) {
+			if (group.typeTable[local.i] == (typeof local.array)) {
 				local.j = local.i;
 				goto __upFreq4;
 			}
 		}
 		local.j = group.freqTable.size;
 		group.freqTable[local.j] = 0;
-		group.varTable[local.j] = typeof local.array;
+		group.typeTable[local.j] = typeof local.array;
 		
 		__upFreq4:
 		group.freqTable[local.j]++;
@@ -2141,17 +2347,27 @@ end;
 /** ==========================================================================================
  GetVarFreqs Function
  ---------------------------------------------------------------------------------------------
- DESCR|: 	Scans array and makes a list of all variable frequencies found in the specified 
-			array.
- INPUT|: 	<ARRAY array> [INT allDimensions] 
+ DESCR|: 	Scans array and makes a list of all variable type frequencies found in the
+			specified array. 
+			
+			The function will return a hashArray where each rows [1] column corresponds with 
+			the variable and the [2] column with that variable's frequency. If outputFormat is 
+			set, then this function will return a frequency table where the indexes corresponds 
+			with the frequency and their values with the corresponding variable(s).
+			
+ INPUT|: 	<ARRAY array> [INT allDimensions] [INT outputFormat]
  OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
-				array => [0] => [1] -> minimum/first freqArray entry
-								[2] -> maximum/last freqArray entry
-					  => [X] => [0-Y] -> X instances of following variables found (frequency)
-				NIL => error: uninitialized/invalid/inexistent array or nothing found.
+ 			* If output==0;
+				* array =>	[1-X] =>[1] => found variable
+									[2] => corresponding frequency in specified array.
+			* Else if output==1;
+				* array => [0] 	=> [1] -> minimum/first freqArray entry
+								   [2] -> maximum/last freqArray entry
+						=> [X] 	=> [1-Y] -> X instances of following variables found (frequency)
+			*	NIL => error: uninitialized/invalid/inexistent array or nothing found.
  =========================================================================================== */
-_GetVarFreqs local.array local.allDimensions: goto internalAP;
-GetVarFreqs local.array local.allDimensions:
+_GetVarFreqs local.array local.allDimensions local.output: goto internalAP;
+GetVarFreqs local.array local.allDimensions local.output:
 	/*Error & Exception Handling*/
 	if (local.array == NIL || local.array.size <= 0) {
 		if (level.DEBUG) {
@@ -2240,27 +2456,34 @@ GetVarFreqs local.array local.allDimensions:
 	// Compose frequency table; 
 	if (local.freqTable.size == local.varTable.size) {
 		local.arraySize = local.freqTable.size;
-
-		local.max = local.freqTable[0];
-		local.min = local.max;
-		for (local.i = 0; local.i < local.arraySize; local.i++) {
-			if (local.max < local.freqTable[local.i]) {
-				local.max = local.freqTable[local.i];
-			} else if (local.freqTable[local.i] < local.min) {
-				local.min = local.freqTable[local.i];
+		if (local.output) {
+			local.max = local.freqTable[0];
+			local.min = local.max;
+			for (local.i = 0; local.i < local.arraySize; local.i++) {
+				if (local.max < local.freqTable[local.i]) {
+					local.max = local.freqTable[local.i];
+				} else if (local.freqTable[local.i] < local.min) {
+					local.min = local.freqTable[local.i];
+				}
+			}
+			local.result[0] = local.min::local.max;
+			for (local.j = 0; local.j < local.arraySize; local.j++) {
+				if !(local.result[local.freqTable[local.j]]) {
+					local.result[local.freqTable[local.j]][1] = NIL;
+				}
+				local.result[local.freqTable[local.j]][(local.result[local.freqTable[local.j]].size + 1)] = local.varTable[local.j];
+			}
+		} else {
+			local.result[1] = NIL;
+			for (local.j = 0; local.j < local.arraySize; local.j++) {
+				local.k = local.result.size + 1;
+				local.result[local.k][1] = local.varTable[local.j];
+				local.result[local.k][2] = local.freqTable[local.j];
 			}
 		}
-		local.result[0] = local.min::local.max;
-		for (local.j = 0; local.j < local.arraySize; local.j++) {
-			if !(local.result[local.freqTable[local.j]]) {
-				local.result[local.freqTable[local.j]][0] = NIL;
-			}
-			local.result[local.freqTable[local.j]][local.result[local.freqTable[local.j]].size] = local.varTable[local.j];
-		}
-	} else {
-		conprintf "\nLOGICAL SCRIPTING ERROR: the author of function:\"GetVarFreqs\" was either stoned or drunk when he wrote this!\n\n"
-		println "freq size: " local.freqTable.size " var size: " local.varTable.size
-	}
+	} /*else {
+		conprintf ("\nLOGICAL SCRIPTING ERROR::function(\"GetVarFreqs\") freq size: " + local.freqTable.size + " var size: " + local.varTable.size + "!\n\n");
+	}*/
 
 	// Clear group vars.
 	group.freqTable = NIL;
@@ -2299,7 +2522,9 @@ __#GetVarFreqs local.array:
 		group.dimension++;
 		for (local.i = 0; local.i < group.keyArraySize; local.i++) { 
 			local.key = (string group.keyArray[local.i]);
-			waitthread __#GetVarFreqs local.array[local.key];
+			if (local.array[local.key].size > 0) {
+				waitthread __#GetVarFreqs local.array[local.key];
+			}
 		}
 		group.dimension--;
 	} else {
@@ -2326,8 +2551,8 @@ end;
 			Optionally, all (possible) dimensions can be scanned.
  INPUT|: 	<ARRAY array> [INT allDimensions] [INT mode]
  OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
-				int => 1: array is consistent, 0: gaps have been detected
-				NIL => error: uninitialized/invalid/inexistent array or nothing found.
+			*	int => 1: array is consistent, 0: gaps have been detected
+			*	NIL => error: uninitialized/invalid/inexistent array or nothing found.
  =========================================================================================== */
 _IsConcatenated local.array local.allDimensions:
 end (waitthread _IsConsistent local.array local.allDimensions 0);
@@ -2340,11 +2565,12 @@ end (waitthread IsConsistent local.array local.allDimensions 0);
  ---------------------------------------------------------------------------------------------
  DESCR|: 	Scans and checks if array is consistent. Optionally, all (possible) dimensions 
 			can be scanned. If mode is set, the function will also check if the start
-			index is equal in all dimensions.
+			index is equal in all dimensions. Setting mode to two will only check start 
+			indexes, but only if the array is scanned in all dimensions.
  INPUT|: 	<ARRAY array> [INT allDimensions] [INT mode]
  OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
-				int => 1: array is consistent, 0: gaps have been detected
-				NIL => error: uninitialized/invalid/inexistent array or nothing found.
+			*	int => 1: array is consistent, 0: gaps have been detected
+			*	NIL => error: uninitialized/invalid/inexistent array or nothing found.
  =========================================================================================== */
 _IsConsistent local.array local.allDimensions group.chckMode: goto internalAQ;
 IsConsistent local.array local.allDimensions group.chckMode:
@@ -2447,11 +2673,11 @@ end;
 			integers found in the array.
  INPUT|: 	<ARRAY array>
  OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
-				array -> [1] -> [1-X] -> [1] -> Lowest frequency
+			*	array -> [1] -> [1-X] -> [1] -> Lowest frequency
 										 [2] -> Xth integer with lowest frequency
-						 [2] -> [1-X] -> [1] -> Highest frequency
+			*			 [2] -> [1-X] -> [1] -> Highest frequency
 										 [2] -> Xth integer with highest frequency	   
-				NIL => error: uninitialized/invalid/inexistent array or nothing found.
+			*	NIL => error: uninitialized/invalid/inexistent array or nothing found.
  =========================================================================================== */
 _GetExtFreq local.array: goto internalAR;
 GetExtFreq local.array:
@@ -2546,9 +2772,9 @@ end local.result;
 			the array.
  INPUT|: 	<ARRAY array>
  OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
-				array -> [1-X] -> [1] -> Highest frequency
+			*	array -> [1-X] -> [1] -> Highest frequency
 								  [2] -> Xth integer with highest frequency   
-				NIL => error: uninitialized/invalid/inexistent array or nothing found.
+			*	NIL => error: uninitialized/invalid/inexistent array or nothing found.
  =========================================================================================== */
 _GetHiFreq local.array: goto internalAS;
 GetHiFreq local.array:
@@ -2636,9 +2862,9 @@ end local.result;
 			the array.
  INPUT|: 	<ARRAY array>
  OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
-				array -> [1-X] -> [1] -> Lowest frequency
+			*	array -> [1-X] -> [1] -> Lowest frequency
 								  [2] -> Xth integer with lowest frequency   
-				NIL => error: uninitialized/invalid/inexistent array or nothing found.
+			*	NIL => error: uninitialized/invalid/inexistent array or nothing found.
  =========================================================================================== */
 _GetLowFreq local.array: goto internalAT;
 GetLowFreq local.array:
@@ -2770,9 +2996,9 @@ end;
  DESCR|: 	Obtains and returns the lowest and highest int or float found in the array.
  INPUT|: 	<ARRAY array>
  OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
-				array -> [1] -> lowest value
+			*	array -> [1] -> lowest value
 						 [2] -> highest value
-				NIL => error: uninitialized/invalid/inexistent array or nothing found.
+			*	NIL => error: uninitialized/invalid/inexistent array or nothing found.
  =========================================================================================== */
 _GetExtValue local.array: goto internalAU;
 GetExtValue local.array:
@@ -2839,8 +3065,8 @@ end local.result;
  DESCR|: 	Obtains and returns the lowest int or float found in the array.
  INPUT|: 	<ARRAY array>
  OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
-				int/float -> lowest value
-				NIL => error: uninitialized/invalid/inexistent array or nothing found.
+			*	int/float -> lowest value
+			*	NIL => error: uninitialized/invalid/inexistent array or nothing found.
  =========================================================================================== */
 _GetLowValue local.array: goto internalAV;
 GetLowValue local.array:
@@ -2907,8 +3133,8 @@ end local.result;
  DESCR|: 	Obtains and returns the highest int or float found in the array.
  INPUT|: 	<ARRAY array>
  OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
-				int/float -> highest value
-				NIL => error: uninitialized/invalid/inexistent array or nothing found.
+			*	int/float -> highest value
+			*	NIL => error: uninitialized/invalid/inexistent array or nothing found.
  =========================================================================================== */
 _GetHiValue local.array: goto internalAW;
 GetHiValue local.array:
@@ -3013,8 +3239,8 @@ end;
 			Optionally, the column or "dimensional entry" can be specified (default: 1).
  INPUT|: 	<ARRAY array> <INT start idx> [INT column]
  OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
-				array -> processed array
-				NIL => error: uninitialized/invalid/inexistent array
+			*	array -> processed array
+			*	NIL => error: uninitialized/invalid/inexistent array
  =========================================================================================== */
 _HashToAnyArray local.array local.start local.entry: goto internalAX;
 HashToAnyArray local.array local.start local.entry:
@@ -3053,11 +3279,11 @@ end local.result;
 			specified starting index). 
 			Optionally a dimension and optional entry (i.e. in that dimension) can be specified
 			to be exclusively converted. If format mode is set, the conversion will format
-			the new array into one dimension.
+			the new array into one dimension (i.e. Column-major).
  INPUT|: 	<ARRAY array> <INT start idx> [INT format] [INT dimension] [INT entry]
  OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
-				array -> processed array
-				NIL => error: uninitialized/invalid/inexistent array
+			*	array -> processed array
+			*	NIL => error: uninitialized/invalid/inexistent array
  =========================================================================================== */
 _ToAnyArray local.array group.start group.format group.spDimensions group.entry: goto internalAY;
 ToAnyArray local.array group.start group.format group.spDimensions group.entry:
@@ -3079,7 +3305,7 @@ ToAnyArray local.array group.start group.format group.spDimensions group.entry:
 	}
 	if (group.start == group.arrayStart && (typeof local.array) == "array" && (waitthread IsConsistent local.array 1 2)) {
 		if (level.DEBUG) {
-			conprintf "~^~^~^~ ERROR[lib/array.slib::ToAnyArray]: there's no conversion needed [idx=" group.start "]! ~^~^~^~ \n";
+			conprintf "~^~^~^~ ERROR[lib/array.slib::ToAnyArray]: there's no conversion needed! [idx=" group.start "] ~^~^~^~ \n";
 		}
 		local.result = local.array;
 	} else {
@@ -3305,8 +3531,8 @@ end;
 			Optionally, the column or "dimensional entry" can be specified (default: 1).
  INPUT|: 	<ARRAY array> [INT column]
  OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
-				array -> processed array
-				NIL => error: uninitialized/invalid/inexistent array
+			*	array -> processed array
+			*	NIL => error: uninitialized/invalid/inexistent array
  =========================================================================================== */
 _HashToIdxArray local.array local.entry: goto internalAZ;
 HashToIdxArray local.array local.entry:
@@ -3341,11 +3567,12 @@ end local.result;
  ---------------------------------------------------------------------------------------------
  DESCR|: 	Converts specified array into a indexed-Type array. Optionally a dimension and 
 			optional entry (i.e. in that dimension) can be specified to be exclusively converted.
-			If format mode is set, the conversion will format the new array into one dimension.
+			If format mode is set, the conversion will format the new array into one dimension
+			(i.e. column-major).
  INPUT|: 	<ARRAY array> [INT format] [INT dimension] [INT entry]
  OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
-				array -> processed array
-				NIL => error: uninitialized/invalid/inexistent array
+			*	array -> processed array
+			*	NIL => error: uninitialized/invalid/inexistent array
  =========================================================================================== */
 _ToIdxArray local.array group.format group.spDimensions group.entry:
 end (waitthread _ToAnyArray local.array 1 group.format group.spDimensions group.entry);
@@ -3360,8 +3587,8 @@ end (waitthread ToAnyArray local.array 1 group.format group.spDimensions group.e
 			the column or "dimensional entry" can be specified (default: 1).
  INPUT|: 	<ARRAY array> [INT column]
  OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
-				array -> processed array
-				NIL => error: uninitialized/invalid/inexistent array
+			*	array -> processed array
+			*	NIL => error: uninitialized/invalid/inexistent array
  =========================================================================================== */
 _HashToNrmArray local.array local.entry: goto internalBA;
 HashToNrmArray local.array local.entry:
@@ -3396,11 +3623,12 @@ end local.result;
  ---------------------------------------------------------------------------------------------
  DESCR|: 	Converts specified array into a normalType array. Optionally a dimension and 
 			optional entry (i.e. in that dimension) can be specified to be exclusively converted.
-			If format mode is set, the conversion will format the new array into one dimension.
+			If format mode is set, the conversion will format the new array into one dimension
+			(i.e. column-major).
  INPUT|: 	<ARRAY array> [INT format] [INT dimension] [INT entry] 
  OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
-				array -> processed array
-				NIL => error: uninitialized/invalid/inexistent array
+			*	array -> processed array
+			*	NIL => error: uninitialized/invalid/inexistent array
  =========================================================================================== */
 _ToNrmArray local.array group.format group.spDimensions group.entry:
 end (waitthread _ToAnyArray local.array 0 group.format group.spDimensions group.entry);
@@ -3415,9 +3643,9 @@ end (waitthread ToAnyArray local.array 0 group.format group.spDimensions group.e
 			can dismiss derived/system arrays (eg. vectors, strings..) as variables.
  INPUT|: 	<ARRAY array> [INT ignoreSysArray]
  OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
-				1 => multi-dimensional
-				0 => one-dimensional
-				NIL => error: uninitialized/invalid/inexistent array
+			*	1 => multi-dimensional
+			*	0 => one-dimensional
+			*	NIL => error: uninitialized/invalid/inexistent array
  =========================================================================================== */
 _IsMultiDimensional local.array local.ignoreSysArray: goto internalBB;
 IsMultiDimensional local.array local.ignoreSysArray:
@@ -3503,10 +3731,10 @@ end local.result;
 			'system' arrays (eg. vectors, strings..) as variables. 
  INPUT|: 	<ARRAY array> [INT ignoreSysArray]
  OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
-				array -> [1] -> [1] -> minimum number of dimensions (or 'dimension depth')
+			*	array -> [1] -> [1] -> minimum number of dimensions (or 'dimension depth')
 								[2] -> maximum number of dimensions (or 'dimension depth')
-						 [2] -> number of entries detected.
-				NIL => error: uninitialized/invalid/inexistent array
+			*			 [2] -> number of entries detected.
+			*	NIL => error: uninitialized/invalid/inexistent array
  =========================================================================================== */ 
 _GetDimensions local.array local.ignoreSysArray: goto internalBC;
 GetDimensions local.array local.ignoreSysArray:
@@ -3559,10 +3787,6 @@ GetDimensions local.array local.ignoreSysArray:
 
 			waitthread local.helperThread local.array;
 			local.result = (group.min::group.max)::group.entries
-			
-			println "entries : " group.entries
-			println "dimension min : " group.min;
-			println "dimension max : " group.max;
 		break;
 		default:
 		break;
@@ -3624,8 +3848,8 @@ end;
  DESCR|: 	Inspects array and prints its entire structure just as one would write it in code.
  INPUT|: 	<ARRAY array> [INT ignoreSysArray] [STRING prefix]
  OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
-				1 => lines have successfully been printed into the server console.
-				NIL => Error occurred
+			*	1 => lines have successfully been printed into the server console.
+			*	NIL => Error occurred
  =========================================================================================== */
 _Print local.array local.ignoreSysArray local.prefix: goto internalBD;
 Print local.array local.ignoreSysArray local.prefix:
@@ -3662,7 +3886,7 @@ Print local.array local.ignoreSysArray local.prefix:
 	}
 	
 	if !(local.prefix) {
-		local.prefix = "\t local.array";
+		local.prefix = "\tlocal.array";
 	} 
 	group.timeStamp = 0;
 	//TEMP<
@@ -3670,15 +3894,15 @@ Print local.array local.ignoreSysArray local.prefix:
 	//>
 	waitthread local.helperThread local.array local.prefix;
 	//TEMP<
-	if (local.array["__info"] != NIL && typeof local.array["__info"] == "array") {
+	if (group.keyArray.size > 0) {
 		waitthread __Print local.array["__info"] (local.prefix + "[\"__info\"]");
 	}
 	//>
 	conprintf "\n";
 	// TEMP<
 	conprintf ("...done printing " + group.entries + " entries! \n")
-	//>
 	conprintf "\n";
+	//>
 	
 	//clear group. vars
 	group.timeStamp = NIL;
@@ -3691,14 +3915,13 @@ __Print local.array local.prefix:
 	if (waitthread group.IsValidArray local.array) {
 		local.arraySizes = waitthread __AnalyzeArray local.array;
 		
-		if (local.arraySizes[1] < 0) {
-			local.suffix = " ";
-		} else {
-			local.suffix = "";
-		}
-		
 		for (local.i = local.arraySizes[1]; local.i < local.arraySizes[2]; local.i++) { 
 			if (local.array[local.i].size > 0) {
+				if (local.i < 0) {
+					local.suffix = " ";
+				} else {
+					local.suffix = "";
+				}
 				waitthread __Print local.array[local.i] (local.prefix + ("[" + local.suffix + local.i + "]"));
 			}
 		}
@@ -3743,8 +3966,8 @@ end;
  DESCR|: 	Converts specified vector to constant array.
  INPUT|: 	<VECTOR vector>
  OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
-				array => const array
-				NIL => error: uninitialized/invalid/inexistent input
+			*	array => const array
+			*	NIL => error: uninitialized/invalid/inexistent input
  =========================================================================================== */
 _VecToConstArray local.vector: goto internalBE;
 VecToConstArray local.vector:
@@ -3766,8 +3989,8 @@ end (local.vector[0]::local.vector[1]::local.vector[2]);
  DESCR|: 	Converts specified array of 3 int/float values to threedimensional vector.
  INPUT|: 	<ARRAY array>
  OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
-				vector => 3D vector
-				NIL => error: uninitialized/invalid/inexistent input
+			*	vector => 3D vector
+			*	NIL => error: uninitialized/invalid/inexistent input
  =========================================================================================== */
 _To3DVec local.array: goto internalBF;
 To3DVec local.array:
@@ -3833,8 +4056,8 @@ end local.result;
  DESCR|: 	Converts specified array of 2 int/float values to twodimensional vector.
  INPUT|: 	<ARRAY array>
  OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
-				array => normalArray with 2 entries
-				NIL => error: uninitialized/invalid/inexistent input
+			*	array => normalArray with 2 entries
+			*	NIL => error: uninitialized/invalid/inexistent input
  =========================================================================================== */
 _To2DVec local.array: goto internalBG;
 To2DVec local.array:
@@ -3905,8 +4128,8 @@ end local.result;
 			large arrays.
  INPUT|: 	<TYPE content> [INT start] [INT length] [INT dimensionDepth] [INT depthLength]
  OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
-				array => entity array
-				NIL => error: uninitialized/invalid/inexistent input
+			*	array => entity array
+			*	NIL => error: uninitialized/invalid/inexistent input
  =========================================================================================== */
 _Create local.content local.start local.length local.depth local.depthLength: goto internalBH;
 Create local.content local.start local.length local.depth local.depthLength:
@@ -3979,9 +4202,9 @@ end local.array;
 			These are system arrays for targetnamed entities and they are dynamic by nature.
  INPUT|: 	<ARRAY array>
  OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
-				1 => entity array
-				0 => other array
-				NIL => uninitialized/inexistent input or invalid variable type
+			*	1 => entity array
+			*	0 => other array
+			*	NIL => uninitialized/inexistent input or invalid variable type
  =========================================================================================== */
 IsEntityArray local.array:
 	/*Main Logic*/
@@ -4014,10 +4237,10 @@ end local.result;
 			or 'stringbox' arrays). 
  INPUT|: 	<ARRAY array>
  OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
-				2 => array is an objectArray
-				1 => highly likely that array is an objectArray
-				0 => other array
-				NIL => uninitialized/inexistent input or invalid variable type
+			*	2 => array is an objectArray
+			*	1 => highly likely that array is an objectArray
+			*	0 => other array
+			*	NIL => uninitialized/inexistent input or invalid variable type
  =========================================================================================== */
 IsObjectArray local.array local.checkKey:
 	/*Main Logic*/
@@ -4028,6 +4251,7 @@ IsObjectArray local.array local.checkKey:
 			case "vector":
 			case "const array":
 				local.result = 0;
+			break;
 			case "array":
 				local.result = 2;
 				if (local.array["__info"].size <= 0) {
@@ -4048,10 +4272,10 @@ end local.result;
  DESCR|: 	Determines whether an array is a normalArray (i.e. an array starting at slot 0)
  INPUT|: 	<ARRAY array>
  OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
-				2 => normalArray
-				1 => system normalArray: "string","vector","const string"
-				0 => other array
-				NIL => uninitialized/inexistent input or invalid variable type
+			*	2 => normalArray
+			*	1 => system normalArray: "string","vector","const string"
+			*	0 => other array
+			*	NIL => uninitialized/inexistent input or invalid variable type
  =========================================================================================== */
 IsNormalArrayType local.array:
 	/*Main Logic*/
@@ -4084,11 +4308,11 @@ end local.result;
  DESCR|: 	Determines whether an array is an indexedArray (i.e. array that doesn't start at 0).
  INPUT|: 	<ARRAY array> 
  OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
-				2 => indexedArray
-				1 => constant indexArray: "const array" (i.e. hashArray with makeArray or 
+			*	2 => indexedArray
+			*	1 => constant indexArray: "const array" (i.e. hashArray with makeArray or 
 															constArray with "::"-operator)
-				0 => other array
-				NIL => uninitialized/inexistent input or invalid variable type
+			*	0 => other array
+			*	NIL => uninitialized/inexistent input or invalid variable type
  =========================================================================================== */
 IsIndexedArrayType local.array:
 	/*Main Logic*/
@@ -4121,9 +4345,9 @@ end local.result;
  DESCR|: 	Returns the array's starting index. 
  INPUT|: 	<ARRAY array>
  OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
-				INT => specified array's starting index
-				NIL => uninitialized/inexistent input, invalid variable type, indexes out of  
-				searched range or objectArray
+			*	INT => specified array's starting index
+			*	NIL => uninitialized/inexistent input, invalid variable type, indexes out of  
+						searched range or objectArray
  =========================================================================================== */
 _GetArrayIdx local.array: goto internalBI;
 GetArrayIdx local.array:
@@ -4149,9 +4373,9 @@ end (waitthread __ArrayStart local.array);
 			the function will search for it.
  INPUT|: 	<ARRAY array> [INT startIdx]
  OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
-				INT => specified array's end index
-				NIL => uninitialized/inexistent input, invalid variable type, indexes out of  
-				searched range or objectArray
+			*	INT => specified array's end index
+			*	NIL => uninitialized/inexistent input, invalid variable type, indexes out of  
+						searched range or objectArray
  =========================================================================================== */
 _GetLastIdx local.array local.start: goto internalBJ;
 GetLastIdx local.array local.start:
@@ -4176,10 +4400,10 @@ end (waitthread __ArraySize local.array local.start);
 			1 returns the last non-empty index).
  INPUT|: 	<ARRAY array>
  OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
-				ARRAY => 	[1]		-> specified array's starting index
+			*	ARRAY => 	[1]		-> specified array's starting index
 							[2]		-> specified array's end index
-				NIL => uninitialized/inexistent input, invalid variable type, indexes out of  
-				searched range or objectArray
+			*	NIL => uninitialized/inexistent input, invalid variable type, indexes out of  
+						searched range or objectArray
  =========================================================================================== */
 _GetArraySizes local.array: goto internalBK;
 GetArraySizes local.array:
@@ -4204,9 +4428,9 @@ end (waitthread __AnalyzeArray local.array);
  DESCR|: 	Determines whether an array is a hashArray made with the 'makeArray' command
  INPUT|: 	<ARRAY array>
  OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
-				1 => constant hashArray
-				0 => other array
-				NIL => uninitialized/inexistent input or invalid variable type
+			*	1 => constant hashArray
+			*	0 => other array
+			*	NIL => uninitialized/inexistent input or invalid variable type
  =========================================================================================== */
 IsHashArray local.array:
 	/*Main Logic*/
@@ -4240,9 +4464,9 @@ end local.result;
  DESCR|: 	Determines whether an variable is a derivative/system type array.
  INPUT|: 	<ARRAY array>
  OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
-				1 => sysArray: "vector","string","const string"
-				0 => other array
-				NIL => uninitialized/inexistent input or invalid variable type
+			*	1 => sysArray: "vector","string","const string"
+			*	0 => other array
+			*	NIL => uninitialized/inexistent input or invalid variable type
  =========================================================================================== */
 IsSystemArray local.var:
 	/*Main Logic*/
@@ -4271,9 +4495,9 @@ end local.result;
  DESCR|: 	Determines whether a specified variable is a user-made array as opposed to a
 			system-designated or 'derived' array.
  OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
-				1 => array: "array","const array"
-				0 => other array type
-				NIL => uninitialized/inexistent input or invalid variable type
+			*	1 => array: "array","const array"
+			*	0 => other array type
+			*	NIL => uninitialized/inexistent input or invalid variable type
  =========================================================================================== */
 IsUserArray local.var:
 	/*Main Logic*/
@@ -4302,9 +4526,9 @@ end local.result;
 			an array type.
  INPUT|: 	<ARRAY array>
  OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
-				1 => array type: "array","const array","vector","string","const string"
-				0 => other variable type
-				NIL => error: uninitialized/invalid/inexistent input
+			*	1 => array type: "array","const array","vector","string","const string"
+			*	0 => other variable type
+			*	NIL => error: uninitialized/invalid/inexistent input
  =========================================================================================== */
 IsArrayType local.var:
 	/*Main Logic*/
@@ -4330,8 +4554,8 @@ end local.result;
  DESCR|: 	Determines and returns specified array's type as a string.
  INPUT|: 	<ARRAY array> [INT ignoreSysArray]
  OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
-				string => type array
-				NIL => error: uninitialized/invalid/inexistent array
+			*	string => type array
+			*	NIL => error: uninitialized/invalid/inexistent array
  =========================================================================================== */
 /*! "normal array"; "ent array"; "index array"; "vector"; "string"; "const string"; "const array"; "hash array"; "Index array"; "object array";  */ 
 Type local.array:
@@ -4379,28 +4603,28 @@ Type local.array:
 end local.result;
 
 /** ==========================================================================================
- HasType Function
+ ConsistsOf Function
  ---------------------------------------------------------------------------------------------
  DESCR|: 	Determines whether an array contains only values of specified type(s) or not.
 			Multiple types can be specified by using a constant array with ::-operators.
 			Optionally, one may specified a specific dimensions to search only.
  INPUT|: 	<ARRAY array> <STRING type> [INT dimensionToSearch]
  OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
-				1 => only specified type detected
-				0 => other types detected
-				NIL => error: uninitialized/invalid/inexistent array
+			*	1 => only specified type detected
+			*	0 => other types detected
+			*	NIL => error: uninitialized/invalid/inexistent array
  =========================================================================================== */
-_HasType local.array group.varType group.spDimensions: goto internalBL;
-HasType local.array group.varType group.spDimensions:
+_ConsistsOf local.array group.varType group.spDimensions: goto internalBL;
+ConsistsOf local.array group.varType group.spDimensions:
 	/*Error & Exception Handling*/
 	if (local.array == NIL || local.array.size <= 0 || !(waitthread IsArrayType local.array) || (waitthread IsObjectArray local.array)) {
 		if (level.DEBUG) {
-			conprintf "\n ~^~^~^~ FATAL_ERROR[lib/array.slib::HasType]: array <arg1> is uninitialized, invalid or inexistent! ~^~^~^~ \n\n";
+			conprintf "\n ~^~^~^~ FATAL_ERROR[lib/array.slib::ConsistsOf]: array <arg1> is uninitialized, invalid or inexistent! ~^~^~^~ \n\n";
 		}
 		end;
 	} if (group.varType == NIL) {
 		if (level.DEBUG) {
-			conprintf "\n ~^~^~^~ FATAL_ERROR[lib/array.slib::HasType]: type <arg2> is not specified! ~^~^~^~ \n\n";
+			conprintf "\n ~^~^~^~ FATAL_ERROR[lib/array.slib::ConsistsOf]: type <arg2> is not specified! ~^~^~^~ \n\n";
 		}
 		end;
 	} 
@@ -4412,6 +4636,7 @@ HasType local.array group.varType group.spDimensions:
 		local.varType = group.varType;
 		group.varType = NIL;
 		group.varType[1] = local.varType;
+		local.varType = NIL;
 	}
 	
 	if (!group.spDimensions || group.spDimensions <= 0) {
@@ -4421,7 +4646,7 @@ HasType local.array group.varType group.spDimensions:
 	group.result = 0;
 	group.dimension = 0;
 	
-	waitthread __HasType local.array;
+	waitthread __ConsistsOf local.array;
 	
 	group.startThread = NIL;
 	group.spDimensions = NIL;
@@ -4431,14 +4656,14 @@ HasType local.array group.varType group.spDimensions:
 	group.result = NIL;
 end local.result;
 
-__HasType local.array:
+__ConsistsOf local.array:
 	if (group.spDimensions != group.dimension && (waitthread IsUserArray local.array)) {
 		if !(group.startThread) {group.startThread = local};
 		group.dimension++;
 		local.arraySizes = waitthread __AnalyzeArray local.array;
 		
 		for (local.i = local.arraySizes[1]; local.i < local.arraySizes[2]; local.i++) { 
-			waitthread __HasType local.array[local.i];
+			waitthread __ConsistsOf local.array[local.i];
 		}
 		group.dimension--;
 	} else {
@@ -4457,12 +4682,14 @@ __HasType local.array:
 					group.result = 0;
 				}
 			}
+		} else {
+			group.result = 0;
 		}
 		
 		// Fullstop.
 		if !(group.result) {
 			//Like collapsing a house of cards, this will delete the initial thread that has triggered all other instances of this threadlabel.
-			//Since every thread is waiting for the other to end, terminating the first one will inevitable terminate the entire group of threads.
+			//Since every thread is waiting for the other to end, terminating the first one will inevitably terminate the entire group of threads.
 			group.startThread end;
 		}
 	}
@@ -4577,7 +4804,7 @@ __AnalyzeArray local.array:
 				
 					// This second loop will only be run if not all entries were accounted for in the last loop.
 					// This time around, the margin will be based on a pre-determined search range (default: 1024 * 2).
-					// The fact that I only check for potention object arrays (i.e. string indexes) now, guarantees
+					// The fact that I only check for potentional object arrays (i.e. string indexes) now, guarantees
 					// support for most hybrid arrays (arrays with integer & string indexes) in the first loop.
 					if (0 < local.numEntries && local.array["__info"] == NIL) {
 						local.range = $Array.seekRange;
@@ -4764,22 +4991,25 @@ __ArrayStart local.array local.end:
 	}
 end local.result;
 
-/* possible functions? 27 left..
+/* possible functions? 26 left..
 updateLIFO -> remove last in
 addLIFO -> add entry to LIFO array
+LILO/LOLI	(LastINLastOUT/LastOUTLastIN)
+LIFO/FOLI	(LastINFirstOUT/FirstOUTLastIN)
+FILO/LOFI	(FirstINLastOUT/..)
+FIFO/FOFI	(FirstINFirstOUT)
 
 UpdateDynArray (for arrays with dynamic slots; i.e. reconcatenate & add)
 EmptyArray (makes size == 0, instead of -1)
-CreateConstArray (creates constant array out of given input: max 12 entries).
+
 ConvToHashArray	(converts specified array to a hasharray)
 CreateHashArray (creates hash array out of given input: max 12 entries).
 
 #Add		(add specified input as entry to specified indexed or normal array; optional entry; cannot be const!) => provides same functionality as AddToObjArray.
-AddDyn		(add specified input as entry to specified dynamic array; either close the gaps and add or add in a gap and then close up the remaining; cannot be const!)
+AddDyn		(add specified input as entry to specified dynamic array; check if not already in array; either close the gaps and add or add in a gap and then close up the remaining; cannot be const!)
 
 #OverrideByIdx			(Overrides all <{ARRAY:INT/INT} index(es)> in [INT dimension] with <VAR input>)
 #OverrideByValue 		(Overrides all entries with <VAR value> in [INT dimension] with <VAR input>)	
-#@HasVar				(is specified var in specified array?)
 
 #DeleteFromArray		(removes specified entry/slot from specified normal/indexed array; cannot be const!)
 DeleteFromDynArray  (removes specified entry/slot from specified dynamic array, immediately closes the gap)

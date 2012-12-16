@@ -2,11 +2,11 @@
 
 main local.player:
 	if (level.eventSys) {
-		for (local.i = 0; local.i < level.eventSys.list["spawn"].size; local.i++) {
-			if (typeof level.eventSys.list["spawn"][local.i] == "const array") {
-				thread level.eventSys.list["spawn"][local.i] local.player;
+		for (local.i = 0; local.i < level.eventSys.script["spawn"].size; local.i++) {
+			if (typeof level.eventSys.script["spawn"][local.i] == "const array") {
+				thread level.eventSys.script["spawn"][local.i] local.player;
 			} else {
-				exec level.eventSys.list["spawn"][local.i] local.player;
+				exec level.eventSys.script["spawn"][local.i] local.player;
 			}
 		}
 	}

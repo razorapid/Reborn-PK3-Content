@@ -1,10 +1,10 @@
 /**
  Medal of Honor: Allied Assault v1.12 REBORN  -  Morpheus Script
  ================================================================
- STRING INFORMATION LIBRARY; 			Multiplayer Bots 4.0 BETA 
+ STRING INFORMATION LIBRARY; 				Script Framework BETA 
  ================================================================
  BY Sor
- VERSION 1.1 (25/10/2012)
+ VERSION 1.2.05 (4/12/2012)
  =-------------------------------------------------------------=		
  Copyright (c) 2008-2014  Lenny Knockx
  All rights reserved.
@@ -27,6 +27,19 @@
  WEBSITE: 	http://www.x-null.net | www.mohaairborne.co.cc
  ================================================================
 */
+__info:
+	local.inf["library"] = "string.lib";	//filename
+	local.inf["namespace"] = "Str";			//targetname of class this script is part of...
+	local.inf["title"] = "STRING INFORMATION LIBRARY";
+	local.inf["version"] = "1.2.05";
+	local.inf["lastmodified"] = "4/12/2012";
+	local.inf["authors"][0] = "Sor";
+end local.inf;
+
+/// ********************************************************* ///
+///						L	I	S	T	S					  ///
+/// ********************************************************* ///
+
 BadCharData:
 	local.hashArray = makeArray
 	"/"
@@ -41,7 +54,7 @@ BadCharData:
 	"<"
 	" "
 	endArray;
-end (waitthread global/bot4/func/func_array.scr::convertHashtoConstArray local.hashArray); //(waitthread $scr.func.convertHashtoConst local.hashArray)
+end (waitthread $Array.fullPath::_HashToIdxArray local.hashArray);
 
 DecimalData:
 	local.hashArray = makeArray
@@ -56,20 +69,7 @@ DecimalData:
 	"8"
 	"9"
 	endArray;
-end (waitthread global/bot4/func/func_array.scr::convertHashtoConstArray local.hashArray); //(waitthread $scr.func.convertHashtoConst local.hashArray)
-
-DecimalDataMasks:
-	local.tmp["0"] = 0;
-	local.tmp["1"] = 1;
-	local.tmp["2"] = 2;
-	local.tmp["3"] = 3;
-	local.tmp["4"] = 4;
-	local.tmp["5"] = 5;
-	local.tmp["6"] = 6;
-	local.tmp["7"] = 7;
-	local.tmp["8"] = 8;
-	local.tmp["9"] = 9;
-end local.tmp; //(waitthread $scr.func.convertHashtoConst local.hashArray)
+end (waitthread $Array.fullPath::_HashToIdxArray local.hashArray);
 
 SafeCharData:
 	local.hashArray = makeArray
@@ -140,7 +140,7 @@ SafeCharData:
 	"_"
 	";"
 	endArray;
-end (waitthread global/bot4/func/func_array.scr::convertHashtoConstArray local.hashArray); //(waitthread $scr.func.convertHashtoConst local.hashArray)
+end (waitthread $Array.fullPath::_HashToIdxArray local.hashArray);
 
 LowerCaseData:
 	local.hashArray = makearray
@@ -171,7 +171,7 @@ LowerCaseData:
 	"y"
 	"z"
 	endarray
-end (waitthread global/bot4/func/func_array.scr::convertHashtoConstArray local.hashArray); //(waitthread $scr.func.convertHashtoConst local.hashArray)
+end (waitthread $Array.fullPath::_HashToIdxArray local.hashArray);
 
 UpperCaseData:
 	local.hashArray = makearray
@@ -202,7 +202,7 @@ UpperCaseData:
 	"Y"
 	"Z"
 	endArray
-end (waitthread global/bot4/func/func_array.scr::convertHashtoConstArray local.hashArray); //(waitthread $scr.func.convertHashtoConst local.hashArray)
+end (waitthread $Array.fullPath::_HashToIdxArray local.hashArray);
 
 TitleExceptions:
 	local.hashArray = makeArray
@@ -235,7 +235,96 @@ TitleExceptions:
 	"a"
 	"an"
 	endArray;
-end (waitthread global/bot4/func/func_array.scr::convertHashtoConstArray local.hashArray); //(waitthread $scr.func.convertHashtoConst local.hashArray)
+end (waitthread $Array.fullPath::_HashToIdxArray local.hashArray);
+
+
+/// ********************************************************* ///
+///						M	A	S	K	S					  ///
+/// ********************************************************* ///
+
+NumericalMasks:
+	local.tmp["0"] = 1;
+	local.tmp["1"] = 1;
+	local.tmp["2"] = 1;
+	local.tmp["3"] = 1;
+	local.tmp["4"] = 1;
+	local.tmp["5"] = 1;
+	local.tmp["6"] = 1;
+	local.tmp["7"] = 1;
+	local.tmp["8"] = 1;
+	local.tmp["9"] = 1;
+	/* local.tmp["__info"] = "0"::"1"::"2"::"3"::"4"::"5"::"6"::"7"::"8"::"9" */;	
+end local.tmp
+
+DecimalDataMasks:
+	local.tmp["0"] = 0;
+	local.tmp["1"] = 1;
+	local.tmp["2"] = 2;
+	local.tmp["3"] = 3;
+	local.tmp["4"] = 4;
+	local.tmp["5"] = 5;
+	local.tmp["6"] = 6;
+	local.tmp["7"] = 7;
+	local.tmp["8"] = 8;
+	local.tmp["9"] = 9;
+	/* local.tmp["__info"] = "0"::"1"::"2"::"3"::"4"::"5"::"6"::"7"::"8"::"9" */;	
+end local.tmp;
+
+LetterDataMasks:
+	local.tmp["a"] = 1;
+	local.tmp["b"] = 1;
+	local.tmp["c"] = 1;
+	local.tmp["d"] = 1;
+	local.tmp["e"] = 1;
+	local.tmp["f"] = 1;
+	local.tmp["g"] = 1;
+	local.tmp["h"] = 1;
+	local.tmp["i"] = 1;
+	local.tmp["j"] = 1;
+	local.tmp["k"] = 1;
+	local.tmp["l"] = 1;
+	local.tmp["m"] = 1;
+	local.tmp["n"] = 1;
+	local.tmp["o"] = 1;
+	local.tmp["p"] = 1;
+	local.tmp["q"] = 1;
+	local.tmp["r"] = 1;
+	local.tmp["s"] = 1;
+	local.tmp["t"] = 1;
+	local.tmp["u"] = 1;
+	local.tmp["v"] = 1;
+	local.tmp["w"] = 1;
+	local.tmp["x"] = 1;
+	local.tmp["y"] = 1;
+	local.tmp["z"] = 1;
+	local.tmp["A"] = 2;
+	local.tmp["B"] = 2;
+	local.tmp["C"] = 2;
+	local.tmp["D"] = 2;
+	local.tmp["E"] = 2;
+	local.tmp["F"] = 2;
+	local.tmp["G"] = 2;
+	local.tmp["H"] = 2;
+	local.tmp["I"] = 2;
+	local.tmp["J"] = 2;
+	local.tmp["K"] = 2;
+	local.tmp["L"] = 2;
+	local.tmp["M"] = 2;
+	local.tmp["N"] = 2;
+	local.tmp["O"] = 2;
+	local.tmp["P"] = 2;
+	local.tmp["Q"] = 2;
+	local.tmp["R"] = 2;
+	local.tmp["S"] = 2;
+	local.tmp["T"] = 2;
+	local.tmp["U"] = 2;
+	local.tmp["V"] = 2;
+	local.tmp["W"] = 2;
+	local.tmp["X"] = 2;
+	local.tmp["Y"] = 2;
+	local.tmp["Z"] = 2;
+	/* local.tmp["__info"] = "a"::"b"::"c"::"d"::"e"::"f"::"g"::"h"::"i"::"j"::"k"::"l"::"m"::"n"::"q"::"r"::"s"::"t"::"u"::"v"::"w"::"x"::"y"::"z"::"A"::"B"::"C"::"D"::"E"::"F"::"G"::"H"::"I"::"J"::"K"::"M"::"N"::"O"::"P"::"Q"::"R"::"S"::"T"::"U"::"V"::"W"::"X"::"Y"::"Z"; */
+end local.tmp;
 
 CharData local.selection:
 	// lowercase -> UPPERCASE
@@ -404,3 +493,538 @@ ASCIIData:
 	local.tmp[125] = "}";
 	local.tmp[126] = "~";
 end local.tmp;
+
+
+/// ********************************************************* ///
+///				S	W	I	T	C	H	E	S				  ///
+/// ********************************************************* ///
+
+IsDecimalData local.var:
+	switch (local.var) {
+		case "0":
+			local.result = "0";
+		break;
+		case "1":
+			local.result = "1";
+		break;
+		case "2":
+			local.result = "2";
+		break;
+		case "3":
+			local.result = "3";
+		break;
+		case "4":
+			local.result = "4";
+		break;
+		case "5":
+			local.result = "5";
+		break;
+		case "6":
+			local.result = "6";
+		break;
+		case "7":
+			local.result = "7";
+		break;
+		case "8":
+			local.result = "8";
+		break;
+		case "9":
+			local.result = "9";
+		break;
+		default:
+			local.result = 0;
+		break;
+	}
+end local.result;
+
+IsLetterData local.var:
+	switch (local.var) {
+		case "a":
+			local.result = "a";
+		break;
+		case "b":
+			local.result = "b";
+		break;
+		case "c":
+			local.result = "c";
+		break;
+		case "d":
+			local.result = "d";
+		break;
+		case "e":
+			local.result = "e";
+		break;
+		case "f":
+			local.result = "f";
+		break;
+		case "g":
+			local.result = "g";
+		break;
+		case "h":
+			local.result = "h";
+		break;
+		case "i":
+			local.result = "i";
+		break;
+		case "j":
+			local.result = "j";
+		break;
+		case "k":
+			local.result = "k";
+		break;
+		case "l":
+			local.result = "l";
+		break;
+		case "m":
+			local.result = "m";
+		break;
+		case "n":
+			local.result = "n";
+		break;
+		case "o":
+			local.result = "o";
+		break;
+		case "p":
+			local.result = "p";
+		break;
+		case "q":
+			local.result = "q";
+		break;
+		case "r":
+			local.result = "r";
+		break;
+		case "s":
+			local.result = "s";
+		break;
+		case "t":
+			local.result = "t";
+		break;
+		case "u":
+			local.result = "u";
+		break;
+		case "v":
+			local.result = "v";
+		break;
+		case "w":
+			local.result = "w";
+		break;
+		case "x":
+			local.result = "x";
+		break;
+		case "y":
+			local.result = "y";
+		break;
+		case "z":
+			local.result = "z";
+		break;
+		case "A":
+			local.result = "A";
+		break;
+		case "B":
+			local.result = "B";
+		break;
+		case "C":
+			local.result = "C";
+		break;		
+		case "D":
+			local.result = "D";
+		break;		
+		case "E":
+			local.result = "E";
+		break;		
+		case "F":
+			local.result = "F";
+		break;		
+		case "G":
+			local.result = "G";
+		break;		
+		case "H":
+			local.result = "H";
+		break;		
+		case "I":
+			local.result = "I";
+		break;		
+		case "J":
+			local.result = "J";
+		break;		
+		case "K":
+			local.result = "K";
+		break;		
+		case "L":
+			local.result = "L";
+		break;		
+		case "M":
+			local.result = "M";
+		break;		
+		case "N":
+			local.result = "N";
+		break;		
+		case "O":
+			local.result = "O";
+		break;		
+		case "P":
+			local.result = "P";
+		break;		
+		case "Q":
+			local.result = "Q";
+		break;		
+		case "R":
+			local.result = "R";
+		break;		
+		case "S":
+			local.result = "S";
+		break;		
+		case "T":
+			local.result = "T";
+		break;		
+		case "U":
+			local.result = "U";
+		break;		
+		case "V":
+			local.result = "V";
+		break;		
+		case "W":
+			local.result = "W";
+		break;		
+		case "X":
+			local.result = "X";
+		break;		
+		case "Y":
+			local.result = "Y";
+		break;		
+		case "Z":
+			local.result = "Z";
+		break;
+		default:		
+			local.result = 0;
+		break;
+	}
+end local.result;
+
+IsEsc local.var:
+	switch (local.var) {
+		case "\n":
+			local.result = "\n";
+		break;
+		case "\t":
+			local.result = "\t";
+		break;
+		case "\"":
+			local.result = "\"";
+		break;
+		case "\\":
+			local.result = "\\";
+		break;
+		default:
+			local.result = 0;
+		break;
+	}
+end local.result;
+
+IsPunct local.var:
+	switch (local.var) {
+		case ".":
+			local.result = ".";
+		break;
+		case ",":
+			local.result = ",";
+		break;
+		case ":":
+			local.result = ":";
+		break;
+		case ";":
+			local.result = ";";
+		break;
+		case "?":
+			local.result = ";";
+		break;
+		case "!":
+			local.result = ";";
+		break;
+		case "\"":
+			local.result = "\"";
+		break;
+		case "'":
+			local.result = "'";
+		break;
+		case "-":
+			local.result = "-";
+		break;
+		default:
+			local.result = 0;
+		break;
+	}
+end local.result;
+
+IsSymbol local.var:
+	switch (local.var) {
+		case ".":
+			local.result = ".";
+		break;
+		case ",":
+			local.result = ",";
+		break;
+		case ":":
+			local.result = ":";
+		break;
+		case ";":
+			local.result = ";";
+		break;
+		case "?":
+			local.result = ";";
+		break;
+		case "!":
+			local.result = ";";
+		break;
+		case "\"":
+			local.result = "\"";
+		break;
+		case "'":
+			local.result = "'";
+		break;
+		case "-":
+			local.result = "-";
+		break;
+		case "&":
+			local.result = "&";
+		break; 
+		case "|":
+			local.result = "|";
+		break;
+		case "@":
+			local.result = "@";
+		break;
+		case "#":
+			local.result = "#";
+		break;
+		case "(":
+			local.result = "(";
+		break;
+		case "^":
+			local.result = "^";
+		break;
+		case "{":
+			local.result = "{";
+		break;
+		case "}":
+			local.result = "}";
+		break;
+		case ")":
+			local.result = ")";
+		break;
+		case "[":
+			local.result = "[";
+		break;
+		case "]":
+			local.result = "]";
+		break;
+		case "$":
+			local.result = "$";
+		break;
+		case "*":
+			local.result = "*";
+		break;
+		case "%":
+			local.result = "%";
+		break;
+		case "`":
+			local.result = "`";
+		break;
+		case "+":
+			local.result = "+";
+		break;
+		case "/":
+			local.result = "/";
+		break;
+		case "\\":
+			local.result = "\\";
+		break;
+		case "=":
+			local.result = "=";
+		break;
+		case "~": 
+			local.result = "~";
+		break;
+		case "<":
+			local.result = "<";
+		break;
+		case ">":
+			local.result = ">";
+		break;
+		default:
+			local.result = 0;
+		break;
+	}
+end local.result;
+
+IsLower local.var:
+	switch (local.var) {
+		case "a":
+			local.result = "a";
+		break;
+		case "b":
+			local.result = "b";
+		break;
+		case "c":
+			local.result = "c";
+		break;
+		case "d":
+			local.result = "d";
+		break;
+		case "e":
+			local.result = "e";
+		break;
+		case "f":
+			local.result = "f";
+		break;
+		case "g":
+			local.result = "g";
+		break;
+		case "h":
+			local.result = "h";
+		break;
+		case "i":
+			local.result = "i";
+		break;
+		case "j":
+			local.result = "j";
+		break;
+		case "k":
+			local.result = "k";
+		break;
+		case "l":
+			local.result = "l";
+		break;
+		case "m":
+			local.result = "m";
+		break;
+		case "n":
+			local.result = "n";
+		break;
+		case "o":
+			local.result = "o";
+		break;
+		case "p":
+			local.result = "p";
+		break;
+		case "q":
+			local.result = "q";
+		break;
+		case "r":
+			local.result = "r";
+		break;
+		case "s":
+			local.result = "s";
+		break;
+		case "t":
+			local.result = "t";
+		break;
+		case "u":
+			local.result = "u";
+		break;
+		case "v":
+			local.result = "v";
+		break;
+		case "w":
+			local.result = "w";
+		break;
+		case "x":
+			local.result = "x";
+		break;
+		case "y":
+			local.result = "y";
+		break;
+		case "z":
+			local.result = "z";
+		break;
+		default:
+			local.result = 0;
+		break;
+	}
+end local.result;
+
+IsUpper local.var:
+	switch (local.var) {
+		case "A":
+			local.result = "A";
+		break;
+		case "B":
+			local.result = "B";
+		break;
+		case "C":
+			local.result = "C";
+		break;		
+		case "D":
+			local.result = "D";
+		break;		
+		case "E":
+			local.result = "E";
+		break;		
+		case "F":
+			local.result = "F";
+		break;		
+		case "G":
+			local.result = "G";
+		break;		
+		case "H":
+			local.result = "H";
+		break;		
+		case "I":
+			local.result = "I";
+		break;		
+		case "J":
+			local.result = "J";
+		break;		
+		case "K":
+			local.result = "K";
+		break;		
+		case "L":
+			local.result = "L";
+		break;		
+		case "M":
+			local.result = "M";
+		break;		
+		case "N":
+			local.result = "N";
+		break;		
+		case "O":
+			local.result = "O";
+		break;		
+		case "P":
+			local.result = "P";
+		break;		
+		case "Q":
+			local.result = "Q";
+		break;		
+		case "R":
+			local.result = "R";
+		break;		
+		case "S":
+			local.result = "S";
+		break;		
+		case "T":
+			local.result = "T";
+		break;		
+		case "U":
+			local.result = "U";
+		break;		
+		case "V":
+			local.result = "V";
+		break;		
+		case "W":
+			local.result = "W";
+		break;		
+		case "X":
+			local.result = "X";
+		break;		
+		case "Y":
+			local.result = "Y";
+		break;		
+		case "Z":
+			local.result = "Z";
+		break;
+		default:
+			local.result = 0;
+		break;
+	}
+end local.result;

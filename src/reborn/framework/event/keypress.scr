@@ -2,11 +2,11 @@
 
 main local.player local.keynum:
 	if (level.eventSys) {
-		for (local.i = 0; local.i < level.eventSys.list["keypress"].size; local.i++) {
-			if (typeof level.eventSys.list["keypress"][local.i] == "const array") {
-				thread level.eventSys.list["keypress"][local.i] local.player local.keynum;
+		for (local.i = 0; local.i < level.eventSys.script["keypress"].size; local.i++) {
+			if (typeof level.eventSys.script["keypress"][local.i] == "const array") {
+				thread level.eventSys.script["keypress"][local.i] local.player local.keynum;
 			} else {
-				exec level.eventSys.list["keypress"][local.i] local.player local.keynum;
+				exec level.eventSys.script["keypress"][local.i] local.player local.keynum;
 			}
 		}
 	}

@@ -4,9 +4,9 @@
  MATHEMATICAL FUNCTIONS LIBRARY; 			Script Framework BETA
  ================================================================
  BY Sor	
- VERSION 1.1.21 (23/11/2012)
- =-------------------------------------------------------------=		
- Copyright (c) 2009-2013  Lenny Knockx
+ VERSION 1.3.19 (4/12/2012)
+ =-------------------------------------------------------------=
+ Copyright (c) 2009-2014  Lenny Knockx
  All rights reserved.
  =-------------------------------------------------------------=
  Permission to use, copy, modify, and/or distribute this software 
@@ -28,7 +28,8 @@
  ================================================================
 */
 /** 
-IsNumArray => HasType "int"::"float"
+FOR MATRICES! Also use $Array.CompareStruct function
+IsNumArray => ConsistsOf <array> "int"::"float"; Idx or Nrm; IsMultiDimensional==0? Support hash (row major)?
 ArrayEuclDiv => for IsNumArray arrays, optional dimension & entries.
 ArrayDiv
 ArrayMult
@@ -36,28 +37,27 @@ ArrayAdd
 ArraySub
 ArrayMod
 ArrayPow
+=> obviously, make _thread shortcuts possible!
 */
 /*!
 	ToColour => converts #RRGGBB & #RGB hex to ( R G B ) dec.
 */
-///faculty => take max int val into account
+///factorial => take max int val into account; _thread version uses solution table and no calc
 ///fibonacci => take max int val into account
 /*!
 $Int.ToArray	=|
-$Float.ToArray	=|> casts 'int = data' to 'int[0/start] = local.data'
+$Float.ToArray	=|> converts 'int = data' to 'int[0/start] = local.data'
 $Bool.ToArray	=|
 
 $Int.ToVector	=|
-$Float.ToVector	=|> casts 'int = data' to 'int = ( data data data )'
+$Float.ToVector	=|> converts 'int = data' to 'int = ( data data data )'
 $Bool.ToVector	=|
 (or .ToVec)
 
-// more hassle-free casting
 $Float.ToStr	//casting
 $Float.ToBool	//casting
 $Float.ToInt	//casting
 $Float.Fraction => returns decimal part of float; also $Float.Frac
-$Float.Compare => compares two floats, 0=equal; 1=lower than; 2=greater than
 $Float.Mod => fmod
 $Float.Ceil => $Math.Ceil
 $Float.Floor => $Math.Floor
@@ -69,134 +69,197 @@ $Bool.ToFloat // only returns 0 if 0.0
 */
 ///add euclidian division function: ((num - (num % 10)) / 10) => RETURN INT
 ///re-write/update median
+///ListPrimes			(use euclidian sieve)
+///IsPrime				(is number a prime? use int(sqrt) & modulo i)
+///GreatestCommonDivisor (also 'GCD', 'GreatestCommonFactor', 'GCF'; use euclid's algorithm)
+/** int big = int.Parse(Console.ReadLine());
+    int small = int.Parse(Console.ReadLine());
+    int rest = big % small;
+    while (rest > 0) {
+      big = small;
+      small = rest;
+      rest = big % small;
+    }*/
+///Convert HEX;OCT;BIN string representation of ints & floats to int/float and vice versa...
 ///RoundToNearestMult	(round X to nearest multitude of Y)
 ///CeilToNearestMult	(round X up to nearest multitude of Y)
 ///FloorToNearestMult	(round X down to nearest multitude of Y)
-///NormalizeDegrees/Norm (normalize degrees back to [0,360] range
+///FormatDecimalDegrees	(convert float (or int) of degrees to an array with [degrees, minutes, seconds]) //http://geography.about.com/library/howto/htdegrees.htm
 ///GLOBAL VARS: Users can use group. objects.
-///SUPPORT NUMSTRINGS: use $Str.IsNumerical local.x 
-__init:
-	//Temporary:
-	level.Math = local CreateListener; level.Math targetname "Math";
-	level.Math.filePath = "reborn/framework/lib/";
-	level.Math.fileName = "math.slib";
-	level.Math.initThread = "__init";
-	level.Math.parent = "Library";
-	level.Math.isRoot = false;
-	level.Math.mSize = 0;
-	level.Math.pSize = 6;
-	//
-	
-	if ($/*System.Library.*/Math) {
-		/// Cross-reference:
-		level.Math = $Math;
+///SUPPORT NUMSTRINGS: use $Str.IsNumeric local.x 
+/// Leave function shortcut names as is but change actual function names to full names of their mathematical function
+NormalizeDegrees local.degrees:
+	if (local.degrees && (waitthread IsNumber local.degrees)) {
+		// This normalizes any multiplications back to the base degrees in the [-360,360] domain.
+		// Use default modulo operator on integers.
+		if (typeof local.degrees == "int") {
+			local.result = local.degrees % 360;
+		// Use reborn's new fmod command on floats ;-)
+		} else {
+			local.result = fmod local.degrees 360;
+		}
 		
+		// This normalizes any negative degrees to a positive [0, 360] domain.
+		if (local.result <= 0) {
+			local.result += 360;
+		}
+	}
+end local.result;
+
+__init:
+	if (self && self == $/*System.Library.*/Math) {
 		///MATHEMATICAL CONSTANTS:
-		level.Math.PI = 3.141592654; 
-		level.Math.E = 2.718281828;		/**Euler's number*/
-		level.Math.PHI = 1.618033988;	/**Golden ratio Phi*/
-		level.Math.SQ2 = 1.414213562;	/**Square root of two*/
+		self.PI = 3.141592654; 		
+		self.EU = 0.577215664;		/**Euler's number*/
+		self.E = 2.718281828;		/**e natural log*/
+		self.PHI = 1.618033988;		/**Golden ratio Phi*/
+		self.SQ2 = 1.414213562;		/**Square root of two*/
 
 		// Users need to use group.x and .y objects for multiple transformations
 		//parm.math = local CreateListener;
 		
 		// Shortcuts
-		level.Math.Int = waitthread /*$System.fullPath::#DefineClass "Int" "reborn/framework/lib/math.slib"::*/"__initInt";
-		//level.Math.Float = waitthread $System.fullPath::#DefineClass "Float" "reborn/framework/lib/math.slib"::"__initFloat";
-		//level.Math.Bool = waitthread $System.fullPath::#DefineClass "Bool" "reborn/framework/lib/math.slib"::"__initBool";
-
-		level.Math.IsNum = 					(level.Math.filePath + level.Math.fileName)::"IsNumber";
-		level.Math.NaN = 					(level.Math.filePath + level.Math.fileName)::"NotaNumber";
-		level.Math.ToRadians = 				(level.Math.filePath + level.Math.fileName)::"ToRadians";
-		level.Math.ToDegrees = 				(level.Math.filePath + level.Math.fileName)::"ToDegrees";
-		/*level.Math.Rad = 					(level.Math.filePath + level.Math.fileName)::"ToRadians";
-		level.Math.Deg = 					(level.Math.filePath + level.Math.fileName)::"ToDegrees";*/
+		self.IsNum = 				self.fullPath::"IsNumber";
+		self.NaN = 					self.fullPath::"NotaNumber";
+		self.ToRadians = 			self.fullPath::"ToRadians";
+		self.ToDegrees = 			self.fullPath::"ToDegrees";
+		/*self.Rad = 				self.fullPath::"ToRadians";
+		self.Deg = 					self.fullPath::"ToDegrees";*/
 		// for radians input: 15
-		level.Math.Cos = 					(level.Math.filePath + level.Math.fileName)::"Cos";
-		level.Math.Sin = 					(level.Math.filePath + level.Math.fileName)::"Sin";
-		level.Math.Tan =					(level.Math.filePath + level.Math.fileName)::"Tan";
-		level.Math.Acos =					(level.Math.filePath + level.Math.fileName)::"Acos";
-		level.Math.Asin =					(level.Math.filePath + level.Math.fileName)::"Asin";
-		level.Math.Atan =					(level.Math.filePath + level.Math.fileName)::"Atan";
-		level.Math.Atan2 =					(level.Math.filePath + level.Math.fileName)::"Atan2";
-		//level.Math.Cosec =				(level.Math.filePath + level.Math.fileName)::"Csc";
-		level.Math.Csc =					(level.Math.filePath + level.Math.fileName)::"Csc";
-		level.Math.Sec =					(level.Math.filePath + level.Math.fileName)::"Sec";
-		level.Math.Cot =					(level.Math.filePath + level.Math.fileName)::"Cot";
-		//level.Math.Acosec =				(level.Math.filePath + level.Math.fileName)::"Acsc";
-		level.Math.Acsc =					(level.Math.filePath + level.Math.fileName)::"Acsc";
-		level.Math.Asec =					(level.Math.filePath + level.Math.fileName)::"Asec";
-		level.Math.Acot =					(level.Math.filePath + level.Math.fileName)::"Acot";
+		self.Cos = 					self.fullPath::"Cos";
+		self.Sin = 					self.fullPath::"Sin";
+		self.Tan =					self.fullPath::"Tan";
+		self.Acos =					self.fullPath::"Acos";
+		self.Asin =					self.fullPath::"Asin";
+		self.Atan =					self.fullPath::"Atan";
+		self.Atan2 =				self.fullPath::"Atan2";
+		//self.Cosec =				self.fullPath::"Csc";
+		self.Csc =					self.fullPath::"Csc";
+		self.Sec =					self.fullPath::"Sec";
+		self.Cot =					self.fullPath::"Cot";
+		//self.Acosec =				self.fullPath::"Acsc";
+		self.Acsc =					self.fullPath::"Acsc";
+		self.Asec =					self.fullPath::"Asec";
+		self.Acot =					self.fullPath::"Acot";
 		// Same as above, but for degrees input: 15
-		level.Math.Cosd = 					(level.Math.filePath + level.Math.fileName)::"Cosd";
-		level.Math.Sind = 					(level.Math.filePath + level.Math.fileName)::"Sind";
-		level.Math.Tand =					(level.Math.filePath + level.Math.fileName)::"Tand";
-		level.Math.Acosd =					(level.Math.filePath + level.Math.fileName)::"Acosd";
-		level.Math.Asind =					(level.Math.filePath + level.Math.fileName)::"Asind";
-		level.Math.Atand =					(level.Math.filePath + level.Math.fileName)::"Atand";
-		level.Math.Atan2d =					(level.Math.filePath + level.Math.fileName)::"Atan2d";
-		level.Math.Cotd =					(level.Math.filePath + level.Math.fileName)::"Cotd";
-		level.Math.Acotd =					(level.Math.filePath + level.Math.fileName)::"Acotd";
-		//level.Math.Cosecd =				(level.Math.filePath + level.Math.fileName)::"Cscd";
-		level.Math.Cscd =					(level.Math.filePath + level.Math.fileName)::"Cscd";
-		level.Math.Secd =					(level.Math.filePath + level.Math.fileName)::"Secd";
-		level.Math.Cotd =					(level.Math.filePath + level.Math.fileName)::"Cotd";
-		//level.Math.Acosecd =				(level.Math.filePath + level.Math.fileName)::"Acscd";
-		level.Math.Acscd =					(level.Math.filePath + level.Math.fileName)::"Acscd";
-		level.Math.Asecd =					(level.Math.filePath + level.Math.fileName)::"Asecd";
-		level.Math.Acotd =					(level.Math.filePath + level.Math.fileName)::"Acotd";
+		self.Cosd = 				self.fullPath::"Cosd";
+		self.Sind = 				self.fullPath::"Sind";
+		self.Tand =					self.fullPath::"Tand";
+		self.Acosd =				self.fullPath::"Acosd";
+		self.Asind =				self.fullPath::"Asind";
+		self.Atand =				self.fullPath::"Atand";
+		self.Atan2d =				self.fullPath::"Atan2d";
+		self.Cotd =					self.fullPath::"Cotd";
+		self.Acotd =				self.fullPath::"Acotd";
+		//self.Cosecd =				self.fullPath::"Cscd";
+		self.Cscd =					self.fullPath::"Cscd";
+		self.Secd =					self.fullPath::"Secd";
+		self.Cotd =					self.fullPath::"Cotd";
+		//self.Acosecd =			self.fullPath::"Acscd";
+		self.Acscd =				self.fullPath::"Acscd";
+		self.Asecd =				self.fullPath::"Asecd";
+		self.Acotd =				self.fullPath::"Acotd";
 		// Remaining trimmed functions :) thanks to Razo's new scripting commands
-		level.Math.Exp =					(level.Math.filePath + level.Math.fileName)::"Exp";
-		level.Math.Frexp =					(level.Math.filePath + level.Math.fileName)::"Frexp";
-		level.Math.Ldexp =					(level.Math.filePath + level.Math.fileName)::"Ldexp";
-		level.Math.Ln =						(level.Math.filePath + level.Math.fileName)::"Log";
-		level.Math.Log =					(level.Math.filePath + level.Math.fileName)::"Log";
-		level.Math.Log2 =					(level.Math.filePath + level.Math.fileName)::"Log2";
-		level.Math.Modf =					(level.Math.filePath + level.Math.fileName)::"Modf";
-		level.Math.Pow =					(level.Math.filePath + level.Math.fileName)::"Pow";
-		level.Math.Floor =					(level.Math.filePath + level.Math.fileName)::"Floor";
-		level.Math.Ceil =					(level.Math.filePath + level.Math.fileName)::"Ceil";
-		level.Math.Fmod =					(level.Math.filePath + level.Math.fileName)::"Fmod";
-		level.Math.Sqrt =					(level.Math.filePath + level.Math.fileName)::"Sqrt";
+		self.Exp =					self.fullPath::"Exp";
+		self.Frexp =				self.fullPath::"Frexp";
+		self.Ldexp =				self.fullPath::"Ldexp";
+		self.Ln =					self.fullPath::"Log";
+		self.Log =					self.fullPath::"Log";
+		self.Log2 =					self.fullPath::"Log2";
+		self.Modf =					self.fullPath::"Modf";
+		self.Pow =					self.fullPath::"Pow";
+		self.Floor =				self.fullPath::"Floor";
+		self.Ceil =					self.fullPath::"Ceil";
+		self.Fmod =					self.fullPath::"Fmod";
+		self.Sqrt =					self.fullPath::"Sqrt";
 		// Square root different methods & versions.
-		level.Math.Sqrt1 =					(level.Math.filePath + level.Math.fileName)::"Sqrt1";
-		level.Math.Sqrt2 =					(level.Math.filePath + level.Math.fileName)::"Sqrt2";
-		level.Math.Sqrt3 =					(level.Math.filePath + level.Math.fileName)::"Sqrt3";
+		self.Sqrt1 =				self.fullPath::"Sqrt1";
+		self.Sqrt2 =				self.fullPath::"Sqrt2";
+		self.Sqrt3 =				self.fullPath::"Sqrt3";
 		// General functions...
-		level.Math.IsPowOf2 = 				(level.Math.filePath + level.Math.fileName)::"IsPowOf2";
-		level.Math.Round = 					(level.Math.filePath + level.Math.fileName)::"Round";
-		level.Math.FloorToPowOf = 			(level.Math.filePath + level.Math.fileName)::"FloorToPowOf";
-		level.Math.CeilToPowOf = 			(level.Math.filePath + level.Math.fileName)::"CeilToPowOf";
-		level.Math.RoundToPowOf = 			(level.Math.filePath + level.Math.fileName)::"RoundToPowOf";
-		level.Math.Median = 				(level.Math.filePath + level.Math.fileName)::"Median";
-		level.Math.Average = 				(level.Math.filePath + level.Math.fileName)::"Average";		
-		/*level.Math.Med = 					(level.Math.filePath + level.Math.fileName)::"Median";
-		level.Math.Avg = 					(level.Math.filePath + level.Math.fileName)::"Average";
-		level.Math.Eucl = 					(level.Math.filePath + level.Math.fileName)::"EuclDivision";*/
-		level.Math.EuclDiv = 				(level.Math.filePath + level.Math.fileName)::"EuclDivision";
+		self.IsPowOf2 = 			self.fullPath::"IsPowOf2";
+		self.Round = 				self.fullPath::"Round";
+		self.FloorToPowOf = 		self.fullPath::"FloorToPowOf";
+		self.CeilToPowOf = 			self.fullPath::"CeilToPowOf";
+		self.RoundToPowOf = 		self.fullPath::"RoundToPowOf";
+		self.Median = 				self.fullPath::"Median";
+		self.Average = 				self.fullPath::"Average";		
+		/*self.Med = 				self.fullPath::"Median";
+		self.Avg = 					self.fullPath::"Average";
+		self.Eucl = 				self.fullPath::"EuclDivision";*/
+		self.EuclDiv = 				self.fullPath::"EuclDivision";
+		self.NormalizeDegrees =		self.fullPath::"NormalizeDegrees";
+		/*self.NormDeg = 			self.fullPath::"NormalizeDegrees";*/
 		
-		level.Math.msize = 50;
+		// There are 51 methods in this function library.
+		self.methodSize += 51;
+		
+		// There are 5 properties defined.
+		self.propertySize += 5;
+		
+		// $Math class has 3 children or 'subclasses'.
+		self waitthread $System.fullPath::#DefineClass "Int" self.fullPath::"__initInt"; self.Int = $Int;
+		self waitthread $System.fullPath::#DefineClass "Float" self.fullPath::"__initFloat" 1; self.Int = $Float;
+		self waitthread $System.fullPath::#DefineClass "Bool" self.fullPath::"__initBool" 1; self.Int = $Bool;
 	}
-end level.Math;
+end;
+
+__info:
+	local.inf["library"] = "math.slib";		//filename
+	local.inf["namespace"] = "Math";		//targetname of class this script is part of...
+	local.inf["title"] = "MATHEMATICAL FUNCTIONS LIBRARY";
+	local.inf["version"] = "1.3.19";
+	local.inf["lastmodified"] = "4/12/2012";
+	local.inf["authors"][0] = "Sor";
+	local.inf["authors"][1] = "jv_map";
+	local.inf["authors"][2] = "veers";
+end local.inf;
 
 __initInt:
-	level.Int = local CreateListener; 
-	level.Int targetname "Int";
-	
-	level.Int.MAX_VALUE = 2147483647;
-	level.Int.MAX_VALUE_POW = 31; //from -2^31 to (2^31) - 1
-	level.Int.MIN_VALUE = -2147483648;
-	level.Int.SIGNED = true;
+	if (self && self == $Math.Int) {
+		self.MAX_VALUE = 2147483647;
+		self.MAX_VALUE_POW = 31; 	//from -2^31 to (2^31) - 1
+		self.MIN_VALUE = -2147483648;
+		self.SIGNED = true;
 
-	// Method shortcuts
-	level.Int.IsPowOf2 = 		(level.Math.filePath + level.Math.fileName)::"IsPowOf2";
-	level.Int.ToStr = 			(level.Math.filePath + level.Math.fileName)::"IntToStr";
-	level.Int.ToFloat = 		(level.Math.filePath + level.Math.fileName)::"IntToFloat";
-	level.Int.ToBool = 			(level.Math.filePath + level.Math.fileName)::"IntToBool";
-	level.Int.FloorToPowOf = 	(level.Math.filePath + level.Math.fileName)::"FloorToPowOf";
-	level.Int.CeilToPowOf = 	(level.Math.filePath + level.Math.fileName)::"CeilToPowOf";
-	level.Int.RoundToPowOf = 	(level.Math.filePath + level.Math.fileName)::"RoundToPowOf";
-end
+		// Method shortcuts
+		self.IsPowOf2 = 		self.fullPath::"IsPowOf2";
+		self.ToStr = 			self.fullPath::"IntToStr";
+		self.ToFloat = 			self.fullPath::"IntToFloat";
+		self.ToBool = 			self.fullPath::"IntToBool";
+		self.FloorToPowOf = 	self.fullPath::"FloorToPowOf";
+		self.CeilToPowOf = 		self.fullPath::"CeilToPowOf";
+		self.RoundToPowOf = 	self.fullPath::"RoundToPowOf";
+		
+		// There are 7 methods registered in this function library;
+		self.methodSize += 7;
+		
+		// There are 4 properties defined;
+		self.propertySize += 4;
+	}
+end;
+
+__InitFloat:
+	if (self && self == $Float) {
+
+		// There are 0 methods registered in this function library;
+		self.methodSize += 0;
+		
+		// There are 0 properties defined;
+		self.propertySize += 0;
+	}
+end;
+
+__InitBool:
+	if (self && self == $Bool) {
+	
+		// There are 0 methods registered in this function library;
+		self.methodSize += 0;
+		
+		// There are 0 properties defined;
+		self.propertySize += 0;
+	}
+end;
 
 IntToStr local.int:
 	if (local.int) {
@@ -264,16 +327,49 @@ FloatToStr local.float:
 	}
 end local.result;
 
+/**
+	Say we have a number 8, which is 2^3. In binary we get:
+			1000
+	Now how can we easily tell whether this binary number is 
+	a power of two without actually going over all known powers.
+	Say we were to deduct 1 from 8, we would get 7, which is:
+			0111
+	If we apply the bitwise AND operation on the first and 
+	second binary number we get 0:
+			1000
+			0111
+		AND ----
+			0000
+	AND operation only returns a 1 bit if the bit in both numbers is
+	set to 1.
+	
+	Say we have a number 20. It is the result of adding 2^4 + 2^2
+	but 20 itself is not a power of two. In binary we get:
+			0001 0100
+	If we subtract 1 again, we get:
+			0001 0011
+	We apply the bitwise AND operation:
+			0001 0100
+			0001 0011
+		AND ---------
+			0001 0000
+	Our algorithm returns 16 instead of 0, this means 20 is not a 
+	power of 2 like it should be.
+*/
 IsPowOf2 local.x:
-	// If x does not exist; if global x exists, use it and in all other cases unequivocally end;
-	if (local.x == NIL) {if (group.x != NIL) {local.x = group.x;} else {waitthread __Error1 "IsPowOf2"; end;}};
-	// Make x positive
+	/*Error & Exception handling*/
+	local.x = waitthread MakeNumber local.x;
+	if (local.x == NIL) {waitthread __Error1 "IsPowOf2" NIL local.x; end;}
+	else if (typeof local.x == "float") {local.x = float(local.x);}
+	
+	// Make x positive. We need the signed bit to be 0.
 	local.x = abs(local.x);
 	// This will convert bits so it returns 1 if x is 1,2,4,8,16,32,64,128,256,512,1024,2048,4096...
 end ((local.i != 0) && ((local.i & (local.i - 1)) == 0));
 
 Round local.x:
-	if (local.x == NIL) {if (group.x != NIL) {local.x = group.x;} else {waitthread __Error1 "Round"; end;}};
+	local.x = waitthread MakeNumber local.x;
+	if (local.x == NIL) {waitthread __Error1 "RoundToPowOf" NIL local.x; end;}
 	
 	/*Main Logic*/
 	local.y = floor local.x;
@@ -314,13 +410,17 @@ end (local.result / local.total);
 _RoundToPowOf local.x local.y: goto internal3;
 RoundToPowOf local.x local.y:
 	/*Error & Exception handling*/
-	if (local.x == NIL) {if (group.x != NIL) {local.x = group.x;} else {waitthread __Error1 "CeilToPowOf"; end;}};
-	if (local.y == NIL) {if (group.y != NIL) {local.y = group.y;} else {waitthread __Error1 "CeilToPowOf" "y <arg2>"; end;}};
-	if (!(waitthread IsNumber local.y) || local.y < 0) {
+	local.x = waitthread MakeNumber local.x;
+	if (local.x == NIL) {waitthread __Error1 "RoundToPowOf" NIL local.x; end;}
+	
+	local.y = waitthread MakeNumber local.y;
+	if (local.y == NIL) {waitthread __Error1 "RoundToPowOf" "y <arg2>" local.y; end;}
+	
+	if (local.y < 0) {
 		if (level.DEBUG) {
-			conprintf "\n ~^~^~^~ FATAL_ERROR[LIB::math.slib::RoundToPowOf]: power/exponent <arg2> is either zero or invalid! ~^~^~^~ \n\n";
+			conprintf "~^~^~^~ EXCEPTION[lib/math.slib::RoundToPowOf]: power/exponent <arg2> is cannot be negative! Making positive... ~^~^~^~ \n";
 		}
-		end;
+		local.y = abs(local.y);
 	} 
 	
 	/*Main Logic*/
@@ -352,13 +452,17 @@ end local.result;
 _CeilToPowOf local.x local.y: goto internal2;
 CeilToPowOf local.x local.y:
 	/*Error & Exception handling*/
-	if (local.x == NIL) {if (group.x != NIL) {local.x = group.x;} else {waitthread __Error1 "CeilToPowOf"; end;}};
-	if (local.y == NIL) {if (group.y != NIL) {local.y = group.y;} else {waitthread __Error1 "CeilToPowOf" "y <arg2>"; end;}};
-	if (!(waitthread IsNumber local.y) || local.y < 0) {
+	local.x = waitthread MakeNumber local.x;
+	if (local.x == NIL) {waitthread __Error1 "CeilToPowOf" NIL local.x; end;}
+	
+	local.y = waitthread MakeNumber local.y;
+	if (local.y == NIL) {waitthread __Error1 "CeilToPowOf" "y <arg2>" local.y; end;}
+	
+	if (local.y < 0) {
 		if (level.DEBUG) {
-			conprintf "\n ~^~^~^~ FATAL_ERROR[LIB::math.slib::CeilToPowOf]: power/exponent <arg2> is either zero or invalid! ~^~^~^~ \n\n";
+			conprintf "~^~^~^~ EXCEPTION[lib/math.slib::CeilToPowOf]: power/exponent <arg2> is cannot be negative! Making positive... ~^~^~^~ \n";
 		}
-		end;
+		local.y = abs(local.y);
 	} 
 	
 	/*Main Logic*/
@@ -382,13 +486,17 @@ end local.result;
 _FloorToPowOf local.x local.y: goto internal1;
 FloorToPowOf local.x local.y:
 	/*Error & Exception handling*/
-	if (local.x == NIL) {if (group.x != NIL) {local.x = group.x;} else {waitthread __Error1 "FloorToPowOf"; end;}};
-	if (local.y == NIL) {if (group.y != NIL) {local.y = group.y;} else {waitthread __Error1 "FloorToPowOf" "y <arg2>"; end;}};
-	if (!(waitthread IsNumber local.y) || local.y < 0) {
+	local.x = waitthread MakeNumber local.x;
+	if (local.x == NIL) {waitthread __Error1 "FloorToPowOf" NIL local.x; end;}
+	
+	local.y = waitthread MakeNumber local.y;
+	if (local.y == NIL) {waitthread __Error1 "FloorToPowOf" "y <arg2>" local.y; end;}
+	
+	if (local.y < 0) {
 		if (level.DEBUG) {
-			conprintf "\n ~^~^~^~ FATAL_ERROR[LIB::math.slib::FloorToPowOf]: power/exponent <arg2> is either zero or invalid! ~^~^~^~ \n\n";
+			conprintf "~^~^~^~ EXCEPTION[lib/math.slib::FloorToPowOf]: power/exponent <arg2> is cannot be negative! Making positive... ~^~^~^~ \n";
 		}
-		end;
+		local.y = abs(local.y);
 	} 
 	
 	/*Main Logic*/
@@ -415,20 +523,42 @@ end !(waitthread IsNumber local.var);
 IsNumber local.var:
 	local.type = typeof local.var;
 end (local.type == "int" || local.type == "float");
-/// good idea??
-/**local.x = waitthread MakeNumber local.x;
-if (local.x) {
-	continue;
-}*/
+
+MakeNumber local.x:
+	if (local.x != NIL) {
+		local.type = typeof local.x;
+		if (local.type == "int" || local.type == "float") {
+			local.result = local.x;
+		} else if (local.type == "string") {
+			local.numeric = waitthread $Str.IsNumeric local.x;
+			if (local.numeric == 1) {
+				local.result = int (local.x);
+			if (local.numeric == 2) {
+				local.result = float (local.x);
+			} else {
+				switch (local.x) {
+					case "true":
+						local.result = 1;
+					break;
+					case "false":
+						local.result = 0;
+					break;
+					default:
+					break;
+				}
+			}
+		}
+	}
+end local.result;
 
 ToRadians local.value:
-	if (waitthread IsNumber local.value) {
+	if (local.value && waitthread IsNumber local.value) {
 		local.result = local.value * ( level.PI / 180.0 );
 	} 
 end local.result;
 
 ToDegrees local.degrees:
-	if (waitthread IsNumber local.value) {
+	if (local.degrees && waitthread IsNumber local.degrees) {
 		local.result = local.value * ( 180.0 / level.PI );
 	}
 end local.result;
@@ -438,145 +568,169 @@ end local.result;
 -------------------------------------------------------------------------------------------------------------------- */
 // These are for reference, really...
 Cos local.x:
-	if (local.x == NIL) {if (group.x != NIL) {local.x = group.x;} else {waitthread __Error1 "Cos"; end;}};
-	if (waitthread IsNumber local.x) {
-		local.result = cos local.x;
-	}
-end local.result;
+	/*Error & Exception handling*/
+	local.x = waitthread MakeNumber local.x;
+	if (local.x == NIL) {waitthread __Error1 "Cos" NIL local.x; end;}
+	
+	/*Main Logic*/
+end (cos local.x);
 
 Sin local.x:
-	if (local.x == NIL) {if (group.x != NIL) {local.x = group.x;} else {waitthread __Error1 "Sin"; end;}};
-	if (waitthread IsNumber local.x) {
-		local.result = sin local.x;
-	}
-end local.result;
+	/*Error & Exception handling*/
+	local.x = waitthread MakeNumber local.x;
+	if (local.x == NIL) {waitthread __Error1 "Sin" NIL local.x; end;}
+	
+	/*Main Logic*/
+end (sin local.x);
 
 Tan local.x:
-	if (local.x == NIL) {if (group.x != NIL) {local.x = group.x;} else {waitthread __Error1 "Tan"; end;}};
-	if (waitthread IsNumber local.x) {
-		local.result = tan local.x;
-	}
-end local.result;
+	/*Error & Exception handling*/
+	local.x = waitthread MakeNumber local.x;
+	if (local.x == NIL) {waitthread __Error1 "Tan" NIL local.x; end;}
+	
+	/*Main Logic*/
+end (tan local.x);
 
 Acos local.x:
-	if (local.x == NIL) {if (group.x != NIL) {local.x = group.x;} else {waitthread __Error1 "Acos"; end;}};
-	if (waitthread IsNumber local.x) {
-		local.result = acos local.x;
-	}
-end local.result;
+	/*Error & Exception handling*/
+	local.x = waitthread MakeNumber local.x;
+	if (local.x == NIL) {waitthread __Error1 "Acos" NIL local.x; end;}
+	
+	/*Main Logic*/
+end (acos local.x);
 
 Asin local.x:
-	if (local.x == NIL) {if (group.x != NIL) {local.x = group.x;} else {waitthread __Error1 "Asin"; end;}};
-	if (waitthread IsNumber local.x) {
-		local.result = asin local.x;
-	}
-end local.result;
+	/*Error & Exception handling*/
+	local.x = waitthread MakeNumber local.x;
+	if (local.x == NIL) {waitthread __Error1 "Asin" NIL local.x; end;}
+	
+	/*Main Logic*/
+end (asin local.x);
 
 Atan local.x:
-	if (local.x == NIL) {if (group.x != NIL) {local.x = group.x;} else {waitthread __Error1 "Atan"; end;}};
-	if (waitthread IsNumber local.x) {
-		local.result = atan local.x;
-	}
-end local.result;
+	/*Error & Exception handling*/
+	local.x = waitthread MakeNumber local.x;
+	if (local.x == NIL) {waitthread __Error1 "Atan" NIL local.x; end;}
+	
+	/*Main Logic*/
+end (atan local.x);
 
-Atan2 local.x local.y:
-	if (local.y == NIL) {if (group.y != NIL) {local.y = group.y;} else {waitthread __Error1 "Atan2" "y <arg1>"; end;}};
-	if (local.x == NIL) {if (group.x != NIL) {local.x = group.x;} else {waitthread __Error1 "Atan2" "x <arg2>"; end;}};
-	if ((waitthread IsNumber local.y) && (waitthread IsNumber local.x)) {
-		local.result = atan2 local.y local.x;
-	}
-end local.result;
+Atan2 local.y local.x:
+	/*Error & Exception handling*/
+	local.x = waitthread MakeNumber local.x;
+	if (local.x == NIL) {waitthread __Error1 "Atan2" "x <arg2>" local.x; end;}
+
+	local.y = waitthread MakeNumber local.y;
+	if (local.x == NIL) {waitthread __Error1 "Atan2" "y <arg1>" local.x; end;}
+	
+	/*Main Logic*/
+end (atan2 local.y local.x);
 
 Cot local.x:
-	if (local.x == NIL) {if (group.x != NIL) {local.x = group.x;} else {waitthread __Error1 "Cot"; end;}};
-	if (waitthread IsNumber local.x) {
-		if (local.x == 0.0) {
-			local.result = 0.0;
-		} else {
-			local.result = tan (1.0 / local.x);
-		}
+	/*Error & Exception handling*/
+	local.x = waitthread MakeNumber local.x;
+	if (local.x == NIL) {waitthread __Error1 "Cot" NIL local.x; end;}
+	
+	/*Main Logic*/
+	if (local.x == 0.0) {
+		local.result = 0.0;
+	} else {
+		local.result = tan (1.0 / local.x);
 	}
 end local.result;
 
 Csc local.x:
-	if (local.x == NIL) {if (group.x != NIL) {local.x = group.x;} else {waitthread __Error1 "Cosec"; end;}};
-	if (waitthread IsNumber local.x) {
-		if (local.x == 0.0) {
-			local.result = 0.0;
-		} else {
-			local.result = cos (1.0 / local.x);
-		}
+	/*Error & Exception handling*/
+	local.x = waitthread MakeNumber local.x;
+	if (local.x == NIL) {waitthread __Error1 "Csc" NIL local.x; end;}
+	
+	/*Main Logic*/
+	if (local.x == 0.0) {
+		local.result = 0.0;
+	} else {
+		local.result = cos (1.0 / local.x);
 	}
 end local.result;
 
 Sec local.x:
-	if (local.x == NIL) {if (group.x != NIL) {local.x = group.x;} else {waitthread __Error1 "Sec"; end;}};
-	if (waitthread IsNumber local.x) {
-		if (local.x == 0.0) {
-			local.result = 0.0;
-		} else {
-			local.result = sin (1.0 / local.x);
-		}
+	/*Error & Exception handling*/
+	local.x = waitthread MakeNumber local.x;
+	if (local.x == NIL) {waitthread __Error1 "Sec" NIL local.x; end;}
+	
+	/*Main Logic*/
+	if (local.x == 0.0) {
+		local.result = 0.0;
+	} else {
+		local.result = sin (1.0 / local.x);
 	}
 end local.result;
 	
 Acot local.x:
-	if (local.x == NIL) {if (group.x != NIL) {local.x = group.x;} else {waitthread __Error1 "Acot"; end;}};
-	if (waitthread IsNumber local.x) {
-		if (local.x == 0.0) {
-			local.result = 0.0;
-		} else {
-			local.result = atan (1.0 / local.x);
-		}
+	/*Error & Exception handling*/
+	local.x = waitthread MakeNumber local.x;
+	if (local.x == NIL) {waitthread __Error1 "Acot" NIL local.x; end;}
+	
+	/*Main Logic*/
+	if (local.x == 0.0) {
+		local.result = 0.0;
+	} else {
+		local.result = atan (1.0 / local.x);
 	}
 end local.result;
 
 Acsc local.x:
-	if (local.x == NIL) {if (group.x != NIL) {local.x = group.x;} else {waitthread __Error1 "Acosec"; end;}};
-	if (waitthread IsNumber local.x) {
-		if (local.x == 0.0) {
-			local.result = 0.0;
-		} else {
-			local.result = acos (1.0 / local.x);
-		}
+	/*Error & Exception handling*/
+	local.x = waitthread MakeNumber local.x;
+	if (local.x == NIL) {waitthread __Error1 "Acsc" NIL local.x; end;}
+	
+	/*Main Logic*/
+	if (local.x == 0.0) {
+		local.result = 0.0;
+	} else {
+		local.result = acos (1.0 / local.x);
 	}
 end local.result;
 
 Asec local.x:
-	if (local.x == NIL) {if (group.x != NIL) {local.x = group.x;} else {waitthread __Error1 "Sec"; end;}};
-	if (waitthread IsNumber local.x) {
-		if (local.x == 0.0) {
-			local.result = 0.0;
-		} else {
-			local.result = asin (1.0 / local.x);
-		}
+	/*Error & Exception handling*/
+	local.x = waitthread MakeNumber local.x;
+	if (local.x == NIL) {waitthread __Error1 "Acsc" NIL local.x; end;}
+	
+	/*Main Logic*/
+	if (local.x == 0.0) {
+		local.result = 0.0;
+	} else {
+		local.result = asin (1.0 / local.x);
 	}
 end local.result;
 
 Cosh local.x:
-	if (local.x == NIL) {if (group.x != NIL) {local.x = group.x;} else {waitthread __Error1 "Cosh"; end;}};
-	if (waitthread IsNumber local.x) {
-		local.result = cosh local.x;
-	}
-end local.result;
+	/*Error & Exception handling*/
+	local.x = waitthread MakeNumber local.x;
+	if (local.x == NIL) {waitthread __Error1 "Cosh" NIL local.x; end;}
+	
+	/*Main Logic*/
+end (cosh local.x);
 
 Sinh local.x:
-	if (local.x == NIL) {if (group.x != NIL) {local.x = group.x;} else {waitthread __Error1 "Sinh"; end;}};
-	if (waitthread IsNumber local.x) {
-		local.result = sinh local.x;
-	}
-end local.result;
+	/*Error & Exception handling*/
+	local.x = waitthread MakeNumber local.x;
+	if (local.x == NIL) {waitthread __Error1 "Sinh" NIL local.x; end;}
+	
+	/*Main Logic*/
+end (sinh local.x);
 
 Tanh local.x:
-	if (local.x == NIL) {if (group.x != NIL) {local.x = group.x;} else {waitthread __Error1 "Tanh"; end;}};
-	if (waitthread IsNumber local.x) {
-		local.result = tanh local.x;
-	}
-end local.result;
+	/*Error & Exception handling*/
+	local.x = waitthread MakeNumber local.x;
+	if (local.x == NIL) {waitthread __Error1 "Tanh" NIL local.x; end;}
+	
+	/*Main Logic*/
+end (tanh local.x);
 
-//=================================================================================================================//
-// SUPPORT FOR DEGREES INPUT																					   //
-//=================================================================================================================//
+///=================================================================================================================///
+/// SUPPORT FOR DEGREES INPUT																					    ///
+///=================================================================================================================///
 Cosd local.x:
 	if (local.x == NIL) {if (group.x != NIL) {local.x = group.x;} else {waitthread __Error1 "Cosd"; end;}};
 	if (waitthread IsNumber local.x) {
@@ -726,7 +880,8 @@ Asecd local.x:
 		}
 	}
 end local.result;
-//=================================================================================================================//
+
+///=================================================================================================================///
 
 /// Returns the base-e exponential function of x, which is the e number raised to the power x.
 Exp local.x:
@@ -971,11 +1126,47 @@ Sqrt3 local.x:
 	}
 end local.result;
 
-__Error1 local.func local.arg:
+/** -----------------------------------------------------------------------------------
+*** 								Stuff...										***
+------------------------------------------------------------------------------------ */
+__Error1 local.func local.arg local.var:
 	if !(local.arg) {
 		local.arg = "x <arg1>";
 	}
 	if (level.DEBUG) {
-		println "\n ~^~^~^~ FATAL_ERROR[LIB::math.slib::" local.func "]: number " local.arg " does not exist! ~^~^~^~ \n";
+		println ("\n ~^~^~^~ FATAL_ERROR[lib/math.slib::" + local.func + "]: variable " + local.arg + " of type " + (typeof local.var) + " either does not exist or is invalid! ~^~^~^~ \n\n");
 	}
 end;
+
+/** TO ALTERNATE decrementing and incrementing by 1:
+
+		local.something += local.incr;
+		local.incr = ~(local.incr ^ 1);
+			
+	For simplicity's sake, the examples are represented in 4 bits rather than in 32 bits (like integers),
+	but the principles remain the same. First XOR (eXclusive OR) is applied. This operation will return 
+	1 only if both bits don't have equal values. In this case, 1 XOR 1 equals 0 because: 
+			0001 
+			0001 
+		XOR ----
+		 	0000
+	Then the complement operation is applied. This simply turns all 1's into 0's and vice versa:
+			0000
+		  ~ ----
+			1111
+	One would think that this returns the number 15 but remember MoHAA uses signed integers 
+	so the last bit is the sign bit and it is interpreted as a negative value:
+		-8 + 4 + 2 + 1 == -1
+	Once -1 is used then the XOR operation will result in:
+			1111 
+			0001 
+		XOR ----
+			1110
+	This is the binary representation of -2. Since:
+		-8 + 4 + 2 + 0 == -2
+	Once we apply the complement operation..
+			1110
+		  ~ ----
+			0001
+	..we get (+)1! And this process will keep repeating itself and keep alternating between +1 & -1.
+*/

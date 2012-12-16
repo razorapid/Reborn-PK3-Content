@@ -1,10 +1,10 @@
 /**
  Medal of Honor: Allied Assault v1.12 REBORN  -  Morpheus Script
  ================================================================
- STRING FUNCTIONS LIBRARY; 				Multiplayer Bots 4.0 BETA 
+ STRING FUNCTIONS LIBRARY; 					Script Framework BETA 
  ================================================================
  BY Sor	WITH THANKS TO Elgan
- VERSION 1.4 (30/10/2012)
+ VERSION 1.7.008 (10/12/2012)
  =-------------------------------------------------------------=		
  Copyright (c) 2008-2014  Lenny Knockx
  All rights reserved.
@@ -27,153 +27,348 @@
  WEBSITE: 	http://www.x-null.net | www.mohaairborne.co.cc
  ================================================================
 */
-/* TASKS:
-	VerifyFormat => rewrite!! (all args in one array & check for stringtype)
-				 => arguments: string prefix suffix args[0] args[1] args[1] ... args[X<12]
-					=> all arguments must be of stringtype (incl. char); if string=NIL, abort; if args.size <= 0, abort;
-					=> prefix is the optional prefix that must be present, set NIL to disable
-					=> args[0] is the seperator that must be present at least once, or if there are pairs, behind last pair block symbol
-					=> suffix is the optional prefix that must be present, set NIL to disable
-					=> args[0<X<11] with X being any arg but the first are the optional format arguments. they can exist of only 1 char or esc sequence.
-					
-					If argument ends in ":s" (OR if arg size is 2 because of const array arg::"n") then it is treated as a seperator.
-					Char is check on a pair ({}[]()<> => opposite of input is determined; if not a bracket, the next instance of that char will be 
-					treated as closing bracket). The argument right after the pair is treated as seperator inside it (NIL=> disable). 
-					If pair seperator is a pair as well, the next arg is the seperator inside both pairs and so on...unless second pair is designated with ":s" then
-					it is treated as a pair and as the seperator for the first pair while the next argument will be treated as the seperator for the second pair.
-					Obviously there doesn't have to be a pair seperator, setting NIL before next pair disables it by default. Pairs are 'blocked' when the are
-					in subsequent order. Pair groups are seperated by the main seperator, and avoid invalid pair branching. Non-pair arguments are searched for in
-					the predetermined order (based on all arguments) in the specified string. (=> or just you know :n to pair to designate that it has no seperator)
-					Uneven pairs, missing pairs (if detected), no main seperator... all cause terminate the sequence and returns false. 
-					
-					/'* *'/ pair is found, its contents will be skipped. Arguments being a const array of 2 different arguments are treated as custom pairs.
-					arg[1] = str to find. MAX 3 chars & if it consists of 2 arguments (array with [0] & [1]) then they are treated as a pair if designated 'p'
-					arg[2] = designator. "s"=seperator; "p"=pair; "a"=prefix; "z"=suffix; "q"=pair seperator; 
-				=> edit original VerifyFormat to only verify filepaths (1) and filenames (2) and rename it to VerifyPath
-	write FormatInt <int> <scientific?> <#chars align> and FormatFloat <float> <digits> <#chars align>
-		(C) Currency: . . . . . . . . ($123.00)
-		(D) Decimal:. . . . . . . . . -123
-		(E) Scientific: . . . . . . . -1.234500E+002
-		(F) Fixed point:. . . . . . . -123.45
-		(G) General:. . . . . . . . . -123
-			(default):. . . . . . . . -123 (default = 'G')
-		(N) Number: . . . . . . . . . -123.00
-		(P) Percent:. . . . . . . . . -12,345.00 %
-		(R) Round-trip: . . . . . . . -123.45
-		(X) Hexadecimal:. . . . . . . FFFFFF85
-		=> binary? positive? number of decimals to show? number of digits to show?
-	ASCII alternative for SplitStr;InStr;SearchStr;ToUpper;ToLower;TrimLeft;TrimRight;TrimStr;ToTitle;VerifyFormat;IsCharDataSafe since it might be necessary with the arguments passed on by scmd (like Veers reported) 
-	TAKE CHAR INTO ACCOUNT WHEN COMPARING: string(chkstring) if chkstring.size == 1
-	CharToLower & CharToUpper functions
-	$Str.ToInt, $Str.ToFloat, $Str.ToBool (regular bool cast only returns int 0 or 1. Str: output 1 only if 1, and NOT true)
-	Make InStr & SearchStr always output an array, & other functions like that as well.
-	.ConstStrToStr (converts specified constant string into flexible string)
-	write IsNumerical <string> which returns if string consists of only numbers and maximum one dot; also returns if it a string version of an int or a float.
-	update SearchStr to properly process wildcards (save position where first wildcard is applied.)
-	write & finish func_array; update definitions.scr; update main thread below 
-	apply ASCII comparing to this library
+/* Apply ASCII comparing everywhere?
 */
-__init local.ascii local.dev: 
-	// TEMPORARY!!
-	level.DEBUG = 3;
-	game.dataEnt2 = SimpleEntity;
-	//
-	
-	// Create class object for reference...
-	if !($Str) {
-		level.funcStr = spawn game.dataEnt2 "targetname" "Str";
+__init: 
+	if (self && self == $Str) {
+		if (local.dev) {
+			local.lblPrefix = "_";
+		} else {
+			local.lblPrefix = "";
+		}
+		
+		// Register & cross-reference function shortcuts..
+		self.Split = 				self.fullPath::(local.lblPrefix + "Split");
+		self.FormatSplit = 			self.fullPath::(local.lblPrefix + "FormatSplit");
+		self.Partition = 			self.fullPath::(local.lblPrefix + "Partition");
+		self.In = 					self.fullPath::(local.lblPrefix + "In");
+		self.Search = 				self.fullPath::(local.lblPrefix + "Search");
+		self.RemoveStr = 			self.fullPath::(local.lblPrefix + "RemoveStr");
+		self.ReplaceStr = 			self.fullPath::(local.lblPrefix + "ReplaceStr");
+		self.Remove = 				self.fullPath::(local.lblPrefix + "Remove");
+		self.Replace = 				self.fullPath::(local.lblPrefix + "Replace");
+		self.Concatenate = 			self.fullPath::(local.lblPrefix + "Concatenate");
+		self.Compare = 				self.fullPath::(local.lblPrefix + "Compare");
+		self.ToUpper = 				self.fullPath::(local.lblPrefix + "ToUpper");
+		self.ToLower = 				self.fullPath::(local.lblPrefix + "ToLower");
+		self.Left = 				self.fullPath::(local.lblPrefix + "Left");
+		self.Right = 				self.fullPath::(local.lblPrefix + "Right");
+		self.CutLeft = 				self.fullPath::(local.lblPrefix + "CutLeft");
+		self.CutRight = 			self.fullPath::(local.lblPrefix + "CutRight");
+		self.LeftOf = 				self.fullPath::(local.lblPrefix + "LeftOf");
+		self.RightOf = 				self.fullPath::(local.lblPrefix + "RightOf");
+		self.CutLeftOf = 			self.fullPath::(local.lblPrefix + "CutLeftOf");
+		self.CutRightOf = 			self.fullPath::(local.lblPrefix + "CutRightOf");
+		self.CutPos = 				self.fullPath::(local.lblPrefix + "CutPos");
+		self.SubString = 			self.fullPath::(local.lblPrefix + "SubString");
+		self.Cut = 					self.fullPath::(local.lblPrefix + "Cut");
+		self.SubStr = 				self.fullPath::(local.lblPrefix + "SubStr");
+		self.Transform =			self.fullPath::(local.lblPrefix + "Transform");
+		self.VerifyPath = 			self.fullPath::(local.lblPrefix + "VerifyPath");
+		self.ToInt = 				self.fullPath::(local.lblPrefix + "ToInt");
+		self.ToChar =				self.fullPath::(local.lblPrefix + "ToChar");
+		self.ToFloat = 				self.fullPath::(local.lblPrefix + "ToFloat");
+		self.ToBool = 				self.fullPath::(local.lblPrefix + "ToBool");
+		self.ToVector = 			self.fullPath::(local.lblPrefix + "ToVector");
+		self.ToArray = 				self.fullPath::(local.lblPrefix + "ToArray");
+		self.NotConst =				self.fullPath::"NotConstant";
+		self.IsNumeric = 			self.fullPath::"IsNumeric";
+		self.IsFloat = 				self.fullPath::"IsFloat";
+		self.IsInteger = 			self.fullPath::"IsInteger";
+		self.IsBool =				self.fullPath::"IsBool";
+		self.IsVector =				self.fullPath::"IsVector";
+		self.WhatIs = 				self.fullPath::"WhatIs";
+		self.ToTitle = 				self.fullPath::"ToTitle"
+		self.Reverse = 				self.fullPath::"Reverse";
+		self.Trim = 				self.fullPath::"Trim";
+		self.TrimLeft = 			self.fullPath::"TrimLeft";
+		self.TrimRight = 			self.fullPath::"TrimRight";
+		self.CharToInt = 			self.fullPath::"CharToInt";
+		self.IntToChar = 			self.fullPath::(local.lblPrefix + "IntToChar");
+		self.CookieCutter = 		self.fullPath::"CookieCutter";
+		self.MakeLn = 				self.fullPath::"MakeLn";
+		self.StripLn = 				self.fullPath::"StripLn";
+		self.AddDblQuotes = 		self.fullPath::"AddDblQuotes";
+		self.Comment = 				self.fullPath::"Comment";
+		self.Uncomment = 			self.fullPath::"Uncomment";
+		self.AddTabs = 				self.fullPath::"AddTabs";
+		self.DelTabs = 				self.fullPath::"DelTabs";
+		self.IsCharDataSafe = 		self.fullPath::"IsCharDataSafe";
+		self.MakeCharDataSafe = 	self.fullPath::"MakeCharDataSafe";
+		self.ValidatePairs = 		self.fullPath::"ValidatePairs";
+		
+		// Internal functions, but they are available for those who need them:
+		self.IsString = 			self.fullPath::"__IsString";
+		self.IsStringType = 		self.fullPath::"__IsStringType";
+
+		// Path to associated information library.
+		self.infoLib = 				(self.filePath + "string.lib");
+		// Maximum string size in buffer:
+		self.STRINGBUFFERSIZE = 	game.Root.CAP_STRINGBUFFER;
+		
+		// There are 58 methods registered in this function library.
+		self.methodSize += 58;	
+		// There are 2 properties registered in this function library.
+		self.propertySize += 2;
+		
+		// This class has one child or 'subclass':
+		self waitthread $System.fullPath::#DefineClass "Char" self.fullPath::"__initChar"; self.Char = $Char;
 	}
-	//temp? make definitions.scr define all subdirectories/paths.
-	local.path = "reborn/" //"global/bot4/";	
-	if (local.ascii) {
-		local.fileName = "string_ascii.func";
-	} else {
-		local.fileName = "string.func";
-	}
-	
-	if (local.dev) {
-		local.labelPrefix = "_";
-	} else {
-		local.labelPrefix = "";
-	}
-	
-	// Register & cross-reference function shortcuts..
-	level.funcStr.SplitStr = 		(local.path + "func/" + local.fileName)::(local.labelPrefix + "SplitStr");
-	level.funcStr.InStr = 			(local.path + "func/" + local.fileName)::(local.labelPrefix + "InStr");
-	level.funcStr.SearchStr = 		(local.path + "func/" + local.fileName)::(local.labelPrefix + "SearchStr");
-	level.funcStr.RemoveStr = 		(local.path + "func/" + local.fileName)::(local.labelPrefix + "RemoveStr");
-	level.funcStr.ReplaceStr = 		(local.path + "func/" + local.fileName)::(local.labelPrefix + "ReplaceStr");
-	level.funcStr.ConcatenateStr = 	(local.path + "func/" + local.fileName)::(local.labelPrefix + "ConcatenateStr");
-	level.funcStr.CompareStr = 		(local.path + "func/" + local.fileName)::(local.labelPrefix + "CompareStr");
-	level.funcStr.ToUpper = 		(local.path + "func/" + local.fileName)::(local.labelPrefix + "ToUpper");
-	level.funcStr.ToLower = 		(local.path + "func/" + local.fileName)::(local.labelPrefix + "ToLower");
-	level.funcStr.ValidateFormat = 	(local.path + "func/" + local.fileName)::(local.labelPrefix + "ValidateFormat");
-	level.funcStr.Left = 			(local.path + "func/" + local.fileName)::(local.labelPrefix + "Left");
-	level.funcStr.Right = 			(local.path + "func/" + local.fileName)::(local.labelPrefix + "Right");
-	level.funcStr.CutLeft = 		(local.path + "func/" + local.fileName)::(local.labelPrefix + "CutLeft");
-	level.funcStr.CutRight = 		(local.path + "func/" + local.fileName)::(local.labelPrefix + "CutRight");
-	level.funcStr.LeftOf = 			(local.path + "func/" + local.fileName)::(local.labelPrefix + "LeftOf");
-	level.funcStr.RightOf = 		(local.path + "func/" + local.fileName)::(local.labelPrefix + "RightOf");
-	level.funcStr.CutLeftOf = 		(local.path + "func/" + local.fileName)::(local.labelPrefix + "CutLeftOf");
-	level.funcStr.CutRightOf = 		(local.path + "func/" + local.fileName)::(local.labelPrefix + "CutRightOf");
-	level.funcStr.CutRange = 		(local.path + "func/" + local.fileName)::(local.labelPrefix + "CutRange");
-	level.funcStr.SubString = 		(local.path + "func/" + local.fileName)::(local.labelPrefix + "SubString");
-	level.funcStr.CutStr = 			(local.path + "func/" + local.fileName)::(local.labelPrefix + "CutStr");
-	level.funcStr.SubStr = 			(local.path + "func/" + local.fileName)::(local.labelPrefix + "SubStr");
-	level.funcStr.TransformStr =	(local.path + "func/" + local.fileName)::(local.labelPrefix + "TransformStr");
-	level.funcStr.IsWhat = 			(local.path + "func/" + local.fileName)::"IsWhat";
-	level.funcStr.Remove = 			(local.path + "func/" + local.fileName)::"Remove";
-	level.funcStr.Replace = 		(local.path + "func/" + local.fileName)::"Replace";
-	level.funcStr.ToTitle = 		(local.path + "func/" + local.fileName)::"ToTitle"
-	level.funcStr.ReverseStr = 		(local.path + "func/" + local.fileName)::"ReverseStr";
-	level.funcStr.TrimStr = 		(local.path + "func/" + local.fileName)::"TrimStr";
-	level.funcStr.TrimLeft = 		(local.path + "func/" + local.fileName)::"TrimLeft";
-	level.funcStr.TrimRight = 		(local.path + "func/" + local.fileName)::"TrimRight";
-	level.funcStr.CharToInt = 		(local.path + "func/" + local.fileName)::"CharToInt";
-	level.funcStr.IntToChar = 		(local.path + "func/" + local.fileName)::"IntToChar";
-	level.funcStr.CutterStr = 		(local.path + "func/" + local.fileName)::"CutterStr";
-	level.funcStr.MakeLn = 			(local.path + "func/" + local.fileName)::"MakeLn";
-	level.funcStr.StripLn = 		(local.path + "func/" + local.fileName)::"StripLn";
-	level.funcStr.AddDblQuotes = 	(local.path + "func/" + local.fileName)::"AddDblQuotes";
-	level.funcStr.CommentStr = 		(local.path + "func/" + local.fileName)::"CommentStr";
-	level.funcStr.UncommentStr = 	(local.path + "func/" + local.fileName)::"UncommentStr";
-	level.funcStr.AddTabs = 		(local.path + "func/" + local.fileName)::"AddTabs";
-	level.funcStr.DelTabs = 		(local.path + "func/" + local.fileName)::"DelTabs";
-	level.funcStr.IsCharDataSafe = 	(local.path + "func/" + local.fileName)::"IsCharDataSafe";
-	level.funcStr.MakeCharDataSafe = (local.path + "func/" + local.fileName)::"MakeCharDataSafe";
-	
-	//Internal functions, but they are available for those who need them:
-	level.funcStr.IsString = 		(local.path + "func/" + local.fileName)::"__IsString";
-	level.funcStr.IsStringType = 	(local.path + "func/" + local.fileName)::"__IsStringType";
-	
-	level.funcStr.lib = (local.path + "lib/string.lib") //path to info library; change later!
-	level.funcStr.msize = 45;							//45 methods registered in this library
-end level.funcStr;
+end;
 
 __info:
-	local.inf["library"] = "lib/string.slib";	//filepath in reborn/framework/
-	local.inf["namespace"] = "string";			//filename without extension	
+	local.inf["library"] = "string.slib";	//filename
+	local.inf["namespace"] = "Str";			//targetname of class this script is part of...
 	local.inf["title"] = "STRING FUNCTIONS LIBRARY";
-	local.inf["version"] = "1.4";
+	local.inf["version"] = "1.7.008";
+	local.inf["lastmodified"] = "10/12/2012";
 	local.inf["authors"][0] = "Sor";
 end local.inf;
 
+__initChar:
+	if (self && self == $Char) {
+		// Function shortcuts:
+		// Casting...
+		self.ToStr =				self.fullPath::CharToStr;
+		self.ToInt =				self.fullPath::CharTypeToInt;
+		self.ToFloat =				self.fullPath::CharToFloat;
+		// Char designation...
+		self.IsDigit = 				self.fullPath::IsDigit;
+		self.IsLetter =				self.fullPath::IsLetter;
+		self.IsLetterOrDigit = 		self.fullPath::IsLetterOrDigit;
+		self.IsWhiteSpace = 		self.fullPath::IsWhiteSpace;
+		self.IsEscapeSeq =			self.fullPath::IsEscapeSeq;
+		self.IsPunctuation = 		self.fullPath::IsPunctuation;
+		self.IsSymbol = 			self.fullPath::IsSymbol;
+		self.IsLower = 				self.fullPath::IsLower;
+		self.IsUpper =				self.fullPath::IsUpper;
+		// Transformations..
+		self.ToLower =				self.fullPath::CharToLower;
+		self.ToUpper =				self.fullPath::CharToUpper;
+		
+		// Path to information library...
+		self.infoLib = $(self.parent).infoLib;
+		
+		// There are 14 methods in this library...
+		self.methodSize += 14;
+		// There is 1 property in this library...
+		self.propertySize += 1;
+	}
+end;
+
 /** ==========================================================================================
- IsWhat Function
+ CharToStr Function
+ ---------------------------------------------------------------------------------------------
+ DESCR|: 	Casts char-type variable to string type.
+ INPUT|: 	<CHAR char>
+ OUTPUT|: 	string => casting result
+ =========================================================================================== */
+CharToStr local.char:
+	// Pointless to check for anything but if char exists.
+	if (local.char != NIL) {
+		local.result = (string local.char);
+	}
+end local.result;
+
+/** ==========================================================================================
+ CharToInt Function
+ ---------------------------------------------------------------------------------------------
+ DESCR|: 	Casts numerical char-type variable to integer type.
+ INPUT|: 	<CHAR char>
+ OUTPUT|: 	int => casting result
+ =========================================================================================== */
+CharTypeToInt local.char:
+	if (local.char && typeof local.char == "char") {
+		if (waitthread $Str.infoLib::IsDecimalData (string local.char)) {
+			local.result = (int (string local.char));
+		} else {
+			local.result = local.char;
+		}
+	} else {
+		local.result = local.char;
+	}
+end local.result;
+
+/** ==========================================================================================
+ CharToFloat Function
+ ---------------------------------------------------------------------------------------------
+ DESCR|: 	Casts numerical char-type variable to float type.
+ INPUT|: 	<CHAR char>
+ OUTPUT|: 	float => casting result
+ =========================================================================================== */
+CharToFloat local.char:
+	if (local.char && typeof local.char == "char") {
+		if (waitthread $Str.infoLib::IsDecimalData (string local.char)) {
+			local.result = (float (string local.char));
+		} else {
+			local.result = local.char;
+		}
+	} else {
+		local.result = local.char;
+	}
+end local.result;
+
+/** ==========================================================================================
+ ToChar Function
+ ---------------------------------------------------------------------------------------------
+ DESCR|: 	Casts string type to char (character) type.
+ INPUT|: 	<STRING string>
+ OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
+			*	int => casted string
+			*	NIL => error: uninitialized/inexistent string
+ =========================================================================================== */
+ToChar local.string:
+	if (local.string && (waitthread __IsString local.string)) {
+		local.result = local.string[0];
+	} else {
+		local.result = local.string;
+	}
+end local.result;
+
+/** ==========================================================================================
+ ToInt Function
+ ---------------------------------------------------------------------------------------------
+ DESCR|: 	Casts numerical string type to integer type. If no casting can be done, the function
+			will return its input variable.
+ INPUT|: 	<STRING string>
+ OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
+			*	int => casted string
+			*	NIL => error: uninitialized/inexistent string
+ =========================================================================================== */
+ToInt local.string:
+	if (local.string && (waitthread IsNumeric local.string)) {
+		local.result = int local.string;
+	} else {
+		local.result = local.string;
+	}
+end local.result;
+
+/** ==========================================================================================
+ ToFloat Function
+ ---------------------------------------------------------------------------------------------
+ DESCR|: 	Casts numerical string type to floating point type. If no casting can be done, 
+			the function will return its input variable.
+ INPUT|: 	<STRING string>
+ OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
+			*	float => casted string
+			*	NIL => error: uninitialized/inexistent string
+ =========================================================================================== */
+ToFloat local.string:
+	if (local.string && (waitthread IsNumeric local.string)) {
+		local.result = float local.string;
+	} else {
+		local.result = local.string;
+	}
+end local.result;
+
+/** ==========================================================================================
+ ToBool Function
+ ---------------------------------------------------------------------------------------------
+ DESCR|: 	Casts boolean string type to bool type. If no casting can be done, the function 
+			will return its input variable.
+ INPUT|: 	<STRING string>
+ OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
+			*	bool => casted string
+			*	NIL => error: uninitialized/inexistent string
+ =========================================================================================== */
+ToBool local.string:
+	if (local.string && (waitthread __IsString local.string)) {
+		switch (local.string) {
+			case "1":
+			case "true":
+				local.result = true;
+			break;
+			case "0":
+			case "false":
+				local.result = false;
+			break;
+			default:
+				local.result = local.string;
+			break;
+		}
+	} else {
+		local.result = local.string;
+	}
+end local.result;
+
+/** ==========================================================================================
+ ToVector Function
+ ---------------------------------------------------------------------------------------------
+ DESCR|: 	Casts a stringified vector to vector type. If no casting can be done, the function 
+			will return its input variable.
+ INPUT|: 	<STRING string>
+ OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
+			*	vector => casted string
+			*	NIL => error: uninitialized/inexistent string
+ =========================================================================================== */
+ToVector local.string:
+	local.result = local.string;
+	if (local.string && (waitthread __IsString local.string)) {
+		if (local.string[0] == "(" && local.string[(local.string.size - 1)] == ")") {
+			local.pt = 0;
+			local.str[local.pt] = "";
+			local.strSize = (local.string.size - 1);
+			for (local.i = 1; local.i < local.strSize; local.i++) {
+				if ((charToInt local.string[local.i]) == 44) {
+					local.pt++;
+					local.str[local.pt] = "";
+					
+					// Skips following space char
+					if ((charToInt local.string[(local.i + 1)]) == 32) {
+						local.i++; 
+					}
+					continue;
+				}
+				local.str[local.pt] += local.string[local.i];
+			}
+			
+			if (local.str.size == 3) {
+				local.stringsSize = local.str.size;
+				local.result = ( 0.0 0.0 0.0 );
+				local.j = 0;
+				for (local.i = 0; local.i < local.stringsSize; local.i++) {
+					if (waitthread IsNumeric local.str[local.i]) {
+						local.result[local.j] = (float local.str[local.i]);
+						local.j++;
+					} else {
+						local.result = local.string;
+						break;
+					}
+				}
+			}
+		}
+	}
+end local.result;
+
+/** ==========================================================================================
+ ToArray Function
+ ---------------------------------------------------------------------------------------------
+ DESCR|: 	Casts a stringified array to array type datastructure. If no casting can be done, 
+			the function will return its input variable.
+ INPUT|: 	<STRING string>
+ OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
+			*	array => casted string
+			*	NIL => error: uninitialized/inexistent string
+ =========================================================================================== */
+ToArray local.array:
+end (waitthread $Decompile.Array local.array);
+
+/** ==========================================================================================
+ WhatIs Function
  ---------------------------------------------------------------------------------------------
  DESCR|: 	Determines whether a string exists, is empty or is uninitialized.
  INPUT|: 	<STRING string>
  OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
-				1 => normal string
-				0 => empty string
-				-1 => character string
-				NIL => error: uninitialized/inexistent string
+			*	1 => normal string
+			*	0 => empty string
+			*	-1 => character string
+			*	NIL => error: uninitialized/inexistent string
  =========================================================================================== */
-IsWhat local.string:
+WhatIs local.string:
 	/* Error & Exception handling */
-	if !(waitthread __IsStringType local.chkString) {
-		if (level.DEBUG > 0) {
-			conprintf "\n ~^~^~^~ FATAL_ERROR|BOT4_ENGINE[lib/string.slib::IsWhat]: Specified input <arg1> is not a string type! ~^~^~^~ \n\n";
+	if !(waitthread __IsStringType local.string) {
+		if (level.DEBUG) {
+			conprintf "\n ~^~^~^~ FATAL_ERROR[lib/string.slib::WhatIs]: Specified input <arg1> is not a string type! ~^~^~^~ \n\n";
 		}
 		end;
 	}
@@ -196,27 +391,224 @@ IsWhat local.string:
 end local.result;
 
 /** ==========================================================================================
- SplitStr Function
+ Empty Function
  ---------------------------------------------------------------------------------------------
- DESCR|: 	Splits specified string into a constant array of words according to specified spacers.
+ DESCR|: 	Returns an empty string type.
+ INPUT|: 	/
+ OUTPUT|: 	string => empty string
+ =========================================================================================== */
+Empty:
+end "";
+
+/** ==========================================================================================
+ IsBool Function
+ ---------------------------------------------------------------------------------------------
+ DESCR|: 	Determines whether a string is a valid boolean representation that can be 
+			successfully converted to a bool type.
+ INPUT|: 	<STRING string>
+ OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
+ 			*	2 => stringified bool(true)
+			*	1 => stringified bool(false)
+			*	0 => other string or variable type
+ =========================================================================================== */
+IsBool local.string:
+	local.result = 0;
+	if (local.string && waitthread __IsString local.string) {
+		switch (local.string) {
+			case "true":
+				local.result = 2;
+			case "false":
+				local.result = 1;
+			break;
+			default:
+			break;
+		}
+	}
+end local.result;
+
+/** ==========================================================================================
+ IsInteger Function
+ ---------------------------------------------------------------------------------------------
+ DESCR|: 	Determines whether a string is a valid integral representation that can be 
+			successfully converted to a integer type.
+ INPUT|: 	<STRING string>
+ OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
+			*	2 => integer
+			*	1 => stringified integer
+			*	0 => stringified float or simply not numerical
+ =========================================================================================== */
+IsInteger local.string:
+	local.result = 0;
+	if (local.string && waitthread __IsStringType local.string) {
+		local.numMask = waitthread $Str.infoLib::NumericalMasks;
+		if (local.string[0] == "-" || local.numMask[(string local.string[0])] == 1) {
+			local.strSize = local.string.size;
+			local.result = 1;
+			for (local.i = 1; local.i < local.strSize; local.i++) {
+				if (local.numMask[(string local.string[local.i])] != 1) {
+					local.result = 0;
+					break;
+				}
+			}
+		}
+	} else if (local.string && typeof local.string == "int") {
+		local.result = 2;
+	}
+end local.result;
+
+/** ==========================================================================================
+ IsFloat Function
+ ---------------------------------------------------------------------------------------------
+ DESCR|: 	Determines whether a string is a valid floating point representation that can be 
+			successfully converted to a float type
+ OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
+			* 	2 => float
+			*	1 => stringified float
+			*	0 => stringified integer or simply not numerical
+ =========================================================================================== */
+IsFloat local.string:
+	local.result = 0;
+	if (local.string && waitthread __IsStringType local.string) {
+		local.numMask = waitthread $Str.infoLib::NumericalMasks;
+		local.dots = 0;
+		local.strSize = local.string.size;
+		local.result = 1;
+		for (local.i = 0; local.i < local.strSize; local.i++) {
+			if (local.numMask[(string local.string[local.i])] != 1) {
+				if (local.string[local.i] == "." && !local.dots) {
+					local.dots++;
+					continue;
+				} else if (local.string[local.i] == "-" && local.i == 0) {
+					continue;
+				}
+				local.result = 0;
+				break;
+			}
+		}
+		
+		if (local.result && local.dots != 1) {
+			local.result = 0;
+		}
+	} else if (local.string && typeof local.string == "float") {
+		local.result = 2;
+	}
+end local.result;
+
+/** ==========================================================================================
+ IsNumeric Function
+ ---------------------------------------------------------------------------------------------
+ DESCR|: 	Determines whether a string consists only of a valid numerical representation and
+			thus determines whether that string can be successfully converted to an integer or
+			float type.
+ INPUT|: 	<STRING string>
+ OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
+			* 	3 => int or float
+			*	2 => stringified float
+			*	1 => stringified integer
+			*	0 => not numerical
+ =========================================================================================== */
+IsNumeric local.string:
+	local.result = 0;
+	if (local.string && waitthread __IsStringType local.string) {
+		if (typeof local.string == "char") {
+			local.string = (string local.string);
+		}
+
+		local.numMask = waitthread $Str.infoLib::NumericalMasks;
+		local.dots = 0;
+		local.strSize = local.string.size;
+		local.result = 1;
+		for (local.i = 0; local.i < local.strSize; local.i++) {
+			if (local.numMask[(string local.string[local.i])] != 1) {
+				if (local.string[local.i] == "." && local.dots == 0) {
+					local.result = 2;
+					local.dots++;
+					continue;
+				} else if (local.string[local.i] == "-" && local.i == 0) {
+					continue;
+				}
+				local.result = 0;
+				break;
+			}
+		}
+	} else if (local.string) {
+		local.type = typeof local.string;
+		if (local.type == "int" || local.type == "float") {
+			local.result = 3;
+		}
+	}
+end local.result;
+
+/** ==========================================================================================
+ IsVector Function
+ ---------------------------------------------------------------------------------------------
+ DESCR|: 	Determines whether the specified string is a stringified vector (that can be casted
+			back to a vector type) or not.
+ INPUT|: 	<STRING string>
+ OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
+			*	2 => is vector
+			*	1 => is stringified vector
+			*	0 => is other string or other variable type
+ =========================================================================================== */
+IsVector local.string:
+	local.result = 0;
+	if (waitthread __IsString local.string) {
+		if (local.string[0] == "(" && local.string[(local.string.size - 1)] == ")") {
+			local.pt = 0;
+			local.str[local.pt] = "";
+			local.strSize = (local.string.size - 1);
+			for (local.i = 1; local.i < local.strSize; local.i++) {
+				if ((charToInt local.string[local.i]) == 44) {
+					local.pt++;
+					local.str[local.pt] = "";
+					
+					// Skips following space char
+					if ((charToInt local.string[(local.i + 1)]) == 32) {
+						local.i++; 
+					}	
+					continue;
+				}
+				local.str[local.pt] += local.string[local.i];
+			}
+			
+			if (local.str.size == 3) {
+				local.stringsSize = local.str.size;
+				local.result = 1;
+				for (local.i = 0; local.i < local.stringsSize; local.i++) {
+					if !(waitthread IsNumeric local.str[local.i]) {
+						local.result = 0;
+						break;
+					}
+				}
+			}
+		}
+	} else if (local.string && typeof local.string == "vector") {
+		local.result = 2;
+	}
+end local.result;
+
+/** ==========================================================================================
+ Split Function
+ ---------------------------------------------------------------------------------------------
+ DESCR|: 	Splits specified string into a constant array of words according to specified spacer.
  INPUT|: 	<STRING string> <STRING spacer>
  OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
-				array => of found words; use .size property to get the word count, if
+			*	array => of found words; use .size property to get the word count, if
 						 the array's size is 1 then the string has not been split.
-				NIL => error: invalid input
+			*	NIL => error: invalid input
  =========================================================================================== */
-_SplitStr local.string local.spacer: goto internal1;
-SplitStr local.string local.spacer:
+_Split local.string local.spacer: goto internal1;
+Split local.string local.spacer:
 	/* Error & Exception handling */
-	if ( !(local.string) || !(waitthread __IsString local.string)) {
-		if (level.DEBUG > 0) {
-			conprintf "\n ~^~^~^~ FATAL_ERROR|BOT4_ENGINE[lib/string.slib::SplitStr]: Specified string <arg1> is either inexistent or not a string type! ~^~^~^~ \n\n";
+	if ( !local.string || !(waitthread __IsString local.string)) {
+		if (level.DEBUG) {
+			conprintf "\n ~^~^~^~ FATAL_ERROR[lib/string.slib::Split]: Specified string <arg1> is either inexistent or not a string type! ~^~^~^~ \n\n";
 		}
 		end;
 	} 
-	if ( !(local.spacer) || !(waitthread __IsStringType local.spacer)) {
+	if ( !local.spacer || !(waitthread __IsStringType local.spacer) || local.spacer.size > 1) {
 		if (level.DEBUG > 1) {
-			conprintf "~^~^~^~ EXCEPTION|BOT4_ENGINE[lib/string.slib::SplitStr]: Specified spacer <arg2> is invalid! Parameter has defaulted. ~^~^~^~ \n";
+			conprintf "~^~^~^~ EXCEPTION[lib/string.slib::Split]: Specified spacer <arg2> is invalid! Parameter has defaulted. ~^~^~^~ \n";
 		}
 		local.spacer = " ";
 	}
@@ -243,55 +635,178 @@ SplitStr local.string local.spacer:
 end local.result;
 
 /** ==========================================================================================
- InStr Function
+ FormatSplit Function
+ ---------------------------------------------------------------------------------------------
+ DESCR|: 	Splits specified string into a constant array of substrings based on the specified 
+			seperator in the specified pair's (i.e. brackets) first dimension. Optionally,
+			a prefix char may be specified, the substring before its first occurance will be
+			outputted in entry 0 of the result.
+ INPUT|: 	<STRING string> <STRING pairChar> <STRING seperator> [STRING prefix]
+ OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
+			*	array => 	[0] 	=> Optional prefix string extracted
+							[1-X]	=> All fragmented strings
+			*	NIL => error: invalid input
+ EXAMPLE|:	IN: 	
+			*	local.result = waitthread $Str.FormatSplit "[[1,2],3]" "[" "," NIL;
+			OUT:
+			*	local.result[1] = "[1,2]"
+			*	local.result[2] = "3"
+ =========================================================================================== */
+_FormatSplit local.string local.pair local.seperator local.prefix: goto internal27;
+FormatSplit local.string local.pair local.seperator local.prefix:
+	/* Error & Exception handling */
+	if ( !local.string || !(waitthread __IsString local.string)) {
+		if (level.DEBUG) {
+			conprintf "\n ~^~^~^~ FATAL_ERROR[lib/string.slib::FormatSplit]: Specified string <arg1> is either inexistent or not a string type! ~^~^~^~\n\n"
+		}
+		end;
+	} if ( !local.pair || !(waitthread __IsStringType local.pair) || local.pair.size > 1) {
+		if (level.DEBUG) {
+			conprintf "\n ~^~^~^~ FATAL_ERROR[lib/string.slib::FormatSplit]: Specified pair character string <arg2> is either inexistent or not a string type! ~^~^~^~\n\n"
+		}
+		end;
+	} if ( !local.seperator || !(waitthread __IsStringType local.seperator) || local.seperator.size > 1) {
+		if (level.DEBUG) {
+			conprintf "\n ~^~^~^~ FATAL_ERROR[lib/string.slib::FormatSplit]: Specified seperator string <arg3> is either inexistent or not a string type! ~^~^~^~\n\n"
+		}
+		end;
+	}  
+	
+	internal27:
+
+	/* Main Logic */
+	
+	local.endPair = waitthread $Compile.infoLib::__PairOther local.pair;
+	local.j = 1;
+
+	// Extracts main pair's prefix to the 0th entry of our result.
+	if (local.prefix && local.string[0] == local.pair && local.string[(local.string.size - 1)] == local.endPair) {
+		local.strSize = local.string.size - 1;
+		local.result[0] = "";
+		for (local.i = 1; local.i < local.strSize; local.i++) {
+			if (local.string[local.i] == local.prefix) {
+				break;
+			}
+			local.result[0] += local.string[local.i];
+		}
+		local.start = (local.i + 1);
+		local.numPairs = 1;
+	} else {
+		// Define correct starting and ending string positions.
+		if (local.string[0] == local.pair && local.string[(local.string.size - 1)] == local.endPair) {
+			local.strSize = local.string.size - 1;
+			local.start = 1;
+			local.numPairs = 1;
+		} else {
+			local.strSize = local.string.size;
+			local.start = 0;
+			local.numPairs = 0;
+		}
+	}
+
+	// Splits string according to specified seperator for the pair's first dimension.
+	local.result[local.j] = "";
+	for (local.i = local.start; local.i < local.strSize; local.i++) {
+		if (local.string[local.i] == local.pair) {
+			local.numPairs++;
+		} else if (local.string[local.i] == local.endPair) {
+			local.numPairs--;
+		} 
+		if (local.numPairs == 1 && local.string[local.i] == local.seperator) {
+			local.j++;
+			local.result[local.j] = "";
+			continue;
+		}
+		local.result[local.j] += local.string[local.i];
+	}
+end local.result;
+
+/** ==========================================================================================
+ Partition Function
+ ---------------------------------------------------------------------------------------------
+ DESCR|: 	Partitions a specified string into an array of smaller-sized strings.
+ INPUT|: 	<STRING string> <INT partitionSize>
+ OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
+			*	array => of partitioned strings
+			*	NIL => error: uninitialized/inexistent/invalid string
+ =========================================================================================== */
+_Partition local.string local.partitionSize: goto internal28;
+Partition local.string local.partitionSize:
+	/* Error & Exception handling */
+	if ( !local.string || !(waitthread __IsString local.string) ) {
+		if (level.DEBUG) {
+			conprintf "\n ~^~^~^~ FATAL_ERROR[lib/string.slib::Search]: Specified string <arg1> is either inexistent or not a string type! ~^~^~^~ \n\n";
+		}
+		end;
+	}
+	if (local.partitionSize == NIL || local.partitionSize <= 0 || !(typeof local.partitionSize == "int") || local.partitionSize >= $Str.STRINGBUFFERSIZE) {
+		local.partitionSize = 1024;
+	}
+	
+	internal28:
+	
+	/*Main Logic*/
+	local.strSize = local.string.size;
+	local.part = 1;
+	local.result[local.part] = "";
+	local.chars = 0;
+	for (local.i = 0; local.i < local.string.size; local.i++) {
+		if (local.chars == local.partitionSize) {
+			local.chars = 0;
+			local.part++;
+			local.result[local.part] = "";
+		}
+		local.result[local.part] += local.string[local.i];
+		local.chars++;
+	}
+end local.result;
+
+/** ==========================================================================================
+ In Function
  ---------------------------------------------------------------------------------------------
  DESCR|: 	Searches specified string for the string or char to be found. Outputs the starting 
 			and ending position(s) in the string.
  INPUT|: 	<STRING string> <STRING chkString> [INT startPos] [INT seekMode]
  OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
-				array => [1]= starting pos of found str/char; [2]= corresponding ending pos.
-				array => if seekMode is 1 then [X][1]= starting pos of X instance of found
+			*	array => [1]= starting pos of found str/char; [2]= corresponding ending pos.
+			*	array => if seekMode is 1 then [X][1]= starting pos of Xth instance of found
 						 str/char; [X][2]= corresponding ending pos. Size property will 
 						 indicate how many instances were found. 
-				0 => is the array size if nothing is found (same for both seek modes).
-				NIL => error: invalid input
+			*	0 => is the array size if nothing is found (same for both seek modes).
+			*	NIL => error: invalid input
  =========================================================================================== */
-_InStr local.string local.chkString local.startPos local.seekMode: 	local.strSize = local.string.size; local.chkStrSize = local.chkString.size; goto internal2;
-InStr local.string local.chkString local.startPos local.seekMode:
+_In local.string local.chkString local.startPos local.seekMode: 	local.strSize = local.string.size; local.chkStrSize = local.chkString.size; goto internal2;
+In local.string local.chkString local.startPos local.seekMode:
 	local.strSize = local.string.size; 
 	local.chkStrSize = local.chkString.size;
 	
 	/* Error & Exception handling */
-	if ( !(local.string) || !(waitthread __IsString local.string)) {
-		if (level.DEBUG > 0) {
-			conprintf "\n ~^~^~^~ FATAL_ERROR|BOT4_ENGINE[lib/string.slib::InStr]: Specified string <arg1> is either inexistent or not a string type! ~^~^~^~ \n\n";
+	if ( !local.string || !(waitthread __IsString local.string)) {
+		if (level.DEBUG) {
+			conprintf "\n ~^~^~^~ FATAL_ERROR[lib/string.slib::In]: Specified string <arg1> is either inexistent or not a string type! ~^~^~^~ \n\n";
 		}
 		end;
 	}
 	if ( !(local.chkString) || !(waitthread __IsStringType local.chkString)) {
-		if (level.DEBUG > 0) {
-			conprintf "\n ~^~^~^~ FATAL_ERROR|BOT4_ENGINE[lib/string.slib::InStr]: Specified checkString <arg2> is either inexistent or not a string type! ~^~^~^~ \n\n";
-		}
-		end;
-	} else if (local.chkStrSize > local.strSize) {
-		if (level.DEBUG > 0) {
-			conprintf "\n ~^~^~^~ FATAL_ERROR|BOT4_ENGINE[lib/string.slib::InStr]: Specified chkString <arg2> is longer than the searchString <arg1>! ~^~^~^~ \n\n";
+		if (level.DEBUG) {
+			conprintf "\n ~^~^~^~ FATAL_ERROR[lib/string.slib::In]: Specified checkString <arg2> is either inexistent or not a string type! ~^~^~^~ \n\n";
 		}
 		end;
 	}
 	if ( (local.startPos == NIL) || !(typeof local.startPos == "int") || (local.startPos < 0) ) {
 		if (level.DEBUG > 1) {
-			conprintf "~^~^~^~ EXCEPTION|BOT4_ENGINE[lib/string.slib::InStr]: Specified starting position <arg3> is invalid! Parameter has defaulted. ~^~^~^~ \n";
+			conprintf "~^~^~^~ EXCEPTION[lib/string.slib::In]: Specified starting position <arg3> is invalid! Parameter has defaulted. ~^~^~^~ \n";
 		}
 		local.startPos = 0;
 	} else if (local.startPos >= local.strSize) {
-		if (level.DEBUG > 0) {
-			conprintf "\n ~^~^~^~ FATAL_ERROR|BOT4_ENGINE[lib/string.slib::InStr]: Specified start position <arg3> is out of range for specified string <arg1>! ~^~^~^~ \n\n";
+		if (level.DEBUG) {
+			conprintf "\n ~^~^~^~ FATAL_ERROR[lib/string.slib::In]: Specified start position <arg3> is out of range for specified string <arg1>! ~^~^~^~ \n\n";
 		}
 		end;
-	} else if (local.chkStrSize > (local.strSize - local.startPos)) {
-		if (level.DEBUG > 0) {
-			conprintf "\n ~^~^~^~ FATAL_ERROR|BOT4_ENGINE[lib/string.slib::InStr]: Specified chkString <arg2> is longer than the searchable range (string.size <arg1> - start position <arg3>)! ~^~^~^~ \n\n";
+	} 
+	if (local.chkStrSize > (local.strSize - local.startPos)) {
+		if (level.DEBUG) {
+			conprintf "\n ~^~^~^~ FATAL_ERROR[lib/string.slib::In]: Specified chkString <arg2> is longer than the searchable range (string.size <arg1> - start position <arg3>)! ~^~^~^~ \n\n";
 		}
 		end;
 	}
@@ -299,330 +814,651 @@ InStr local.string local.chkString local.startPos local.seekMode:
 	/* Main logic */
 	internal2:
 	
-	local.fsize = 0;
+	// Search loop preperations...
 	local.instance = 0;
 	local.result[1] = NIL;
+	
 	for (local.i = local.startPos; local.i < local.strSize; local.i++) {
-		if (local.string[local.i] == local.chkString[local.fsize]) {
-			local.fsize++;
-			
-			if (local.fsize == 1) {
-				local.pos = local.i;
-			}
-			
-			if ( (local.fsize == local.chkStrSize) && (local.pos != NIL) ) {
-				if (local.seekMode) {
-					local.instance++;
-					local.endPos = local.i; 
-					local.result[local.instance] = local.pos::local.endPos;
-
-					// found all instances?
-					if (local.chkStrSize > (local.strSize - (local.i + 1))) {
-						break;
-					}
-					goto EOLreset
-				} else {
-					local.endPos = local.i;
-					local.result = local.pos::local.endPos;
-					break;
-				}
-			}
-			continue;
-		} 
-		
-		if ( (local.chkStrSize > 1) && (local.string[local.i] == local.chkString[0]) ) { 
-			local.i--;
+		// Check if we can find a char match...
+		local.check = 0;
+		if ((charToInt local.string[local.i]) == (charToInt local.chkString[0])) {
+			local.check = 1;
 		}
 		
-		// reset for next loop
-		EOLreset:
-		local.fsize = 0;
-		local.pos = NIL;
-		local.endPos = NIL;
+		// Bingo! Character match found...
+		if (local.check) {
+			// More characters need to be searched. This projects our chkString onto the next characters in the specified string.
+			if (local.chkStrSize > 1) {
+				if (local.chkStrSize <= (local.strSize - (local.i + 1))) {
+					// Save the current position in the string so as to not entangle our for() loops.
+					local.k = (local.i + 1);
+					for (local.j = 1; local.j < local.chkStrSize; local.j++) {
+						if ((charToInt local.string[local.k]) != (charToInt local.chkString[local.j])) {
+							goto ResetEOC2;
+						} 
+						// Synchronizes positions in both strings.
+						local.k++;
+					}
+					// Defines the matching end character:
+					local.endPos = local.k - 1;
+				} else {
+					// Break loop since we cannot find any other instance if the chkString 
+					// now contains more characters than the remaining characters to search.
+					break;
+				}
+			} else {
+				local.endPos = local.i;
+			}
+			
+			// Multiple queries:
+			if (local.seekMode) {
+				local.instance++;
+				local.result[local.instance] = local.i::local.endPos;
+				
+				// We can fastforward the main position indicator because we found something since position 'i'
+				// and because seekMode is set we need to continue searching for more instances.
+				local.i = local.endPos;
+				
+				// Will we find any more instances?
+				if (local.chkStrSize > (local.strSize - (local.i + 1))) {
+					break;
+				}
+			// Single query.
+			} else {
+				local.result = local.i::local.endPos;
+				// This mode searches for the first found instance only.
+				break;
+			}
+			
+			// Reset/clear some vars..
+			ResetEOC2:
+			local.k = NIL;
+			local.endPos = NIL;
+		}
 	}
 	
 	if (local.seekMode && level.DEBUG > 2) {
-		conprintf (">>>>>> BOT4_ENGINE[lib/string.slib::InStr]: " + local.instance + " instances found of specified to-be-searched string: \"" + local.chkString + "\" <<<<<< \n");
+		conprintf (">>>>>> BOT4_ENGINE[lib/string.slib::In]: " + local.instance + " instances found of specified to-be-searched string: \"" + local.chkString + "\" <<<<<< \n");
 	}
 end local.result;
 
 /** ==========================================================================================
- SearchStr Function
+ Search Function
  ---------------------------------------------------------------------------------------------
  DESCR|: 	Searches specified string for the string or char to be found. Outputs the starting 
-			and ending position(s) in the string. Optionally, character cases can be ignored.
-			Wildcard searches are enabled by default (*); the wildcard symbol can be changed,
-			however it must be only one character in length. 
-			Don't search for asterisk-character or set this option to empty string in order 
-			to disable this feature.
- INPUT|: 	<STRING string> <STRING chkString> [INT seekMode] [INT caseInsensitive] [CHAR wcard]
+			and ending position(s) in the string. Options:
+			1) Position in the specified string to start searching from.
+			2) Multiple query mode can be set, the function will then seek and return all found
+			   instances of the specified searchQuery in the specified string.
+			3) Character cases can be ignored.
+			4) Wildcard searches are enabled by default (*); the wildcard symbol can be changed.
+			   Change the wildcard character, set the wildcard to an empty string or don't 
+			   search for the wildcard character to disable this feature.
+			5) The character size of the 'wildCard' parameter determines the amount of characters
+			   that will be skipped when a wildCard character is used in the checkString.
+			6) The spacer character is a space (" " or ASCII #32) by default. This is the only 
+			   character that is unaffected by a wildcard.
+ INPUT|: 	<STRING string> <STRING chkString> [INT startPos] [INT seekMode] 
+			[INT caseInsensitive] [STRING wcard] [CHAR spacer]
  OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
-				array => [1]= starting pos of found str/char; [2]= corresponding ending pos.
-				array => if seekMode is 1 then [X][1]= starting pos of X instance of found
+			*	array => [1]= starting pos of found str/char; [2]= corresponding ending pos.
+			*	array => if seekMode is 1 then [X][1]= starting pos of X instance of found
 						 str/char; [X][2]= corresponding ending pos. Size property will 
 						 indicate how many instances were found. 
-				0 => is the array size if nothing is found (same for both seek modes).
-				NIL => error: invalid input
+			*	0 => is the array size if nothing is found (same for both seek modes).
+			*	NIL => error: invalid input
  =========================================================================================== */
-_SearchStr local.string local.chkString local.seekMode local.caseInsensitive local.wcard: 	local.strSize = local.string.size; local.chkStrSize = local.chkString.size; goto internal3;
-SearchStr local.string local.chkString local.seekMode local.caseInsensitive local.wcard:
+_Search local.string local.chkString local.startPos local.seekMode local.caseInsensitive local.wildCard local.spacer: 	local.strSize = local.string.size; local.chkStrSize = local.chkString.size; goto internal3;
+Search local.string local.chkString local.startPos local.seekMode local.caseInsensitive local.wildCard local.spacer:
 	local.strSize = local.string.size; 
 	local.chkStrSize = local.chkString.size;
 	
 	/* Error & Exception handling */
-	if ( !(local.string) || !(waitthread __IsString local.string) ) {
-		if (level.DEBUG > 0) {
-			conprintf "\n ~^~^~^~ FATAL_ERROR|BOT4_ENGINE[lib/string.slib::SearchStr]: Specified string <arg1> is either inexistent or not a string type! ~^~^~^~ \n\n";
+	if ( !local.string || !(waitthread __IsString local.string) ) {
+		if (level.DEBUG) {
+			conprintf "\n ~^~^~^~ FATAL_ERROR[lib/string.slib::Search]: Specified string <arg1> is either inexistent or not a string type! ~^~^~^~ \n\n";
 		}
 		end;
 	}
 	if ( !(local.chkString) || !(waitthread __IsStringType local.chkString) ) {
-		if (level.DEBUG > 0) {
-			conprintf "\n ~^~^~^~ FATAL_ERROR|BOT4_ENGINE[lib/string.slib::SearchStr]: Specified checkString <arg2> is either inexistent or not a string type! ~^~^~^~ \n\n";
-		}
-		end;
-	} else if (local.chkStrSize > local.strSize) {
-		if (level.DEBUG > 0) {
-			conprintf "\n ~^~^~^~ FATAL_ERROR|BOT4_ENGINE[lib/string.slib::SearchStr]: Specified chkString <arg2> is longer than the searchString <arg1>! ~^~^~^~ \n\n";
+		if (level.DEBUG) {
+			conprintf "\n ~^~^~^~ FATAL_ERROR[lib/string.slib::Search]: Specified checkString <arg2> is either inexistent or not a string type! ~^~^~^~ \n\n";
 		}
 		end;
 	} 
-	
-	/* Main logic */
-	internal3:
-	if ( (local.wcard == NIL) || (local.wcard.size > 1) || !(waitthread __IsStringType local.wcard)) {
-		local.wcard = "*";
-	}
-	
-	if (local.chkString[0] == local.wcard) {
-		if (level.DEBUG > 0) {
-			conprintf "\n ~^~^~^~ ERROR|BOT4_ENGINE[lib/string.slib::SearchStr]: Specified chkString <arg2> cannot start with a wildcard! ~^~^~^~ \n";
+	if (local.startPos == NIL || !(typeof local.startPos == "int") || local.startPos < 0) {
+		local.startPos = 0;
+	} else if (local.startPos >= local.strSize) {
+		if (level.DEBUG) {
+			conprintf "\n ~^~^~^~ FATAL_ERROR[lib/string.slib::Search]: Specified start position <arg3> is out of range for specified string <arg1>! ~^~^~^~ \n\n";
+		}
+		end;
+	} 
+	if (local.chkStrSize > (local.strSize - local.startPos)) {
+		if (level.DEBUG) {
+			conprintf "\n ~^~^~^~ FATAL_ERROR[lib/string.slib::Search]: Specified chkString <arg2> is longer than the searchable range (string.size <arg1> - start position <arg3>)! ~^~^~^~ \n\n";
 		}
 		end;
 	}
-
-	// search loop init
-	local.fsize = 0;
+	
+	/* Main logic */
+	internal3:
+	
+	// Default certain parameters if necessary.
+	if (local.wildCard == NIL || !(waitthread __IsStringType local.wildCard)) {
+		local.wildCard = "*";
+	} if (local.spacer == NIL || local.spacer.size > 1 || !(waitthread __IsStringType local.spacer)) {
+		local.spacer = " ";
+	}
+	
+	// Convert potential char type input to string type.
+	local.spacer = string local.spacer;
+	
+	// Search loop preperations...
 	local.instance = 0;
 	local.result[1] = NIL;
 	
-	for (local.i = 0; local.i < local.strSize; local.i++) {
-		local.char = local.string[local.i];
-		local.chkChar = local.chkString[local.fsize];
-		
-		//Check
+	for (local.i = local.startPos; local.i < local.strSize; local.i++) {
+		// Check if we can find a char match...
 		local.check = 0;
-		if (local.char == local.chkChar || local.chkChar == local.wcard) {
+		if ((charToInt local.string[local.i]) == (charToInt local.chkString[0]) || (local.chkString[0] == local.wildCard[0] && local.string[local.i] != local.spacer)) {
 			local.check = 1;
-		} else if (local.caseInsensitive && ((charToInt(local.char) + 32) == (charToInt(local.chkChar)) || (charToInt(local.char)) == (charToInt(local.chkChar) + 32))) {
+		} else if (local.caseInsensitive && ((charToInt(local.string[local.i]) + 32) == (charToInt(local.chkString[0])) || (charToInt(local.string[local.i])) == (charToInt(local.chkString[0]) + 32))) {
 			local.check = 1;
 		}
 		
-		// Process
+		// Bingo! Character match found...
 		if (local.check) {
-			local.fsize++;
-			
-			if (local.fsize == 1) {
-				local.pos = local.i;
-			}
-			
-			// instance found:
-			if ( (local.fsize == local.chkStrSize) && (local.pos != NIL) ) {
-				if (local.seekMode) {
-					local.instance++;
-					local.endPos = local.i; 
-					local.result[local.instance] = local.pos::local.endPos;
-					
-					// found all instances?
-					if (local.chkStrSize > (local.strSize - (local.i + 1))) {
-						break;
+			// More characters need to be searched. This projects our chkString onto the next characters in the specified string.
+			// This is a simple solution that does not infere with the main for() loop that searches through each character, in constrast
+			// to some other functions here, simply because if we applied the same practice here, we'd have to backtrack at almost any turn.
+			if (local.chkStrSize > 1) {
+				if (local.chkStrSize <= (local.strSize - (local.i + 1))) {
+					// Save the current position in the string so as to not entangle our for() loops.
+					local.k = (local.i + 1);
+					for (local.j = 1; local.j < local.chkStrSize; local.j++) {
+						// Wildcard is projected onto our project position in the specified string. 
+						// The number of wildcards marks how much characters must be skipped before 
+						// searching for the next character.
+						if (local.chkString[local.j] == local.wildCard[0] && local.string[local.k] != local.spacer) {
+							local.k += (local.wildCard.size - 1);
+							// No chance of finding a winner in this case...
+							if (local.k >= local.strSize) {
+								goto ResetEOC;
+							}
+						// Default comparing...
+						} else if ((charToInt local.string[local.k]) != (charToInt local.chkString[local.j])) {
+							if !(local.caseInsensitive) {
+								goto ResetEOC;
+							// This compares both strings' current characters if caseInsensitivity option is set to 1.
+							} else if (local.caseInsensitive && ((charToInt(local.string[local.k]) + 32) != (charToInt(local.chkString[local.j])) && (charToInt(local.string[local.k])) != (charToInt(local.chkString[local.j]) + 32))) {
+								goto ResetEOC;
+							} 
+						} 
+						// Synchronizes positions in both strings.
+						local.k++;
 					}
-					goto resetEOL
+					// Defines the matching end character:
+					local.endPos = local.k - 1;
 				} else {
-					local.endPos = local.i;
-					local.result = local.pos::local.endPos;
+					// Break loop since we cannot find any other instance if the chkString 
+					// now contains more characters than the remaining characters to search.
 					break;
 				}
-			} 
-			continue;
-		} 
-		
-		if (local.chkStrSize > 1 && local.char == local.chkString[0]) { 
-			local.i--;
+			} else {
+				local.endPos = local.i;
+			}
+			
+			// Multiple queries:
+			if (local.seekMode) {
+				local.instance++;
+				local.result[local.instance] = local.i::local.endPos;
+				
+				// We can fastforward the main position indicator because we found something since position 'i'
+				// and because seekMode is set we need to continue searching for more instances.
+				local.i = local.endPos;
+				
+				// Will we find any more instances?
+				if (local.chkStrSize > (local.strSize - (local.i + 1))) {
+					break;
+				}
+			// Single query.
+			} else {
+				local.result = local.i::local.endPos;
+				// This mode searches the first found instance only.
+				break;
+			}
+			
+			// Reset/clear some vars..
+			ResetEOC:
+			local.k = NIL;
+			local.endPos = NIL;
 		}
-		
-		// reset for next loop
-		resetEOL:
-		local.fsize = 0;
-		local.pos = NIL;
-		local.endPos = NIL;
 	}
-	
 	if (local.seekMode && level.DEBUG > 2) {
-		conprintf (">>>>>> BOT4_ENGINE[lib/string.slib::SearchStr]: " + local.instance + " instances found of specified to-be-searched string: \"" + local.chkString + "\" <<<<<< \n");
+		conprintf (">>>>>> BOT4_ENGINE[lib/string.slib::Search]: " + local.instance + " instances found of specified to-be-searched string: \"" + local.chkString + "\" <<<<<< \n");
 	}
 end local.result;
 
 /** ==========================================================================================
- Remove Function
+ VerifyPath Function
  ---------------------------------------------------------------------------------------------
- DESCR|: 	Searches and removes one, or optionally all instances of a, specified string/char 
-			in the specified main string. Function makes use of 'SearchStr' function as
-			opposed to 'InStr', thus provides the same extended searching functionality.
- INPUT|: 	<STRING string> <STRING toBeRemoved> [INT allInstances] [INT caseInsensitive]
-			[CHAR wcard]
+ DESCR|: 	Determines whether the specified path, filepath or threadpath is valid and exists.
+ INPUT|: 	<STRING path / STRING filepath / ARRAY:STRING filepath::threadlabel>
  OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
-				string => processed string
-				NIL => error: invalid input
+			*	1 => directory/file/thread, that the specified path points to, exists.
+			*	0 => nonexistent
+			*	NIL => error: uninitialized/inexistent/invalid string
  =========================================================================================== */
-Remove local.string local.toBeRemoved local.allInstances local.caseInsensitive local.wcard: 
-end (waitthread Replace local.string local.toBeRemoved "" local.allInstances local.caseInsensitive local.wcard);
+VerifyPath local.path /*local.thorough*/:
+	/*Main Logic*/
+	if (local.path) {
+		// If script::thread construction, untangle it.
+		if (typeof local.path == "const array") {
+			local.thread = local.path[2];
+			local.path = local.path[1];
+		}
+		// Paths are usually strings.
+		if (waitthread __IsString local.path) {
+			local.result = 0;
+			if (waitthread IsCharDataSafe local.path 1) {
+				// Cuts path into directory path and the filename.
+				local.path = waitthread $System.fullPath::__SplitPath local.path;
+		
+				// Retrieve directory list of specified path.
+				local.list = flist local.path[0] "" 0;
+			
+				// Flist returns the input path if path was invalid, but if the path were valid,
+				// the command will always returns an array even if the specified directory was empty. 
+				if (typeof local.list == "array") {
+					// If there was a filename... check if it exists.
+					if (local.path[1]) {
+						local.lsSize = local.list.size;
+						for (local.i = 0; local.i < local.lsSize; local.i++) {
+							if (local.list[local.i] == local.path[1]) {
+								local.result = 1;
+								break;
+							}
+						}
+						
+						// Checks whether threadlabel (if specified) exists within the file.
+						if (local.result && local.thread /*&& local.thorough*/) {
+							// need Parse.slib for this...
+						}
+					} else {
+						local.result = 1;
+					}
+				}
+			}
+		} else {
+			if (level.DEBUG) {
+				conprintf "\n ~^~^~^~ FATAL_ERROR[lib/string.slib::VerifyPath]: specified (file)path is invalid! ~^~^~^~\n\n";
+			}
+			end;
+		}
+	} else {
+		if (level.DEBUG) {
+			conprintf "\n ~^~^~^~ FATAL_ERROR[lib/string.slib::VerifyPath]: specified (file)path is either uninitialized or inexistent! ~^~^~^~\n\n";
+		}
+		end;
+	}
+end local.result;
+
+/** ==========================================================================================
+ ValidatePairs Function
+ ---------------------------------------------------------------------------------------------
+ DESCR|: 	Determines whether a string complies to the specified criteria, i.e. character
+			pairs such as brackets. If something has to be between one pair character and 
+			another, it can be checked if that pair's infix character is set. If inline is
+			set to 1, then the order of the inputted pairs determines their inlined order.
+			This means that each pair must be defined inside the previously specified pair.
+ INPUT|: 	<STRING string> [INT inline] <STRING pair1> <STRING infix1> ... [STRING infix5]
+ OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
+			*	1 => string complies to specified criteria.
+			*	0 => string does not comply
+			*	NIL => error: uninitialized/inexistent parameters
+ =========================================================================================== */
+ValidatePairs local.string local.inlined local.pair1 local.infix1 local.pair2 local.infix2 local.pair3 local.infix3 local.pair4 local.infix4 local.pair5 local.infix5:
+	/* Error & Exception handling */
+	if ( !local.string || !(waitthread __IsString local.string)) {
+		if (level.DEBUG) {
+			conprintf "\n ~^~^~^~ FATAL_ERROR[lib/string.slib::ValidatePairs]: Specified string <arg1> is either inexistent or not a string type! ~^~^~^~\n\n"
+		}
+		end;
+	}
+	
+	// Assemble array... Each of the maximum 5 entries consist of another array with three more entries.
+	// One entry represents the starting pair character (i.e. input) and the second represents its closing
+	// bracket that $Compile's PairOther function will return. The third entry represents the optional 
+	// 'infix' that, if set, must be between the open bracket of the specified pair and another specified bracket.
+	local.pairArray[0] = NIL;
+	local.pairArray = waitthread __ValidatePairs local.pairArray local.pair1 local.infix1;
+	local.pairArray = waitthread __ValidatePairs local.pairArray local.pair2 local.infix2;
+	local.pairArray = waitthread __ValidatePairs local.pairArray local.pair3 local.infix3;
+	local.pairArray = waitthread __ValidatePairs local.pairArray local.pair4 local.infix4;
+	local.pairArray = waitthread __ValidatePairs local.pairArray local.pair5 local.infix5;
+	
+	if (local.pairArray.size <= 0) {
+		if (level.DEBUG) {
+			conprintf "\n ~^~^~^~ FATAL_ERROR[lib/string.slib::ValidatePairs]: Specified pair(s) <arg3-7> is inexistent or invalid! ~^~^~^~\n\n"
+		}
+		end;
+	}
+	
+	/* Main Logic */
+	
+	// Initialize pair counters:
+	for (local.i = 0; local.i < local.pairArray.size; local.i++) {
+		local.pairs[local.i] = 0;
+		local.lastPair[local.i] = 0;
+		local.pairExists[local.i] = 0;
+	}
+	// Current pair.
+	local.j = 0;
+	// Assume format is correct...
+	local.result = 1;
+	// Avoid contantly re-counting the number of characters in the specified string...
+	local.strSize = local.string.size;
+	for (local.i = 0; local.i < local.strSize; local.i++) {
+		for (local.k = 0; local.k < local.pairArray.size; local.k++) {
+			// If current char in the string equals a specified opening bracket/pair char...
+			if (local.string[local.i] == local.pairArray[local.k][0]) {
+				if (local.k == local.j) {
+					goto Open;
+				} else if (local.lastPair[local.k] == 0) {
+					if (local.k == (local.j + 1) && (!local.inlined || /*local.inlined &&*/ local.lastPair[local.j] == 1)) {
+						goto Open;
+					} else if (local.k == (local.j - 1) && (!local.inlined || /*local.inlined &&*/ local.lastPair[local.j] == 0)) {
+						goto Open;
+					} 
+				} 
+				
+				// Terminate.
+				//println "terminate 1";
+				local.result = 0;
+				goto Brakes;
+				
+				// Continue...
+				Open:
+				
+				local.j = local.k;
+				local.pairExists[local.j] = 1;
+				local.lastPair[local.j] = 1;
+				local.pairs[local.j]++;
+				
+				// Do we have a infix to check?
+				if (local.pairArray[local.j].size == 3) {
+					for (local.i = (local.i + 1); local.i < local.strSize; local.i++) {
+						// Any input char between our open bracket and its infix is regarded as invalid.
+						for (local.l = 0; local.l < local.pairArray.size; local.l++) {
+							if (local.string[local.i] == local.pairArray[local.l][0] || \
+								local.string[local.i] == local.pairArray[local.l][1]) {
+								//println "terminate 2";
+								local.result = 0;
+								goto Brakes;
+							}
+						}
+						// We assume our infix char/string starts at this position.
+						if (local.string[local.i] == local.pairArray[local.j][2][0]) {
+							break;
+						}
+					}
+				
+					// This preliminary if() checks whether the infix string can still be found.
+					if ((local.i + local.pairArray[local.j][2].size) < local.strSize) {
+						local.l = 0;
+						local.chkSize = (local.i + local.pairArray[local.j][2].size);
+						for (local.i = local.i; local.i < local.chkSize; local.i++) {
+							if (local.pairArray[local.j][2][local.l] != local.string[local.i]) {
+								// Terminate.
+								//println "terminate 3";
+								local.result = 0;
+								goto Brakes;
+							}
+							local.l++;
+						}
+					
+						// The current char has been shifted. 
+						// It needs to be examined, so we'll do it next loop.
+						local.i--;
+					} else {
+						// Terminate.
+						//println "terminate 4";
+						local.result = 0;
+						break;
+					}
+				}
+			// If current char in the string equals a specified closing bracket/pair char...
+			} else if (local.string[local.i] == local.pairArray[local.k][1]) {
+				if (local.pairs[local.k]) {
+					if (local.k == local.j) {
+						goto Closed;
+					} else if (local.lastPair[local.k] == 1) {
+						if (local.k == (local.j + 1) && (!local.inlined || /*local.inlined &&*/ local.lastPair[local.j] == 1)) {
+							goto Closed;
+						} else if (local.k == (local.j - 1) && (!local.inlined || /*local.inlined &&*/ local.lastPair[local.j] == 0)) {
+							goto Closed;
+						} 
+					} 
+				}
+				
+				// Terminate.
+				//println "terminate 5";
+				local.result = 0;
+				goto Brakes;
+				
+				// Continue...
+				Closed:
+				
+				local.j = local.k;
+				local.lastPair[local.j] = 0;
+				local.pairs[local.j]--;
+			}
+		/*EOL2*/
+		}
+	/*EOL1*/
+	}
+	
+	// Lastly, double-check whether all pairs were accounted for and if each pair were even...
+	for (local.i = 0; local.i < local.pairArray.size; local.i++) {
+		if (local.pairs[local.i] != 0) {
+			local.result = 0;
+			break;
+		} if (local.pairExists[local.i] == 0) {
+			local.result = 0;
+			break;
+		}
+	}
+	
+	Brakes:
+end local.result;
+
+__ValidatePairs local.result local.pair local.infix:
+	if (local.pair && local.pair.size == 1 && (waitthread __IsStringType local.pair)) {
+		local.idx = local.result.size;
+		local.result[local.idx][0] = local.pair;
+		local.result[local.idx][1] = waitthread $Compile.infoLib::__PairOther local.pair;
+		if (local.infix && (waitthread __IsStringType local.infix)) {
+			local.result[local.idx][2] = local.infix;
+		}
+	}
+end local.result;
 
 /** ==========================================================================================
  RemoveStr Function
  ---------------------------------------------------------------------------------------------
  DESCR|: 	Searches and removes one, or optionally all instances of a, specified string/char 
+			in the specified main string. Function makes use of 'Search' function as
+			opposed to 'In', thus provides the same extended searching functionality.
+ INPUT|: 	<STRING string> <STRING toBeRemoved> [INT startPos] [INT allInstances] 
+			[INT caseInsensitive] [CHAR wcard]
+ OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
+			*	string => processed string
+			*	NIL => error: invalid input
+ =========================================================================================== */
+_RemoveStr local.string local.toBeRemoved local.startPos local.allInstances local.caseInsensitive local.wcard: 
+end (waitthread _ReplaceStr local.string local.toBeRemoved "" local.startPos local.allInstances local.caseInsensitive local.wcard);
+
+RemoveStr local.string local.toBeRemoved local.startPos local.allInstances local.caseInsensitive local.wcard: 
+end (waitthread ReplaceStr local.string local.toBeRemoved "" local.startPos local.allInstances local.caseInsensitive local.wcard);
+
+/** ==========================================================================================
+ Remove Function
+ ---------------------------------------------------------------------------------------------
+ DESCR|: 	Searches and removes one, or optionally all instances of a, specified string/char 
 			in the specified main string.
  INPUT|: 	<STRING string> <STRING toBeRemoved> [INT allInstances]
  OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
-				string => processed string
-				NIL => error: invalid input
+			*	string => processed string
+			*	NIL => error: invalid input
  =========================================================================================== */
-_RemoveStr local.string local.toBeRemoved local.allInstances: goto internal4;
-RemoveStr local.string local.toBeRemoved local.allInstances:
+_Remove local.string local.toBeRemoved local.allInstances: 
+end (waitthread _Replace local.string local.toBeRemoved "" local.allInstances);
+
+Remove local.string local.toBeRemoved local.allInstances:
 	/* Error & Exception handling */
-	if ( !(local.string) || !(waitthread __IsString local.string)) {
-		if (level.DEBUG > 0) {
-			conprintf "\n ~^~^~^~ FATAL_ERROR|BOT4_ENGINE[lib/string.slib::Remove]: Specified string <arg1> is either inexistent or not a string type! ~^~^~^~ \n\n";
+	if ( !local.string || !(waitthread __IsString local.string)) {
+		if (level.DEBUG) {
+			conprintf "\n ~^~^~^~ FATAL_ERROR[lib/string.slib::Remove]: Specified string <arg1> is either inexistent or not a string type! ~^~^~^~ \n\n";
 		}
 		end;
 	}
 	if ( !(local.toBeRemoved) || !(waitthread __IsStringType local.toBeRemoved)) { 
-		if (level.DEBUG > 0) {
-			conprintf "\n ~^~^~^~ FATAL_ERROR|BOT4_ENGINE[lib/string.slib::Remove]: Specified stringToBeRemoved <arg2> is either inexistent or not a string type! ~^~^~^~ \n\n";
+		if (level.DEBUG) {
+			conprintf "\n ~^~^~^~ FATAL_ERROR[lib/string.slib::Remove]: Specified stringToBeRemoved <arg2> is either inexistent or not a string type! ~^~^~^~ \n\n";
 		}
 		end;
 	}
 	
 	/* Main logic */
 	internal4:
-end (waitthread ReplaceStr local.string local.toBeRemoved "" local.allInstances);
-
-/** ==========================================================================================
- Replace Function
- ---------------------------------------------------------------------------------------------
- DESCR|: 	Searches and replaces one or optionally all instances of a specified string/char 
-			with a specified replacement string/char in the specified main string. 
-			Function makes use of 'SearchStr' function as opposed to 'InStr', thus provides 
-			the same extended searching functionality.
- INPUT|: 	<STRING string> <STRING toBeReplaced> <STRING replacedBy> [INT allInstances] 
-			[INT caseInsensitive] [CHAR wcard]
- OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
-				string => processed string
-				NIL => error: invalid input
- =========================================================================================== */
-Replace local.string local.toBeReplaced local.replacedBy local.allInstances local.caseInsensitive local.wcard: 
-	if ((local.replacedBy == NIL) || !(waitthread __IsStringType local.replacedBy)) {
-		if (level.DEBUG > 0) {
-			conprintf "\n ~^~^~^~ FATAL_ERROR|BOT4_ENGINE[lib/string.slib::Replace]: Specified stringReplacedBy <arg3> is either inexistent or not a string type! ~^~^~^~ \n\n";
-		}
-		end;
-	}
-	local.positions = waitthread SearchStr local.string local.toBeReplaced local.allInstances local.caseInsensitive local.wcard;
-goto internal6
+end (waitthread Replace local.string local.toBeRemoved "" local.allInstances);
 
 /** ==========================================================================================
  ReplaceStr Function
  ---------------------------------------------------------------------------------------------
  DESCR|: 	Searches and replaces one or optionally all instances of a specified string/char 
+			with a specified replacement string/char in the specified main string. 
+			Function makes use of 'Search' function as opposed to 'In', thus provides 
+			the same extended searching functionality.
+ INPUT|: 	<STRING string> <STRING toBeReplaced> <STRING replacedBy> [INT startPos] 
+			[INT allInstances] [INT caseInsensitive] [CHAR wcard]
+ OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
+			*	string => processed string
+			*	NIL => error: invalid input
+ =========================================================================================== */
+_ReplaceStr local.string local.toBeReplaced local.replacedBy local.startPos local.allInstances local.caseInsensitive local.wcard: 
+	if ((local.replacedBy == NIL) || !(waitthread __IsStringType local.replacedBy)) {
+		if (level.DEBUG) {
+			conprintf "\n ~^~^~^~ FATAL_ERROR[lib/string.slib::ReplaceStr]: Specified stringReplacedBy <arg3> is either inexistent or not a string type! ~^~^~^~ \n\n";
+		}
+		end;
+	} if (local.startPos == NIL || local.startPos < 0 || (typeof local.startPos != "int")) {
+		local.startPos = 0;
+	}
+	local.positions = waitthread _Search local.string local.toBeReplaced local.startPos local.allInstances local.caseInsensitive local.wcard;
+goto internal6
+ 
+ReplaceStr local.string local.toBeReplaced local.replacedBy local.startPos local.allInstances local.caseInsensitive local.wcard: 
+	if ((local.replacedBy == NIL) || !(waitthread __IsStringType local.replacedBy)) {
+		if (level.DEBUG) {
+			conprintf "\n ~^~^~^~ FATAL_ERROR[lib/string.slib::ReplaceStr]: Specified stringReplacedBy <arg3> is either inexistent or not a string type! ~^~^~^~ \n\n";
+		}
+		end;
+	} if (local.startPos == NIL || local.startPos < 0 || (typeof local.startPos != "int")) {
+		local.startPos = 0;
+	}
+	local.positions = waitthread Search local.string local.toBeReplaced local.startPos local.allInstances local.caseInsensitive local.wcard;
+goto internal6
+
+/** ==========================================================================================
+ Replace Function
+ ---------------------------------------------------------------------------------------------
+ DESCR|: 	Searches and replaces one or optionally all instances of a specified string/char 
 			with a specified replacement string/char in the specified main string.
  INPUT|: 	<STRING string> <STRING toBeReplaced> <STRING replacedBy> [INT allInstances]
  OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
-				string => processed string
-				NIL => error: invalid input
+			*	string => processed string
+			*	NIL => error: invalid input
  =========================================================================================== */
-_ReplaceStr local.string local.toBeReplaced local.replacedBy local.allInstances: goto internal5;
-ReplaceStr local.string local.toBeReplaced local.replacedBy local.allInstances:
+_Replace local.string local.toBeReplaced local.replacedBy local.allInstances: goto internal5;
+Replace local.string local.toBeReplaced local.replacedBy local.allInstances:
 	/* Error & Exception handling */
-	if ( !(local.string) || !(waitthread __IsString local.string)) {
-		if (level.DEBUG > 0) {
-			conprintf "\n ~^~^~^~ FATAL_ERROR|BOT4_ENGINE[lib/string.slib::ReplaceStr]: Specified string <arg1> is either inexistent or not a string type! ~^~^~^~ \n\n";
+	if ( !local.string || !(waitthread __IsString local.string)) {
+		if (level.DEBUG) {
+			conprintf "\n ~^~^~^~ FATAL_ERROR[lib/string.slib::Replace]: Specified string <arg1> is either inexistent or not a string type! ~^~^~^~ \n\n";
 		}
 		end;
 	} else 	if ( !(local.toBeReplaced) || !(waitthread __IsStringType local.toBeReplaced)) {
-		if (level.DEBUG > 0) {
-			conprintf "\n ~^~^~^~ FATAL_ERROR|BOT4_ENGINE[lib/string.slib::ReplaceStr]: Specified stringtoBeReplaced <arg2> is either inexistent or not a string type! ~^~^~^~ \n\n";
+		if (level.DEBUG) {
+			conprintf "\n ~^~^~^~ FATAL_ERROR[lib/string.slib::Replace]: Specified stringtoBeReplaced <arg2> is either inexistent or not a string type! ~^~^~^~ \n\n";
 		}
 		end;
 	} else if ( (local.replacedBy == NIL) || !(waitthread __IsStringType local.replacedBy)) {
-		if (level.DEBUG > 0) {
-			conprintf "\n ~^~^~^~ FATAL_ERROR|BOT4_ENGINE[lib/string.slib::ReplaceStr]: Specified stringReplacedBy <arg3> is either inexistent or not a string type! ~^~^~^~ \n\n";
+		if (level.DEBUG) {
+			conprintf "\n ~^~^~^~ FATAL_ERROR[lib/string.slib::Replace]: Specified stringReplacedBy <arg3> is either inexistent or not a string type! ~^~^~^~ \n\n";
 		}
 		end;
 	}
 	
 	/* Main logic */
 	internal5:
-	local.positions = waitthread _InStr local.string local.toBeReplaced 0 local.allInstances;
+	local.positions = waitthread _In local.string local.toBeReplaced 0 local.allInstances;
 
 	internal6:
+
 	if (local.positions == NIL) {
-		if (level.DEBUG > 0) {
-			conprintf "~^~^~^~ ERROR|BOT4_ENGINE[lib/string.slib::Replace]: Helper function 'InStr' was abnormally terminated! ~^~^~^~ \n";
+		if (level.DEBUG) {
+			conprintf "~^~^~^~ ERROR[lib/string.slib::Replace]: Helper function 'In' was abnormally terminated! ~^~^~^~ \n";
 		}
 		end;
 	} else if (local.positions.size > 0) {
 		local.result = "";
+		local.strSize = local.string.size;
 		if (local.allInstances) {
-			// first position; left
-			local.leftStr = waitthread _LeftOf local.string local.positions[1][1];
-			
+			local.start = 0;
 			for (local.i = 1; local.i <= local.positions.size; local.i++) {
-				if (local.i == local.positions.size) {
-					// last pos
-					local.rightStr = waitthread _RightOf local.string local.positions[local.i][2];
-					local.terminate = 1;
-				} else {
-					// or not?
-					local.rightStr = waitthread _SubString local.string (local.positions[local.i][2] + 1) local.positions[(local.i + 1)][1];
+				for (local.j = local.start; local.j < local.positions[local.i][1]; local.j++) {
+					local.result += local.string[local.j]; 
 				}
-
-				local.result += (local.leftStr + local.replacedBy + local.rightStr);
-				
-				if (local.terminate == 1) {
-					break;
-				}
-				local.leftStr = "";
-				local.rightStr = "";
+				local.result += local.replacedBy;
+				local.start = local.positions[local.i][2] + 1;
 			}
 		} else {
-			local.result += ((waitthread _LeftOf local.string local.positions[1]) + local.replacedBy + (waitthread _RightOf local.string local.positions[2]));
+			for (local.i = 0; local.i < local.positions[1]; local.i++) {
+				local.result += local.string[local.i];
+			}
+			local.result += local.replacedBy;
+			local.start = (local.positions[2] + 1);
+		}
+		
+		for (local.i = local.start; local.i < local.strSize; local.i++) {
+			local.result += local.string[local.i];
 		}
 	} else {
 		if (level.DEBUG > 1) {
-			conprintf ("~^~^~^~ EXCEPTION|BOT4_ENGINE[lib/string.slib::Replace]: No instance of \"" + local.toBeReplaced + "\" was found. ~^~^~^~ \n");
+			conprintf ("~^~^~^~ EXCEPTION[lib/string.slib::Replace]: No instance of \"" + local.toBeReplaced + "\" was found. ~^~^~^~ \n");
 		}
 		local.result = local.string;
 	} 
 end local.result;
 
 /** ==========================================================================================
- ConcatenateStr Function
+ Concatenate Function
  ---------------------------------------------------------------------------------------------
- DESCR|: 	Combines specified array of strings into one connected string, with option spacer
-			between each string
+ DESCR|: 	Combines specified array of strings into one connected string, with optional 
+			spacer between each string
  INPUT|: 	<{ARRAY/CONST ARRAY:STRING} strings> <STRING spacer>
  OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
-				string => concatenation of all strings found in specified array
-				NIL => error: invalid input
+			*	string => concatenation of all strings found in specified array
+			*	NIL => error: invalid input
  =========================================================================================== */
-_ConcatenateStr local.strings local.spacer: goto internal7;
-ConcatenateStr local.strings local.spacer:
+_Concatenate local.strings local.spacer: goto internal7;
+Concatenate local.strings local.spacer:
 	/* Error & Exception handling */
-	// temporary; improve later with func_array.
-	if ( (local.strings == NIL) || ((typeof local.strings != "array") && (typeof local.strings != "const array")) || (local.strings.size <= 0) ) {
-		if (level.DEBUG > 0) {
-			conprintf "\n ~^~^~^~ FATAL_ERROR|BOT4_ENGINE[lib/string.slib::ConcatenateStr]: Invalid array of strings <arg1> specified!  ~^~^~^~ \n\n";
+	if ( !local.strings || local.strings.size <= 1 || !(waitthread $Array.IsUserArray local.strings)) {
+		if (level.DEBUG) {
+			conprintf "\n ~^~^~^~ FATAL_ERROR[lib/string.slib::Concatenate]: Invalid array of strings <arg1> specified!  ~^~^~^~ \n\n";
 		}
 		end;
 	}
@@ -634,34 +1470,55 @@ ConcatenateStr local.strings local.spacer:
 	/* Main logic */
 	internal7:
 	
-	local.result = local.strings[1];
-	for (local.i = 2; local.i <= local.strings.size; local.i++) {
+	if (!(typeof local.strings == "const array") && local.strings[0].size > 0) {
+		local.arraySizes[1] = 0;
+		local.arraySizes[2] = local.strings.size;
+	} else {
+		local.arraySizes[1] = 1;
+		local.arraySizes[2] = (local.strings.size + 1);
+	}
+	
+	// Need to take maximum string size (i.e. buffer) into account...
+	local.chk = 0;
+	for (local.i = local.arraySizes[1]; local.i < local.arraySizes[2]; local.i++) {
+		local.chk += local.strings[local.i].size;
+	}
+	if (local.chk >= $Str.STRINGBUFFERSIZE) {
+		if (level.DEBUG) {
+			conprintf ("\n ~^~^~^~ FATAL_ERROR[lib/string.slib::Concatenate]: The concatenated string will exceed the maximum string buffersize (" + local.chk + " chars)!!  ~^~^~^~ \n\n");
+		}
+		end;
+	}
+	
+	local.chk = NIL;
+	local.result = local.strings[local.arraySizes[1]];
+	for (local.i = (local.arraySizes[1] + 1); local.i < local.arraySizes[2]; local.i++) {
 		local.result += (local.spacer + local.strings[local.i]);
 	}
 end local.result;
 
 /** ==========================================================================================
- CompareStr Function
+ Compare Function
  ---------------------------------------------------------------------------------------------
  DESCR|: 	Determines whether the first specified string equals the other specified string, 
 			on ASCII level. Optionally, letter casing can be ignored.
  INPUT|: 	<STRING string1> <STRING string2> [INT caseInsensitive]
  OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
-				1 => same
-				0 => not the same
-				NIL => error: invalid input
+			*	1 => same
+			*	0 => not the same
+			*	NIL => error: invalid input
  =========================================================================================== */
-_CompareStr local.string1 local.string2 local.caseInsensitive: goto internal8;
-CompareStr local.string1 local.string2 local.caseInsensitive: 
+_Compare local.string1 local.string2 local.caseInsensitive: goto internal8;
+Compare local.string1 local.string2 local.caseInsensitive: 
 	/* Error & Exception handling */
 	if !(waitthread __IsString local.string1) {
-		if (level.DEBUG > 0) {
-			conprintf "\n ~^~^~^~ FATAL_ERROR|BOT4_ENGINE[lib/string.slib::CompareStr]: Specified string <arg1> is not a string type! ~^~^~^~ \n\n";
+		if (level.DEBUG) {
+			conprintf "\n ~^~^~^~ FATAL_ERROR[lib/string.slib::Compare]: Specified string <arg1> is not a string type! ~^~^~^~ \n\n";
 		}
 		end;
 	} if !(waitthread __IsString local.string2) {
-		if (level.DEBUG > 0) {
-			conprintf "\n ~^~^~^~ FATAL_ERROR|BOT4_ENGINE[lib/string.slib::CompareStr]: Specified string <arg2> is not a string type! ~^~^~^~ \n\n";
+		if (level.DEBUG) {
+			conprintf "\n ~^~^~^~ FATAL_ERROR[lib/string.slib::Compare]: Specified string <arg2> is not a string type! ~^~^~^~ \n\n";
 		}
 		end;
 	} 
@@ -701,28 +1558,28 @@ end local.result;
  DESCR|: 	Converts specified string into standard English title-format. 
  INPUT|: 	<STRING string>
  OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
-				string => processed string
-				NIL => error: invalid input
+			*	string => processed string
+			*	NIL => error: invalid input
  =========================================================================================== */
 ToTitle local.string:
 	/* Error & Exception handling */
-	if ( !(local.string) || !(waitthread __IsString local.string)) {
-		if (level.DEBUG > 0) {
-			conprintf "\n ~^~^~^~ FATAL_ERROR|BOT4_ENGINE[lib/string.slib::ToUpper]: Specified string <arg1> is either inexistent or not a string type! ~^~^~^~ \n\n";
+	if ( !local.string || !(waitthread __IsString local.string)) {
+		if (level.DEBUG) {
+			conprintf "\n ~^~^~^~ FATAL_ERROR[lib/string.slib::ToUpper]: Specified string <arg1> is either inexistent or not a string type! ~^~^~^~ \n\n";
 		}
 		end;
 	}
 	
 	/* Main logic */
 	//load necessary data
-	local.lowerCase = waitthread level.funcStr.lib::CharData 0;
-	local.exceptions = waitthread level.funcStr.lib::TitleExceptions;
+	local.lowerCase = waitthread $Str.infoLib::CharData 0;
+	local.exceptions = waitthread $Str.infoLib::TitleExceptions;
 	
 	local.spacer = " ";
 	//get rid of interfering CAPS..
 	local.string = waitthread _ToLower local.string;
 	//we're going to do this word per word
-	local.word = waitthread _SplitStr local.string local.spacer;
+	local.word = waitthread _Split local.string local.spacer;
 	
 	for (local.i = 1; local.i <= local.word.size; local.i++) {
 		//Sentences always start capitalized anyway..
@@ -741,7 +1598,7 @@ ToTitle local.string:
 		tEOL:
 	}
 	//re-combine to string:
-end (waitthread _ConcatenateStr local.word local.spacer);
+end (waitthread _Concatenate local.word local.spacer);
 
 /** ==========================================================================================
  ToUpper Function
@@ -751,23 +1608,42 @@ end (waitthread _ConcatenateStr local.word local.spacer);
 			converted (if necessary).
  INPUT|: 	<STRING string> [{INT/CONSTARRAY:INT} index(es)]
  OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
-				string => processed string
-				NIL => error: invalid input
+			*	string => processed string
+			*	NIL => error: invalid input
  =========================================================================================== */
 _ToUpper local.string local.index: goto internal9;
 ToUpper local.string local.index:
 	/* Error & Exception handling */
-	if ( !(local.string) || !(waitthread __IsStringType local.string)) {
-		if (level.DEBUG > 0) {
-			conprintf "\n ~^~^~^~ FATAL_ERROR|BOT4_ENGINE[lib/string.slib::ToUpper]: Specified string <arg1> is either inexistent or not a string type! ~^~^~^~ \n\n";
+	if ( !local.string || !(waitthread __IsStringType local.string)) {
+		if (level.DEBUG) {
+			conprintf "\n ~^~^~^~ FATAL_ERROR[lib/string.slib::ToUpper]: Specified string <arg1> is either inexistent or not a string type! ~^~^~^~ \n\n";
 		}
 		end;
+	}
+	if (local.index && !(typeof local.index == "int")) {
+		if (typeof local.index == "const array") {
+			if (waitthread $Array.IsHashArray local.index) {
+				local.index = waitthread $Array.fullPath::_HashToIdxArray local.index;
+			}
+		} else {
+			if (level.DEBUG) {
+				conprintf "\n ~^~^~^~ FATAL_ERROR[lib/string.slib::ToLower]: Specified indexes (array) <arg2> is not a constant array! ~^~^~^~ \n\n";
+			}
+			end;
+		}
+		
+		if !(waitthread $Array.ConsistsOf local.index "int" 1) {
+			if (level.DEBUG) {
+				conprintf "\n ~^~^~^~ FATAL_ERROR[lib/string.slib::ToLower]: Specified indexes (array) <arg2> does not homogeneously consist of integers! ~^~^~^~ \n\n";
+			}
+			end;
+		}
 	}
 
 	/* Main logic */
 	internal9:
 	
-	local.lowerCase = waitthread level.funcStr.lib::CharData 0;
+	local.lowerCase = waitthread $Str.infoLib::CharData 0;
 	
 	// Indexes specified?
 	if (local.index != NIL) {
@@ -817,34 +1693,48 @@ end local.string
 			converted (if necessary).
  INPUT|: 	<STRING string> [{INT/CONSTARRAY:INT} index(es)]
  OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
-				string => processed string
-				NIL => error: invalid input
+			*	string => processed string
+			*	NIL => error: invalid input
  =========================================================================================== */
 _ToLower local.string local.index: goto internal10;
 ToLower local.string local.index:
 	/* Error & Exception handling */
-	if ( !(local.string) || !(waitthread __IsStringType local.string)) {
-		if (level.DEBUG > 0) {
-			conprintf "\n ~^~^~^~ FATAL_ERROR|BOT4_ENGINE[lib/string.slib::ToLower]: Specified string <arg1> is either inexistent or not a string type! ~^~^~^~ \n\n";
+	if ( !local.string || !(waitthread __IsStringType local.string)) {
+		if (level.DEBUG) {
+			conprintf "\n ~^~^~^~ FATAL_ERROR[lib/string.slib::ToLower]: Specified string <arg1> is either inexistent or not a string type! ~^~^~^~ \n\n";
 		}
 		end;
 	}
-/*	Use func_array functions to correctly check and parse local.index; 
-	arrays starting at 0 are converted to const arrays; 
-	hash arrays and other multidimensional arrays are converted to const arrays;
-	if (local.index != NIL) {
-	}*/
+	if (local.index && !(typeof local.index == "int")) {
+		if (typeof local.index == "const array") {
+			if (waitthread $Array.IsHashArray local.index) {
+				local.index = waitthread $Array.fullPath::_HashToIdxArray local.index;
+			}
+		} else {
+			if (level.DEBUG) {
+				conprintf "\n ~^~^~^~ FATAL_ERROR[lib/string.slib::ToLower]: Specified indexes (array) <arg2> is not a constant array! ~^~^~^~ \n\n";
+			}
+			end;
+		}
+		
+		if !(waitthread $Array.ConsistsOf local.index "int" 1) {
+			if (level.DEBUG) {
+				conprintf "\n ~^~^~^~ FATAL_ERROR[lib/string.slib::ToLower]: Specified indexes (array) <arg2> does not homogeneously consist of integers! ~^~^~^~ \n\n";
+			}
+			end;
+		}
+	}
 	
 	/* Main logic */
 	internal10:
 	
-	local.upperCase = waitthread level.funcStr.lib::CharData 1;
+	local.upperCase = waitthread $Str.infoLib::CharData 1;
 	
 	// Indexes specified?
 	if (local.index != NIL) {
 		// One instance conversion;
 		if (!(typeof local.index == "const array") && !(typeof local.index == "array")) { /*(local.index.size == 1)*/
-			local.char = local.string[local.index]
+			local.char = local.string[local.index];
 			
 			// check if index is not out of range
 			if (local.char != NIL) {
@@ -878,22 +1768,22 @@ ToLower local.string local.index:
 			}
 		}	
 	}
-end local.string
+end local.string;
 
 /** ==========================================================================================
- ReverseStr Function
+ Reverse Function
  ---------------------------------------------------------------------------------------------
  DESCR|: 	Reverses the order of the characters of the specified string.
  INPUT|: 	<STRING string>
  OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
-				string => processed string
-				NIL => error: invalid input
+			*	string => processed string
+			*	NIL => error: invalid input
  =========================================================================================== */
-ReverseStr local.string:
+Reverse local.string:
 	/* Error & Exception handling */
-	if ( !(local.string) || !(waitthread __IsString local.string)) {
-		if (level.DEBUG > 0) {
-			conprintf "\n ~^~^~^~ FATAL_ERROR|BOT4_ENGINE[lib/string.slib::ReverseStr]: String <arg1> does not exist! ~^~^~^~ \n\n";
+	if ( !local.string || !(waitthread __IsString local.string)) {
+		if (level.DEBUG) {
+			conprintf "\n ~^~^~^~ FATAL_ERROR[lib/string.slib::Reverse]: String <arg1> does not exist! ~^~^~^~ \n\n";
 		}
 		end;
 	} 
@@ -906,19 +1796,19 @@ ReverseStr local.string:
 end local.result;
 
 /** ==========================================================================================
- TrimStr Function
+ Trim Function
  ---------------------------------------------------------------------------------------------
  DESCR|: 	Removes trailing spaces from the specified string.
  INPUT|: 	<STRING string>
  OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
-				string => processed string
-				NIL => error: invalid input
+			*	string => processed string
+			*	NIL => error: invalid input
  =========================================================================================== */
-TrimStr local.string:
+Trim local.string:
 	/* Error & Exception handling */
-	if ( !(local.string) || !(waitthread __IsString local.string)) {
-		if (level.DEBUG > 0) {
-			conprintf "\n ~^~^~^~ FATAL_ERROR|BOT4_ENGINE[lib/string.slib::TrimStr]: String <arg1> does not exist! ~^~^~^~ \n\n";
+	if ( !local.string || !(waitthread __IsString local.string)) {
+		if (level.DEBUG) {
+			conprintf "\n ~^~^~^~ FATAL_ERROR[lib/string.slib::Trim]: String <arg1> does not exist! ~^~^~^~ \n\n";
 		}
 		end;
 	} 
@@ -949,7 +1839,7 @@ TrimStr local.string:
 		}
 	} else {
 		if (level.DEBUG > 2) {
-			conprintf (">>>>>> BOT4_ENGINE[lib/string.slib::TrimStr]: No trailing spaces were found; original string is returned.  <<<<<< \n");
+			conprintf (">>>>>> BOT4_ENGINE[lib/string.slib::Trim]: No trailing spaces were found; original string is returned.  <<<<<< \n");
 		}
 		local.result = local.string;
 	}
@@ -960,14 +1850,14 @@ end local.result;
  DESCR|: 	Removes trailing spaces from left side of the specified string.
  INPUT|: 	<STRING string>
  OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
-				string => processed string
-				NIL => error: invalid input
+			*	string => processed string
+			*	NIL => error: invalid input
  =========================================================================================== */
 TrimLeft local.string:
 	/* Error & Exception handling */
-	if ( !(local.string) || !(waitthread __IsString local.string)) {
-		if (level.DEBUG > 0) {
-			conprintf "\n ~^~^~^~ FATAL_ERROR|BOT4_ENGINE[lib/string.slib::TrimLeft]: String <arg1> does not exist! ~^~^~^~ \n\n";
+	if ( !local.string || !(waitthread __IsString local.string)) {
+		if (level.DEBUG) {
+			conprintf "\n ~^~^~^~ FATAL_ERROR[lib/string.slib::TrimLeft]: String <arg1> does not exist! ~^~^~^~ \n\n";
 		}
 		end;
 	} 
@@ -996,14 +1886,14 @@ end local.result;
  DESCR|: 	Removes trailing spaces from right side of the specified string.
  INPUT|: 	<STRING string>
  OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
-				string => processed string
-				NIL => error: invalid input
+			*	string => processed string
+			*	NIL => error: invalid input
  =========================================================================================== */
 TrimRight local.string:
 	/* Error & Exception handling */
-	if ( !(local.string) || !(waitthread __IsString local.string)) {
-		if (level.DEBUG > 0) {
-			conprintf "\n ~^~^~^~ FATAL_ERROR|BOT4_ENGINE[lib/string.slib::TrimRight]: String <arg1> does not exist! ~^~^~^~ \n\n";
+	if ( !local.string || !(waitthread __IsString local.string)) {
+		if (level.DEBUG) {
+			conprintf "\n ~^~^~^~ FATAL_ERROR[lib/string.slib::TrimRight]: String <arg1> does not exist! ~^~^~^~ \n\n";
 		}
 		end;
 	} 
@@ -1026,107 +1916,39 @@ TrimRight local.string:
 end local.result;
 
 /** ==========================================================================================
- ValidateFormat Function
- ---------------------------------------------------------------------------------------------
- DESCR|: 	Validates specified string based on specified criteria, namely special characters.
-			Optionally a prefix and suffix may be specified to improve the validation.
- INPUT|: 	<STRING string> <STRING specialChar> [STRING prefix] [STRING suffix]
- OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
-				1 => valid format
-				0 => invalid format
-				NIL => error: uninitialized/inexistent string
- =========================================================================================== */
-_ValidateFormat local.string local.sChar local.prefix local.suffix: goto internal11;
-ValidateFormat local.string local.sChar local.prefix local.suffix:
-	/* Error & Exception handling */
-	if ( !(local.string) || !(waitthread __IsString local.string)) {
-		if (level.DEBUG > 0) {
-			conprintf "\n ~^~^~^~ FATAL_ERROR|BOT4_ENGINE[lib/string.slib::ValidateFormat]: Specified string <arg1> is either inexistent or not a string type! ~^~^~^~ \n\n";
-		}
-		end;
-	} if ( !(local.sChar) || !(waitthread __IsStringType local.sChar)) {
-		if (level.DEBUG > 0) {
-			conprintf "\n ~^~^~^~ FATAL_ERROR|BOT4_ENGINE[lib/string.slib::ValidateFormat]: No special characters to be evaluated are specified ~^~^~^~ \n\n";
-		}
-		end;
-	}
-	
-	/* Main logic */
-	internal11:
-	
-	local.startPos = 0;
-	local.endPos = local.string.size - 1;
-	
-	local.result = 1;
-	
-	// Check if start of string complies
-	if (local.prefix) {
-		local.startPos = (local.prefix.size - 1);
-		for (local.i = 0; local.i < local.prefix.size; local.i++) {
-			if (local.prefix[local.i] != local.string[local.i]) {
-				local.result = 0;
-				break;
-			}
-		}
-	}
-	// Check if end of string complies
-	if (local.result && local.suffix) {
-		local.endPos = (local.string.size - local.suffix.size);
-		local.j = 0;
-		for (local.i = local.endPos; local.i < local.string.size; local.i++) {
-			if (local.string[local.i] != local.suffix[local.j]) {
-				local.result = 0;
-				break;
-			}
-			local.j++;
-		}
-	}
-	// Check order & position of the special character(s)
-	if (local.result != 0) {
-		local.sPos = waitthread _InStr local.string local.sChar 0 1;
-		if (local.sPos[1][1] <= local.startPos) {
-			local.result = 0;
-		}
-		if (local.sPos[local.sPos.size][2] >= local.endPos) {
-			local.result = 0;
-		}
-	}
-end local.result
-
-/** ==========================================================================================
  Left Function
  ---------------------------------------------------------------------------------------------
  DESCR|: 	Copies, and returns a string of, the specified range of characters from the left
 			side of the specified string. 
  INPUT|: 	<STRING string> <INT numOfChars>
  OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
-				string => processed string
-				NIL => error: invalid input
+			*	string => processed string
+			*	NIL => error: invalid input
  =========================================================================================== */
 _Left local.string local.char: goto internal12;
 Left local.string local.char: 
 	/* Error & Exception handling */
-	if ( !(local.string) || !(waitthread __IsString local.string)) {
-		if (level.DEBUG > 0) {
-			conprintf "\n ~^~^~^~ FATAL_ERROR|BOT4_ENGINE[lib/string.slib::Left]: String <arg1> does not exist! ~^~^~^~ \n\n";
+	if ( !local.string || !(waitthread __IsString local.string)) {
+		if (level.DEBUG) {
+			conprintf "\n ~^~^~^~ FATAL_ERROR[lib/string.slib::Left]: String <arg1> does not exist! ~^~^~^~ \n\n";
 		}
 		end;
 	} 
 	
 	if ( !(local.char) || !(typeof local.char == "int") ) {	
-		if (level.DEBUG > 0) {
-			conprintf "\n ~^~^~^~ FATAL_ERROR|BOT4_ENGINE[lib/string.slib::Left]: Invalid number of characters <arg2>! ~^~^~^~ \n\n";
+		if (level.DEBUG) {
+			conprintf "\n ~^~^~^~ FATAL_ERROR[lib/string.slib::Left]: Invalid number of characters <arg2>! ~^~^~^~ \n\n";
 		}
 		end;
 	} else if (local.char <= 0) {
 		if (level.DEBUG > 1) {
-			conprintf "~^~^~^~ ERROR|BOT4_ENGINE[lib/string.slib::Left]: Specified number of characters <arg2> is out of range! Adjusting to closest admissible range.. ~^~^~^~ \n";
+			conprintf "~^~^~^~ ERROR[lib/string.slib::Left]: Specified number of characters <arg2> is out of range! Adjusting to closest admissible range.. ~^~^~^~ \n";
 		}
 		local.result = "";
 		end local.result;
 	} else if (local.char >= local.string.size) {
 		if (level.DEBUG > 1) {
-			conprintf "~^~^~^~ ERROR|BOT4_ENGINE[lib/string.slib::Left]: Specified number of characters <arg2> is out of range! Adjusting to closest admissible range.. ~^~^~^~ \n";
+			conprintf "~^~^~^~ ERROR[lib/string.slib::Left]: Specified number of characters <arg2> is out of range! Adjusting to closest admissible range.. ~^~^~^~ \n";
 		}
 		local.result = local.string;
 		end local.result;
@@ -1148,32 +1970,32 @@ end local.result;
 			side of the specified string.
  INPUT|: 	<STRING string> <INT numOfChars>
  OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
-				string => processed string
-				NIL => error: invalid input
+			*	string => processed string
+			*	NIL => error: invalid input
  =========================================================================================== */
 _Right local.string local.char: goto internal13;
 Right local.string local.char:
 	/* Error & Exception handling */
-	if ( !(local.string) || !(waitthread __IsString local.string)) {
-		if (level.DEBUG > 0) {
-			conprintf "\n ~^~^~^~ FATAL_ERROR|BOT4_ENGINE[lib/string.slib::Right]: String <arg1> does not exist! ~^~^~^~ \n\n";
+	if ( !local.string || !(waitthread __IsString local.string)) {
+		if (level.DEBUG) {
+			conprintf "\n ~^~^~^~ FATAL_ERROR[lib/string.slib::Right]: String <arg1> does not exist! ~^~^~^~ \n\n";
 		}
 		end;
 	} 
 	if ( !(local.char) || !(typeof local.char == "int") ) {	
-		if (level.DEBUG > 0) {
-			conprintf "\n ~^~^~^~ FATAL_ERROR|BOT4_ENGINE[lib/string.slib::Right]: Invalid number of characters <arg2>! ~^~^~^~ \n\n";
+		if (level.DEBUG) {
+			conprintf "\n ~^~^~^~ FATAL_ERROR[lib/string.slib::Right]: Invalid number of characters <arg2>! ~^~^~^~ \n\n";
 		}
 		end;
 	} else if (local.char <= 0) {
 		if (level.DEBUG > 1) {
-			conprintf "~^~^~^~ ERROR|BOT4_ENGINE[lib/string.slib::Right]: Specified number of characters <arg2> is out of range! Adjusting to closest admissible range.. ~^~^~^~ \n";
+			conprintf "~^~^~^~ ERROR[lib/string.slib::Right]: Specified number of characters <arg2> is out of range! Adjusting to closest admissible range.. ~^~^~^~ \n";
 		}
 		local.result = "";
 		end local.result;
 	} else if (local.char >= local.string.size) {
 		if (level.DEBUG > 1) {
-			conprintf "~^~^~^~ ERROR|BOT4_ENGINE[lib/string.slib::Right]: Specified number of characters <arg2> is out of range! Adjusting to closest admissible range.. ~^~^~^~ \n";
+			conprintf "~^~^~^~ ERROR[lib/string.slib::Right]: Specified number of characters <arg2> is out of range! Adjusting to closest admissible range.. ~^~^~^~ \n";
 		}
 		local.result = local.string;
 		end local.result;
@@ -1196,26 +2018,26 @@ end local.result;
 			and returns the result.
  INPUT|: 	<STRING string> <INT numOfChars>
  OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
-				string => processed string
-				NIL => error: invalid input
+			*	string => processed string
+			*	NIL => error: invalid input
  =========================================================================================== */
 _CutLeft local.string local.char: goto internal14; 
 CutLeft local.string local.char:
 	/* Error & Exception handling */
-	if ( !(local.string) || !(waitthread __IsString local.string)) {
-		if (level.DEBUG > 0) {
-			conprintf "\n ~^~^~^~ FATAL_ERROR|BOT4_ENGINE[lib/string.slib::CutLeft]: String <arg1> does not exist! ~^~^~^~ \n\n";
+	if ( !local.string || !(waitthread __IsString local.string)) {
+		if (level.DEBUG) {
+			conprintf "\n ~^~^~^~ FATAL_ERROR[lib/string.slib::CutLeft]: String <arg1> does not exist! ~^~^~^~ \n\n";
 		}
 		end;
 	} 
 	if ( !(local.char) || !(typeof local.char == "int") || (local.char < 0) ) {	
-		if (level.DEBUG > 0) {
-			conprintf "\n ~^~^~^~ FATAL_ERROR|BOT4_ENGINE[lib/string.slib::CutLeft]: Invalid number of characters <arg2>! ~^~^~^~ \n\n";
+		if (level.DEBUG) {
+			conprintf "\n ~^~^~^~ FATAL_ERROR[lib/string.slib::CutLeft]: Invalid number of characters <arg2>! ~^~^~^~ \n\n";
 		}
 		end;
 	} else if (local.char >= local.string.size) {
 		if (level.DEBUG > 1) {
-			conprintf "~^~^~^~ EXCEPTION|BOT4_ENGINE[lib/string.slib::CutLeft]: Specified number of characters <arg2> is beyond removable range. ~^~^~^~ \n";
+			conprintf "~^~^~^~ EXCEPTION[lib/string.slib::CutLeft]: Specified number of characters <arg2> is beyond removable range. ~^~^~^~ \n";
 		}
 		local.result = "";
 		end local.result;
@@ -1232,26 +2054,26 @@ end (waitthread _RightOf local.string (waitthread __ConvertCharToPos local.char)
 			and returns the result.
  INPUT|: 	<STRING string> <INT numOfChars>
  OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
-				string => processed string
-				NIL => error: invalid input
+			*	string => processed string
+			*	NIL => error: invalid input
  =========================================================================================== */
 _CutRight local.string local.char: goto internal15;
 CutRight local.string local.char:
 	/* Error & Exception handling */
-	if ( !(local.string) || !(waitthread __IsString local.string)) {
-		if (level.DEBUG > 0) {
-			conprintf "\n ~^~^~^~ FATAL_ERROR|BOT4_ENGINE[lib/string.slib::CutRight]: String <arg1> does not exist! ~^~^~^~ \n\n";
+	if ( !local.string || !(waitthread __IsString local.string)) {
+		if (level.DEBUG) {
+			conprintf "\n ~^~^~^~ FATAL_ERROR[lib/string.slib::CutRight]: String <arg1> does not exist! ~^~^~^~ \n\n";
 		}
 		end;
 	} 
 	if ( !(local.char) || !(typeof local.char == "int") || (local.char < 0) ) {	
-		if (level.DEBUG > 0) {
-			conprintf "\n ~^~^~^~ FATAL_ERROR|BOT4_ENGINE[lib/string.slib::CutRight]: Invalid number of characters <arg2>! ~^~^~^~ \n\n";
+		if (level.DEBUG) {
+			conprintf "\n ~^~^~^~ FATAL_ERROR[lib/string.slib::CutRight]: Invalid number of characters <arg2>! ~^~^~^~ \n\n";
 		}
 		end;
 	} else if (local.char >= local.string.size) {
 		if (level.DEBUG > 1) {
-			conprintf "~^~^~^~ EXCEPTION|BOT4_ENGINE[lib/string.slib::CutRight]: Specified number of characters <arg2> is beyond removable range. ~^~^~^~ \n";
+			conprintf "~^~^~^~ EXCEPTION[lib/string.slib::CutRight]: Specified number of characters <arg2> is beyond removable range. ~^~^~^~ \n";
 		}
 		local.result = "";
 		end local.result;
@@ -1267,32 +2089,32 @@ end (waitthread _LeftOf local.string (waitthread __ConvertCharToPos local.char l
  DESCR|: 	Copies and returns the text left of the specified position in the specified string.
  INPUT|: 	<STRING string> <INT strPosition>
  OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
-				string => processed string
-				NIL => error: invalid input
+			*	string => processed string
+			*	NIL => error: invalid input
  =========================================================================================== */ 
 _LeftOf local.string local.pos: goto internal16;
 LeftOf local.string local.pos:
 	/* Error & Exception handling */
-	if ( !(local.string) || !(waitthread __IsString local.string)) {
-		if (level.DEBUG > 0) {
-			conprintf "\n ~^~^~^~ FATAL_ERROR|BOT4_ENGINE[lib/string.slib::LeftOf]: String <arg1> does not exist! ~^~^~^~ \n\n";
+	if ( !local.string || !(waitthread __IsString local.string)) {
+		if (level.DEBUG) {
+			conprintf "\n ~^~^~^~ FATAL_ERROR[lib/string.slib::LeftOf]: String <arg1> does not exist! ~^~^~^~ \n\n";
 		}
 		end;
 	}  
 	if ( (local.pos == NIL) || !(typeof local.pos == "int") ) {
-		if (level.DEBUG > 0) {
-			conprintf "\n ~^~^~^~ FATAL_ERROR|BOT4_ENGINE[lib/string.slib::LeftOf]: String position <arg2> is invalid or out of range! ~^~^~^~ \n\n";
+		if (level.DEBUG) {
+			conprintf "\n ~^~^~^~ FATAL_ERROR[lib/string.slib::LeftOf]: String position <arg2> is invalid or out of range! ~^~^~^~ \n\n";
 		}
 		end;
 	} else if (local.pos < 0) {
 		if (level.DEBUG > 1) {
-			conprintf "~^~^~^~ ERROR|BOT4_ENGINE[lib/string.slib::LeftOf]: Specified string position <arg2> is out of range! Adjusting to closest admissible range.. ~^~^~^~ \n";
+			conprintf "~^~^~^~ ERROR[lib/string.slib::LeftOf]: Specified string position <arg2> is out of range! Adjusting to closest admissible range.. ~^~^~^~ \n";
 		}
 		local.result = "";
 		end local.result;
 	} else if (local.pos >= local.string.size) {
 		if (level.DEBUG > 1) {
-			conprintf "~^~^~^~ ERROR|BOT4_ENGINE[lib/string.slib::LeftOf]: Specified string position <arg2> is out of range! Adjusting to closest admissible range.. ~^~^~^~ \n";
+			conprintf "~^~^~^~ ERROR[lib/string.slib::LeftOf]: Specified string position <arg2> is out of range! Adjusting to closest admissible range.. ~^~^~^~ \n";
 		}
 		local.result = local.string;
 		end local.result;
@@ -1313,32 +2135,32 @@ end local.result;
  DESCR|: 	Copies and returns the text left of the specified position in the specified string.
  INPUT|: 	<STRING string> <INT strPosition> 
  OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
-				string => processed string
-				NIL => error: invalid input
+			*	string => processed string
+			*	NIL => error: invalid input
  =========================================================================================== */ 
 _RightOf local.string local.pos: goto internal17;
 RightOf local.string local.pos:
 	/* Error & Exception handling */
-	if ( !(local.string) || !(waitthread __IsString local.string)) {
-		if (level.DEBUG > 0) {
-			conprintf "\n ~^~^~^~ FATAL_ERROR|BOT4_ENGINE[lib/string.slib::RightOf]: String <arg1> does not exist! ~^~^~^~ \n\n";
+	if ( !local.string || !(waitthread __IsString local.string)) {
+		if (level.DEBUG) {
+			conprintf "\n ~^~^~^~ FATAL_ERROR[lib/string.slib::RightOf]: String <arg1> does not exist! ~^~^~^~ \n\n";
 		}
 		end;
 	}  
 	if ( (local.pos == NIL) || !(typeof local.pos == "int") ) {
-		if (level.DEBUG > 0) {
-			conprintf "\n ~^~^~^~ FATAL_ERROR|BOT4_ENGINE[lib/string.slib::RightOf]: String position <arg2> is invalid or out of range! ~^~^~^~ \n\n";
+		if (level.DEBUG) {
+			conprintf "\n ~^~^~^~ FATAL_ERROR[lib/string.slib::RightOf]: String position <arg2> is invalid or out of range! ~^~^~^~ \n\n";
 		}
 		end;
 	} else if (local.pos >= local.string.size) {
 		if (level.DEBUG > 1) {
-			conprintf "~^~^~^~ ERROR|BOT4_ENGINE[lib/string.slib::RightOf]: Specified string position <arg2> is out of range! Adjusting to closest admissible range.. ~^~^~^~ \n";
+			conprintf "~^~^~^~ ERROR[lib/string.slib::RightOf]: Specified string position <arg2> is out of range! Adjusting to closest admissible range.. ~^~^~^~ \n";
 		}
 		local.result = "";
 		end local.result;
 	} else if (local.pos < 0) {
 		if (level.DEBUG > 1) {
-			conprintf "~^~^~^~ ERROR|BOT4_ENGINE[lib/string.slib::RightOf]: Specified string position <arg2> is out of range! Adjusting to closest admissible range.. ~^~^~^~ \n";
+			conprintf "~^~^~^~ ERROR[lib/string.slib::RightOf]: Specified string position <arg2> is out of range! Adjusting to closest admissible range.. ~^~^~^~ \n";
 		}
 		local.result = local.string;
 		end local.result;
@@ -1361,32 +2183,32 @@ end local.result;
 			string and returns the result.
  INPUT|: 	<STRING string> <INT strPosition>
  OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
-				string => processed string
-				NIL => error: invalid input
+			*	string => processed string
+			*	NIL => error: invalid input
  =========================================================================================== */
 _CutLeftOf local.string local.pos: goto internal18;
 CutLeftOf local.string local.pos:
 	/* Error & Exception handling */
-	if ( !(local.string) || !(waitthread __IsString local.string)) {
-		if (level.DEBUG > 0) {
-			conprintf "\n ~^~^~^~ FATAL_ERROR|BOT4_ENGINE[lib/string.slib::CutLeftOf]: String <arg1> does not exist! ~^~^~^~ \n\n";
+	if ( !local.string || !(waitthread __IsString local.string)) {
+		if (level.DEBUG) {
+			conprintf "\n ~^~^~^~ FATAL_ERROR[lib/string.slib::CutLeftOf]: String <arg1> does not exist! ~^~^~^~ \n\n";
 		}
 		end;
 	}  
 	if ( (local.pos == NIL) || !(typeof local.pos == "int") ) {
-		if (level.DEBUG > 0) {
-			conprintf "\n ~^~^~^~ FATAL_ERROR|BOT4_ENGINE[lib/string.slib::CutLeftOf]: String position <arg2> is invalid or out of range! ~^~^~^~ \n\n";
+		if (level.DEBUG) {
+			conprintf "\n ~^~^~^~ FATAL_ERROR[lib/string.slib::CutLeftOf]: String position <arg2> is invalid or out of range! ~^~^~^~ \n\n";
 		}
 		end;
 	} else if (local.pos >= local.string.size) {
 		if (level.DEBUG > 1) {
-			conprintf "~^~^~^~ ERROR|BOT4_ENGINE[lib/string.slib::CutLeftOf]: Specified string position <arg2> is out of range! Adjusting to closest admissible range.. ~^~^~^~ \n";
+			conprintf "~^~^~^~ ERROR[lib/string.slib::CutLeftOf]: Specified string position <arg2> is out of range! Adjusting to closest admissible range.. ~^~^~^~ \n";
 		}
 		local.result = "";
 		end local.result;
 	} else if (local.pos < 0) {
 		if (level.DEBUG > 1) {
-			conprintf "~^~^~^~ ERROR|BOT4_ENGINE[lib/string.slib::CutLeftOf]: Specified string position <arg2> is out of range! Adjusting to closest admissible range.. ~^~^~^~ \n";
+			conprintf "~^~^~^~ ERROR[lib/string.slib::CutLeftOf]: Specified string position <arg2> is out of range! Adjusting to closest admissible range.. ~^~^~^~ \n";
 		}
 		local.result = local.string;
 		end local.result;
@@ -1403,32 +2225,32 @@ end (waitthread _Right local.string (waitthread __ConvertPosToChar local.pos loc
 			string and returns the result.
  INPUT|: 	<STRING string> <INT strPosition>
  OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
-				string => processed string
-				NIL => error: invalid input
+			*	string => processed string
+			*	NIL => error: invalid input
  =========================================================================================== */
 _CutRightOf local.string local.pos: goto internal19;
 CutRightOf local.string local.pos:
 	/* Error & Exception handling */
-	if ( !(local.string) || !(waitthread __IsString local.string)) {
-		if (level.DEBUG > 0) {
-			conprintf "\n ~^~^~^~ FATAL_ERROR|BOT4_ENGINE[lib/string.slib::CutRightOf]: String <arg1> does not exist! ~^~^~^~ \n\n";
+	if ( !local.string || !(waitthread __IsString local.string)) {
+		if (level.DEBUG) {
+			conprintf "\n ~^~^~^~ FATAL_ERROR[lib/string.slib::CutRightOf]: String <arg1> does not exist! ~^~^~^~ \n\n";
 		}
 		end;
 	}  
 	if ( (local.pos == NIL) || !(typeof local.pos == "int") ) {
-		if (level.DEBUG > 0) {
-			conprintf "\n ~^~^~^~ FATAL_ERROR|BOT4_ENGINE[lib/string.slib::CutRightOf]: String position <arg2> is invalid or out of range! ~^~^~^~ \n\n";
+		if (level.DEBUG) {
+			conprintf "\n ~^~^~^~ FATAL_ERROR[lib/string.slib::CutRightOf]: String position <arg2> is invalid or out of range! ~^~^~^~ \n\n";
 		}
 		end;
 	} else if (local.pos < 0) {
 		if (level.DEBUG > 1) {
-			conprintf "~^~^~^~ ERROR|BOT4_ENGINE[lib/string.slib::CutRightOf]: Specified string position <arg2> is out of range! Adjusting to closest admissible range.. ~^~^~^~ \n";
+			conprintf "~^~^~^~ ERROR[lib/string.slib::CutRightOf]: Specified string position <arg2> is out of range! Adjusting to closest admissible range.. ~^~^~^~ \n";
 		}
 		local.result = "";
 		end local.result;
 	} else if ( (local.pos >= local.string.size) ) {
 		if (level.DEBUG > 1) {
-			conprintf "~^~^~^~ ERROR|BOT4_ENGINE[lib/string.slib::CutRightOf]: Specified string position <arg2> is out of range! Adjusting to closest admissible range.. ~^~^~^~ \n";
+			conprintf "~^~^~^~ ERROR[lib/string.slib::CutRightOf]: Specified string position <arg2> is out of range! Adjusting to closest admissible range.. ~^~^~^~ \n";
 		}
 		local.result = local.string;
 		end local.result;
@@ -1439,46 +2261,46 @@ CutRightOf local.string local.pos:
 end (waitthread _Left local.string (waitthread __ConvertPosToChar local.pos));
 
 /** ==========================================================================================
- CutRange Function
+ CutPos Function
  ---------------------------------------------------------------------------------------------
  DESCR|: 	Removes part of the string that starts at the specified 'from'-stringPosition
 			to optionally the 'to'-stringPosition, while not including 'to' itself.
  INPUT|: 	<STRING string> <INT strPositionFrom> [INT strPositionTo] [STRING formatSpacer]
  OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
-				string => processed string
-				NIL => error: invalid input
+			*	string => processed string
+			*	NIL => error: invalid input
  =========================================================================================== */
-_CutRange local.string local.startPos local.endPos local.spacer: goto internal20;
-CutRange local.string local.startPos local.endPos local.spacer:
+_CutPos local.string local.startPos local.endPos local.spacer: goto internal20;
+CutPos local.string local.startPos local.endPos local.spacer:
 	/* Error & Exception handling */
-	if ( !(local.string) || !(waitthread __IsString local.string)) {
-		if (level.DEBUG > 0) {
-			conprintf "\n ~^~^~^~ FATAL_ERROR|BOT4_ENGINE[lib/string.slib::CutRange]: String <arg1> does not exist! ~^~^~^~ \n\n";
+	if ( !local.string || !(waitthread __IsString local.string)) {
+		if (level.DEBUG) {
+			conprintf "\n ~^~^~^~ FATAL_ERROR[lib/string.slib::CutPos]: String <arg1> does not exist! ~^~^~^~ \n\n";
 		}
 		end;
 	}  
 	
 	if ( (local.startPos == NIL) || !(typeof local.startPos == "int") ) {
-		if (level.DEBUG > 0) {
-			conprintf "\n ~^~^~^~ FATAL_ERROR|BOT4_ENGINE[lib/string.slib::CutRange]: Invalid strPositionFrom <arg2>. ~^~^~^~ \n\n";
+		if (level.DEBUG) {
+			conprintf "\n ~^~^~^~ FATAL_ERROR[lib/string.slib::CutPos]: Invalid strPositionFrom <arg2>. ~^~^~^~ \n\n";
 		}
 		end;
 	} else if (local.startPos >= local.string.size) {
 		if (level.DEBUG > 1) {
-			conprintf "~^~^~^~ ERROR|BOT4_ENGINE[lib/string.slib::CutRange]: Specified strPositionFrom <arg2> is out of range! Adjusting to closest admissible range.. ~^~^~^~ \n";
+			conprintf "~^~^~^~ ERROR[lib/string.slib::CutPos]: Specified strPositionFrom <arg2> is out of range! Adjusting to closest admissible range.. ~^~^~^~ \n";
 		}
 		local.result = "";
 		end local.result;
 	} else if (local.startPos < 0) {
 		if (level.DEBUG > 1) {
-			conprintf "~^~^~^~ ERROR|BOT4_ENGINE[lib/string.slib::CutRange]: Specified strPositionFrom <arg2> is out of range! Adjusting to closest admissible range.. ~^~^~^~ \n";
+			conprintf "~^~^~^~ ERROR[lib/string.slib::CutPos]: Specified strPositionFrom <arg2> is out of range! Adjusting to closest admissible range.. ~^~^~^~ \n";
 		}
 		local.pos = 0;
 	}
 	
 	if ( (local.endPos == NIL) || !(typeof local.endPos == "int") || (local.endPos > local.string.size) || (local.endPos < local.startPos) ) {
 		if (level.DEBUG > 1) {
-			conprintf "~^~^~^~ EXCEPTION|BOT4_ENGINE[lib/string.slib::CutRange]: Specified strPositionTo <arg3> is invalid! Parameter has defaulted. ~^~^~^~ \n";
+			conprintf "~^~^~^~ EXCEPTION[lib/string.slib::CutPos]: Specified strPositionTo <arg3> is invalid! Parameter has defaulted. ~^~^~^~ \n";
 		}
 		local.endPos = (local.string.size - 1);
 	}
@@ -1500,40 +2322,40 @@ end (local.left + local.spacer + local.right)
 			to optionally the 'to'-stringPosition, while not including 'to' itself.
  INPUT|: 	<STRING string> <INT strPositionFrom> [INT strPositionTo]
  OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
-				string => processed string
-				NIL => error: invalid input
+			*	string => processed string
+			*	NIL => error: invalid input
  =========================================================================================== */
 _SubString local.string local.startPos local.endPos: goto internal21;
 SubString local.string local.startPos local.endPos:
 	/* Error & Exception handling */
-	if ( !(local.string) || !(waitthread __IsString local.string)) {
-		if (level.DEBUG > 0) {
-			conprintf "\n ~^~^~^~ FATAL_ERROR|BOT4_ENGINE[lib/string.slib::SubString]: String <arg1> does not exist! ~^~^~^~ \n\n";
+	if ( !local.string || !(waitthread __IsString local.string)) {
+		if (level.DEBUG) {
+			conprintf "\n ~^~^~^~ FATAL_ERROR[lib/string.slib::SubString]: String <arg1> does not exist! ~^~^~^~ \n\n";
 		}
 		end;
 	}  
 	
 	if ( (local.startPos == NIL) || !(typeof local.startPos == "int") ) {
-		if (level.DEBUG > 0) {
-			conprintf "\n ~^~^~^~ FATAL_ERROR|BOT4_ENGINE[lib/string.slib::SubString]: Invalid strPositionFrom <arg2>. ~^~^~^~ \n\n";
+		if (level.DEBUG) {
+			conprintf "\n ~^~^~^~ FATAL_ERROR[lib/string.slib::SubString]: Invalid strPositionFrom <arg2>. ~^~^~^~ \n\n";
 		}
 		end;
 	} else if (local.startPos >= local.string.size) {
 		if (level.DEBUG > 1) {
-			conprintf "~^~^~^~ ERROR|BOT4_ENGINE[lib/string.slib::SubString]: Specified strPositionFrom <arg2> is out of range! Adjusting to closest admissible range.. ~^~^~^~ \n";
+			conprintf "~^~^~^~ ERROR[lib/string.slib::SubString]: Specified strPositionFrom <arg2> is out of range! Adjusting to closest admissible range.. ~^~^~^~ \n";
 		}
 		local.result = "";
 		end local.result;
 	} else if (local.startPos < 0) {
 		if (level.DEBUG > 1) {
-			conprintf "~^~^~^~ EXCEPTION|BOT4_ENGINE[lib/string.slib::SubString]: Specified strPositionFrom <arg2> is invalid! Adjusting to closest admissible range.. ~^~^~^~ \n";
+			conprintf "~^~^~^~ EXCEPTION[lib/string.slib::SubString]: Specified strPositionFrom <arg2> is invalid! Adjusting to closest admissible range.. ~^~^~^~ \n";
 		}
 		local.pos = 0;
 	}
 	
 	if ( (local.endPos == NIL) || !(typeof local.endPos == "int") || (local.endPos > local.string.size) || (local.endPos <= local.startPos) ) {
 		if (level.DEBUG > 1) {
-			conprintf "~^~^~^~ EXCEPTION|BOT4_ENGINE[lib/string.slib::SubString]: Specified strPositionTo <arg3> is invalid! Parameter has defaulted. ~^~^~^~ \n";
+			conprintf "~^~^~^~ EXCEPTION[lib/string.slib::SubString]: Specified strPositionTo <arg3> is invalid! Parameter has defaulted. ~^~^~^~ \n";
 		}
 		local.endPos = local.string.size;
 	} 
@@ -1548,50 +2370,50 @@ SubString local.string local.startPos local.endPos:
 end local.result;
 
 /** ==========================================================================================
- CutStr Function
+ Cut Function
  ---------------------------------------------------------------------------------------------
  DESCR|: 	Removes part of the string that starts at the specified stringPosition and
 			ends a specified length (in characters) further; by default this length is one.
  INPUT|: 	<STRING string> <INT strPositionFrom> [INT characterLength] [STRING formatSpacer]
  OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
-				string => processed string
-				NIL => error: invalid input
+			*	string => processed string
+			*	NIL => error: invalid input
  =========================================================================================== */
-_CutStr local.string local.pos local.char local.spacer: goto internal22;
-CutStr local.string local.pos local.char local.spacer:
+_Cut local.string local.pos local.char local.spacer: goto internal22;
+Cut local.string local.pos local.char local.spacer:
 	/* Error & Exception handling */
-	if ( !(local.string) || !(waitthread __IsString local.string)) {
-		if (level.DEBUG > 0) {
-			conprintf "\n ~^~^~^~ FATAL_ERROR|BOT4_ENGINE[lib/string.slib::CutStr]: String <arg1> does not exist! ~^~^~^~ \n\n";
+	if ( !local.string || !(waitthread __IsString local.string)) {
+		if (level.DEBUG) {
+			conprintf "\n ~^~^~^~ FATAL_ERROR[lib/string.slib::Cut]: String <arg1> does not exist! ~^~^~^~ \n\n";
 		}
 		end;
 	}  
 	if ( (local.pos == NIL) || !(typeof local.pos == "int") ) {
-		if (level.DEBUG > 0) {
-			conprintf "\n ~^~^~^~ FATAL_ERROR|BOT4_ENGINE[lib/string.slib::CutStr]: Invalid strPositionFrom <arg2>. ~^~^~^~ \n\n";
+		if (level.DEBUG) {
+			conprintf "\n ~^~^~^~ FATAL_ERROR[lib/string.slib::Cut]: Invalid strPositionFrom <arg2>. ~^~^~^~ \n\n";
 		}
 		end;
 	} else if (local.pos >= local.string.size) {
 		if (level.DEBUG > 1) {
-			conprintf "~^~^~^~ ERROR|BOT4_ENGINE[lib/string.slib::CutStr]: Specified strPositionFrom <arg2> is out of range! Adjusting to closest admissible range.. ~^~^~^~ \n";
+			conprintf "~^~^~^~ ERROR[lib/string.slib::Cut]: Specified strPositionFrom <arg2> is out of range! Adjusting to closest admissible range.. ~^~^~^~ \n";
 		}
 		local.result = "";
 		end local.result;
 	} else if (local.pos < 0) {
 		if (level.DEBUG > 1) {
-			conprintf "~^~^~^~ EXCEPTION|BOT4_ENGINE[lib/string.slib::CutStr]: Specified strPositionFrom <arg2> is invalid! Adjusting to closest admissible range.. ~^~^~^~ \n";
+			conprintf "~^~^~^~ EXCEPTION[lib/string.slib::Cut]: Specified strPositionFrom <arg2> is invalid! Adjusting to closest admissible range.. ~^~^~^~ \n";
 		}
 		local.pos = 0;
 	}
 	
 	if ( !(local.char) || !(typeof local.char == "int") || (local.char <= 0) ) {
 		if (level.DEBUG > 1) {
-			conprintf "~^~^~^~ EXCEPTION|BOT4_ENGINE[lib/string.slib::CutStr]: Specified length (in characters) <arg3> is invalid! Parameter has defaulted. ~^~^~^~ \n";
+			conprintf "~^~^~^~ EXCEPTION[lib/string.slib::Cut]: Specified length (in characters) <arg3> is invalid! Parameter has defaulted. ~^~^~^~ \n";
 		}
 		local.char = 1;
 	} else if ( (local.pos + local.char) >= local.string.size) {
 		if (level.DEBUG > 1) {
-			conprintf "~^~^~^~ EXCEPTION|BOT4_ENGINE[lib/string.slib::CutStr]: Specified length (in characters) <arg2> is invalid! Adjusting to closest admissible range.. ~^~^~^~ \n";
+			conprintf "~^~^~^~ EXCEPTION[lib/string.slib::Cut]: Specified length (in characters) <arg2> is invalid! Adjusting to closest admissible range.. ~^~^~^~ \n";
 		}
 		local.char = (waitthread __ConvertPosToChar local.pos local.string.size);
 	}
@@ -1614,45 +2436,45 @@ end (local.left + local.spacer + local.right);
 			ends a specified length (in characters) further; by default this length is one.
  INPUT|: 	<STRING string> <INT strPositionFrom> [INT characterLength]
  OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
-				string => processed string
-				NIL => error: invalid input
+			*	string => processed string
+			*	NIL => error: invalid input
  =========================================================================================== */
 _SubStr local.string local.pos local.char: goto internal23;
 SubStr local.string local.pos local.char:
 	/* Error & Exception handling */
-	if ( !(local.string) || !(waitthread __IsString local.string)) {
-		if (level.DEBUG > 0) {
-			conprintf "\n ~^~^~^~ FATAL_ERROR|BOT4_ENGINE[lib/string.slib::SubStr]: string <arg1> does not exist! ~^~^~^~ \n\n";
+	if ( !local.string || !(waitthread __IsString local.string)) {
+		if (level.DEBUG) {
+			conprintf "\n ~^~^~^~ FATAL_ERROR[lib/string.slib::SubStr]: string <arg1> does not exist! ~^~^~^~ \n\n";
 		}
 		end;
 	}  
 	
 	if ( (local.pos == NIL) || !(typeof local.pos == "int") ) {
-		if (level.DEBUG > 0) {
-			conprintf "\n ~^~^~^~ FATAL_ERROR|BOT4_ENGINE[lib/string.slib::SubStr]: invalid strPositionFrom <arg1>. ~^~^~^~ \n\n";
+		if (level.DEBUG) {
+			conprintf "\n ~^~^~^~ FATAL_ERROR[lib/string.slib::SubStr]: invalid strPositionFrom <arg1>. ~^~^~^~ \n\n";
 		}
 		end;
 	} else if (local.pos >= local.string.size) {
 		if (level.DEBUG > 1) {
-			conprintf "~^~^~^~ ERROR|BOT4_ENGINE[lib/string.slib::SubStr]: Specified strPositionFrom <arg2> is out of range! Adjusting to closest admissible range.. ~^~^~^~ \n";
+			conprintf "~^~^~^~ ERROR[lib/string.slib::SubStr]: Specified strPositionFrom <arg2> is out of range! Adjusting to closest admissible range.. ~^~^~^~ \n";
 		}
 		local.result = "";
 		end local.result;
 	} else if (local.pos < 0) {
 		if (level.DEBUG > 1) {
-			conprintf "~^~^~^~ EXCEPTION|BOT4_ENGINE[lib/string.slib::SubStr]: Specified strPositionFrom <arg2> is invalid! Adjusting to closest admissible range.. ~^~^~^~ \n";
+			conprintf "~^~^~^~ EXCEPTION[lib/string.slib::SubStr]: Specified strPositionFrom <arg2> is invalid! Adjusting to closest admissible range.. ~^~^~^~ \n";
 		}
 		local.pos = 0;
 	}
 	
 	if ( !(local.char) || !(typeof local.char == "int") || (local.char <= 0) ) {
 		if (level.DEBUG > 1) {
-			conprintf "~^~^~^~ EXCEPTION|BOT4_ENGINE[lib/string.slib::SubStr]: Specified length (in characters) <arg3> is invalid! Parameter has defaulted. ~^~^~^~ \n";
+			conprintf "~^~^~^~ EXCEPTION[lib/string.slib::SubStr]: Specified length (in characters) <arg3> is invalid! Parameter has defaulted. ~^~^~^~ \n";
 		}
 		local.char = 1;
 	} else if ( (local.pos + local.char) >= local.string.size) {
 		if (level.DEBUG > 1) {
-			conprintf "~^~^~^~ EXCEPTION|BOT4_ENGINE[lib/string.slib::SubStr]: Specified length (in characters) <arg2> is invalid! Adjusting to closest admissible range.. ~^~^~^~ \n";
+			conprintf "~^~^~^~ EXCEPTION[lib/string.slib::SubStr]: Specified length (in characters) <arg2> is invalid! Adjusting to closest admissible range.. ~^~^~^~ \n";
 		}
 		local.char = (waitthread __ConvertPosToChar local.pos local.string.size);
 	}
@@ -1673,14 +2495,14 @@ end local.result;
  DESCR|: 	Converts specified string into a normalArray of all its characters' ASCII numbers.
  INPUT|: 	<STRING string>
  OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
-				array => array (starting from index 0) of all chars
-				NIL => error: invalid input
+			*	array => array (starting from index 0) of all chars
+			*	NIL => error: invalid input
  =========================================================================================== */
 CharToInt local.string:
 	/* Error & Exception handling */
-	if ( !(local.string) || !(waitthread __IsStringType local.string)) {
-		if (level.DEBUG > 0) {
-			conprintf "\n ~^~^~^~ FATAL_ERROR|BOT4_ENGINE[lib/string.slib::CharToInt]: Specified string <arg1> is either inexistent or not a string type! ~^~^~^~ \n\n";
+	if ( !local.string || !(waitthread __IsStringType local.string)) {
+		if (level.DEBUG) {
+			conprintf "\n ~^~^~^~ FATAL_ERROR[lib/string.slib::CharToInt]: Specified string <arg1> is either inexistent or not a string type! ~^~^~^~ \n\n";
 		}
 		end;
 	} 
@@ -1698,66 +2520,101 @@ end local.result;
  DESCR|: 	Converts specified Array of ASCII numbers into string.
  INPUT|: 	<ARRAY array>
  OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
-				string => processed string
-				NIL => error: invalid input
+			*	string => processed string
+			*	NIL => error: invalid input
  =========================================================================================== */
+_IntToChar local.array: goto internal26;
 IntToChar local.array:
 	/* Error & Exception handling */
-	if ( !(local.array) || ((typeof local.array != "array") && (typeof local.array != "const array")) ) {
-		if (level.DEBUG > 0) {
-			conprintf "\n ~^~^~^~ FATAL_ERROR|BOT4_ENGINE[lib/string.slib::IntToChar]: Specified array <arg1> is either inexistent or invalid! ~^~^~^~ \n\n";
+	if (!local.array || local.array.size <= 0) {
+		if (level.DEBUG) {
+			conprintf "\n ~^~^~^~ FATAL_ERROR[lib/string.slib::IntToChar]: Specified array <arg1> is either inexistent or invalid! ~^~^~^~ \n\n";
 		}
 		end;
+	} 
+	
+	/*Main Logic*/
+	if (typeof local.array == "int") {
+		if (local.array < 127) {
+			// Implicitly converts integer to array...
+			// Cannot overwrite initial variable with a definition in a different dimension, so have to switch.
+			local.tmp = local.array;
+			local.array = NIL;
+			local.array[1] = local.tmp;
+			local.tmp = NIL;
+			
+			// Don't need a to detect array size;
+			local.arraySizes[1] = 1;
+			local.arraySizes[2] = 2; // (i.e. 1 + 1)
+		} else {
+			if (level.DEBUG) {
+				conprintf ("\n ~^~^~^~ FATAL_ERROR[lib/string.slib::IntToChar]: invalid integer <arg1> value! \"" + local.array + "\" cannot be a basic ASCII character code! ~^~^~^~\n\n");
+			}
+			end;
+		}
+	} else if (waitthread $Array.IsUserArray local.array) {
+		if (waitthread $Array.ConsistsOf local.array "int" 1) {
+			internal26:
+			local.arraySizes = waitthread $Array.fullPath::__AnalyzeArray local.array;
+		} else {
+			if (level.DEBUG) {
+				conprintf ("\n ~^~^~^~ FATAL_ERROR[lib/string.slib::IntToChar]: invalid array <arg2>! Input should only contain integers lower than 127! ~^~^~^~\n\n");
+			}
+			end;
+		}
 	}
 	
-	local.charData = waitthread level.funcStr.lib::ASCIIData;
-	
-	local.start = (typeof local.array == "const array");
-	local.arraySize = local.array.size + local.start;
-	
+	local.charData = waitthread $Str.infoLib::ASCIIData;
 	local.result = "";
-	for (local.i = local.start; local.i < local.arraySize; local.i++) {
+	for (local.i = local.arraySizes[1]; local.i < local.arraySizes[2]; local.i++) {
 		local.result += local.charData[local.array[local.i]];
 	}
 end local.result;
 
 /** ==========================================================================================
- TransformStr Function
+ Transform Function
  ---------------------------------------------------------------------------------------------
- DESCR|: 	Converts specified characters in specified string to other characters. The array
-			must be an object array wherein the stringbox there's the character to be 
-			converted and its value is the character to be converted to.
- INPUT|: 	<STRING string> <ARRAY charMapping>
+ DESCR|: 	Converts specified character in specified string to another character.
+ INPUT|: 	<STRING string> <CHAR/STRING charToReplace> <CHAR/STRING replacementChar> 
+			<INT caseInsensitivity>
  OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
-				string => processed string
-				NIL => error: invalid input
+			*	string => processed string
+			*	NIL => error: invalid input
  =========================================================================================== */
-_TransformStr local.string local.mapping local.caseInsensitive: goto internal24;
-TransformStr local.string local.mapping local.caseInsensitive:
+_Transform local.string local.charToReplace local.replacement local.caseInsensitive: goto internal24;
+Transform local.string local.charToReplace local.replacement  local.caseInsensitive:
 	/* Error & Exception handling */
-	if ( !(local.string) || !(waitthread __IsString local.string)) {
-		if (level.DEBUG > 0) {
-			conprintf "\n ~^~^~^~ FATAL_ERROR|BOT4_ENGINE[lib/string.slib::ConvertStr]: string <arg1> does not exist! ~^~^~^~ \n\n";
+	if ( !local.string || !(waitthread __IsString local.string)) {
+		if (level.DEBUG) {
+			conprintf "\n ~^~^~^~ FATAL_ERROR[lib/string.slib::Transform]: string <arg1> does not exist! ~^~^~^~ \n\n";
 		}
 		end;
-	} if ( !(local.mapping) || ((typeof local.mapping != "array") && (typeof local.mapping != "const array")) ) {
-		if (level.DEBUG > 0) {
-			conprintf "\n ~^~^~^~ FATAL_ERROR|BOT4_ENGINE[lib/string.slib::ConvertStr]: Specified array <arg2> is either inexistent or invalid! ~^~^~^~ \n\n";
+	} if ( !(local.charToReplace) || !(waitthread __IsStringType local.charToReplace) || local.charToReplace.size > 1) {
+		if (level.DEBUG) {
+			conprintf "\n ~^~^~^~ FATAL_ERROR[lib/string.slib::Transform]: Specified character (string) <arg2> is either inexistent or invalid! ~^~^~^~ \n\n";
+		}
+		end;
+	} if ( !(local.replacement) || !(waitthread __IsStringType local.replacement) || local.replacement.size > 1) {
+		if (level.DEBUG) {
+			conprintf "\n ~^~^~^~ FATAL_ERROR[lib/string.slib::Transform]: Specified replacement character (string) <arg3> is either inexistent or invalid! ~^~^~^~ \n\n";
 		}
 		end;
 	}
 	
 	internal24:
+	
+	/*Main Logic*/
+	local.mapping[(string local.charToReplace)] = (string local.replacement);
+	
 	if (local.caseInsensitive) {
-		local.charCase = waitthread level.funcStr.lib::CharData 1
+		local.charCase = waitthread $Str.infoLib::CharData 1
 	}
 	
 	local.result = "";
 	local.strSize = local.string.size;
 	for (local.i = 0; local.i < local.strSize; local.i++) {
 		local.char = string(local.string[local.i]);
-		println local.char
-		if (local.mapping[local.char]) {
+		if (local.mapping[local.char].size > 0) {
 			local.result += local.mapping[local.char];
 			continue;
 		} else if (local.caseInsensitive && local.charCase[local.char] && local.mapping[local.charCase[local.char]]) {
@@ -1769,19 +2626,20 @@ TransformStr local.string local.mapping local.caseInsensitive:
 end local.result
 
 /** ==========================================================================================
- CutterStr Function
+ CookieCutter Function
  ---------------------------------------------------------------------------------------------
- DESCR|: 	Cuts specified string up into an normalArray of all its characters.
+ DESCR|: 	Cuts specified string up into an normalArray of all its characters. In other words,
+			this converts a string into a normalArray.
  INPUT|: 	<STRING string>
  OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
-				array => array (starting at index 0) of all chars
-				NIL => error: invalid input
+			*	array => array (starting at index 0) of all chars
+			*	NIL => error: invalid input
  =========================================================================================== */
-CutterStr local.string:
+CookieCutter local.string:
 	/* Error & Exception handling */
-	if ( !(local.string) || !(waitthread __IsString local.string)) {
-		if (level.DEBUG > 0) {
-			conprintf "\n ~^~^~^~ FATAL_ERROR|BOT4_ENGINE[lib/string.slib::MakeLn]: string <arg1> does not exist! ~^~^~^~ \n\n";
+	if ( !local.string || !(waitthread __IsString local.string)) {
+		if (level.DEBUG) {
+			conprintf "\n ~^~^~^~ FATAL_ERROR[lib/string.slib::CookieCutter]: string <arg1> does not exist! ~^~^~^~ \n\n";
 		}
 		end;
 	} 
@@ -1796,27 +2654,44 @@ CutterStr local.string:
 end local.result;
 
 /** ==========================================================================================
+ NotConstant Function
+ ---------------------------------------------------------------------------------------------
+ DESCR|: 	Converts a constant string into a normal string type.
+ INPUT|: 	<STRING string>
+ OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
+			*	string => processed string
+			*	NIL => stringified float or simply not numerical
+ =========================================================================================== */
+NotConstant local.string:
+	if (local.string && (waitthread __IsStringType local.string)) {
+		local.result = (string local.string);
+	} else {
+		local.result = local.string;
+	}
+end local.result;
+
+/** ==========================================================================================
  MakeLn Function
  ---------------------------------------------------------------------------------------------
  DESCR|: 	Function will make line out of specified string. Optionally you can choose to
 			how many newlines to add at the front and/or at the back of the string.
  INPUT|: 	<STRING string> [INT back] [INT front]
  OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
-				string => processed string
-				NIL => error: invalid input
+			*	string => processed string
+			*	NIL => error: invalid input
  =========================================================================================== */
 MakeLn local.string local.back local.front:
 	/* Error & Exception handling */
-	if ( !(local.string) || !(waitthread __IsString local.string)) {
-		if (level.DEBUG > 0) {
-			conprintf "\n ~^~^~^~ FATAL_ERROR|BOT4_ENGINE[lib/string.slib::MakeLn]: string <arg1> does not exist! ~^~^~^~ \n\n";
+	if ( !local.string || !(waitthread __IsString local.string)) {
+		if (level.DEBUG) {
+			conprintf "\n ~^~^~^~ FATAL_ERROR[lib/string.slib::MakeLn]: string <arg1> does not exist! ~^~^~^~ \n\n";
 		}
 		end;
 	} 
 
 	/* Main logic */
 	// default
-	if ((local.back == NIL) && !(local.front)) {
+	if (local.back == NIL && local.front == NIL) {
 		local.result = local.string + "\n";
 	} else {
 		local.newLine = "\n";
@@ -1842,19 +2717,19 @@ end local.result;
  DESCR|: 	Strips specified string of newline ("\n") markers.
  INPUT|: 	<STRING string>
  OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
-				string => processed string
-				NIL => error: invalid input
+			*	string => processed string
+			*	NIL => error: invalid input
  =========================================================================================== */
 StripLn local.string:
 	/* Error & Exception handling */
-	if ( !(local.string) || !(waitthread __IsString local.string)) {
-		if (level.DEBUG > 0) {
-			conprintf "\n ~^~^~^~ FATAL_ERROR|BOT4_ENGINE[lib/string.slib::StripLn]: string <arg1> does not exist! ~^~^~^~ \n\n";
+	if ( !local.string || !(waitthread __IsString local.string)) {
+		if (level.DEBUG) {
+			conprintf "\n ~^~^~^~ FATAL_ERROR[lib/string.slib::StripLn]: string <arg1> does not exist! ~^~^~^~ \n\n";
 		}
 		end;
 	}
 	/* Main logic */
-end (waitthread _ReplaceStr local.string "\n" "" 1);
+end (waitthread _Replace local.string "\n" "" 1);
 
 /** ==========================================================================================
  AddDblQuotes Function
@@ -1862,14 +2737,14 @@ end (waitthread _ReplaceStr local.string "\n" "" 1);
  DESCR|: 	Adds double quotes to both ends of the specified string
  INPUT|: 	<STRING string> [INT option]
  OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
-				string => processed string
-				NIL => error: invalid input
+			*	string => processed string
+			*	NIL => error: invalid input
  =========================================================================================== */
 AddDblQuotes local.string local.option:
 	/* Error & Exception handling */
-	if ( !(local.string) || !(waitthread __IsString local.string)) {
-		if (level.DEBUG > 0) {
-			conprintf "\n ~^~^~^~ FATAL_ERROR|BOT4_ENGINE[lib/string.slib::AddDblQuotes]: string <arg1> does not exist! ~^~^~^~ \n\n";
+	if ( !local.string || !(waitthread __IsString local.string)) {
+		if (level.DEBUG) {
+			conprintf "\n ~^~^~^~ FATAL_ERROR[lib/string.slib::AddDblQuotes]: string <arg1> does not exist! ~^~^~^~ \n\n";
 		}
 		end;
 	} 
@@ -1888,19 +2763,19 @@ AddDblQuotes local.string local.option:
 end local.result
 
 /** ==========================================================================================
- CommentStr Function
+ Comment Function
  ---------------------------------------------------------------------------------------------
  DESCR|: 	Comments specified string out according to the specified manner (options: 0-3)
  INPUT|: 	<STRING string> [INT type]
  OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
-				string => processed string
-				NIL => error: invalid input
+			*	string => processed string
+			*	NIL => error: invalid input
  =========================================================================================== */
-CommentStr local.string local.type:
+Comment local.string local.type:
 	/* Error & Exception handling */
-	if ( !(local.string) || !(waitthread __IsString local.string)) {
-		if (level.DEBUG > 0) {
-			conprintf "\n ~^~^~^~ FATAL_ERROR|BOT4_ENGINE[lib/string.slib::EscSeq]: string <arg1> does not exist! ~^~^~^~ \n\n";
+	if ( !local.string || !(waitthread __IsString local.string)) {
+		if (level.DEBUG) {
+			conprintf "\n ~^~^~^~ FATAL_ERROR[lib/string.slib::Comment]: string <arg1> does not exist! ~^~^~^~ \n\n";
 		}
 		end;
 	}
@@ -1926,19 +2801,19 @@ CommentStr local.string local.type:
 end local.result;
 
 /** ==========================================================================================
- UncommentStr Function
+ Uncomment Function
  ---------------------------------------------------------------------------------------------
  DESCR|: 	Removes all (or the specified type of) comment sequences from specified string.
  INPUT|: 	<STRING string> [INT type]
  OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
-				string => processed string
-				NIL => error: invalid input
+			*	string => processed string
+			*	NIL => error: invalid input
  =========================================================================================== */
-UncommentStr local.string local.type:
+Uncomment local.string local.type:
 	/* Error & Exception handling */
-	if ( !(local.string) || !(waitthread __IsString local.string)) {
-		if (level.DEBUG > 0) {
-			conprintf "\n ~^~^~^~ FATAL_ERROR|BOT4_ENGINE[lib/string.slib::EscSeq]: string <arg1> does not exist! ~^~^~^~ \n\n";
+	if ( !local.string || !(waitthread __IsString local.string)) {
+		if (level.DEBUG) {
+			conprintf "\n ~^~^~^~ FATAL_ERROR[lib/string.slib::Uncomment]: string <arg1> does not exist! ~^~^~^~ \n\n";
 		}
 		end;
 	}
@@ -1988,14 +2863,14 @@ end local.result;
 			specified string can be tabbed a specified number of times at the end or start.
  INPUT|: 	<STRING string> [{INT:+/-} option]
  OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
-				string => processed string
-				NIL => error: invalid input
+			*	string => processed string
+			*	NIL => error: invalid input
  =========================================================================================== */
 AddTabs local.string local.option:
 	/* Error & Exception handling */
-	if ( !(local.string) || !(waitthread __IsString local.string)) {
-		if (level.DEBUG > 0) {
-			conprintf "\n ~^~^~^~ FATAL_ERROR|BOT4_ENGINE[lib/string.slib::EscSeq]: string <arg1> does not exist! ~^~^~^~ \n\n";
+	if ( !local.string || !(waitthread __IsString local.string)) {
+		if (level.DEBUG) {
+			conprintf "\n ~^~^~^~ FATAL_ERROR[lib/string.slib::AddTabs]: string <arg1> does not exist! ~^~^~^~ \n\n";
 		}
 		end;
 	} 
@@ -2026,14 +2901,14 @@ end local.result;
  DESCR|: 	Strips specified string of all tabs and indent sequences.
  INPUT|: 	<STRING string>
  OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
-				string => processed string
-				NIL => error: invalid input
+			*	string => processed string
+			*	NIL => error: invalid input
  =========================================================================================== */
 DelTabs local.string:
 	/* Error & Exception handling */
-	if ( !(local.string) || !(waitthread __IsString local.string)) {
-		if (level.DEBUG > 0) {
-			conprintf "\n ~^~^~^~ FATAL_ERROR|BOT4_ENGINE[lib/string.slib::EscSeq]: string <arg1> does not exist! ~^~^~^~ \n\n";
+	if ( !local.string || !(waitthread __IsString local.string)) {
+		if (level.DEBUG) {
+			conprintf "\n ~^~^~^~ FATAL_ERROR[lib/string.slib::DelTabs]: string <arg1> does not exist! ~^~^~^~ \n\n";
 		}
 		end;
 	} 
@@ -2047,18 +2922,18 @@ end (waitthread _ReplaceStr local.string "\t" "" 1);
 			filepaths.
  INPUT|: 	<STRING string> [INT type]
  OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
-				int => 0:notSafe and 1:safe
-				NIL => error: invalid input
+			*	int => 0:notSafe and 1:safe
+			*	NIL => error: invalid input
  =========================================================================================== */
 IsCharDataSafe local.string local.type:
-	if ( !(local.string) || !(waitthread __IsString local.string)) {
-		if (level.DEBUG > 0) {
-			conprintf "\n ~^~^~^~ ERROR|BOT4_ENGINE[lib/string.slib::IsCharDataSafe]: Fatal error: the string does not exist! ~^~^~^~ \n\n";
+	if ( !local.string || !(waitthread __IsString local.string)) {
+		if (level.DEBUG) {
+			conprintf "\n ~^~^~^~ ERROR[lib/string.slib::IsCharDataSafe]: Fatal error: the string does not exist! ~^~^~^~ \n\n";
 		}
 		end;
 	}
 
-	local.blacklist = waitthread level.funcStr.lib::BadCharData;
+	local.blackList = waitthread $Str.infoLib::BadCharData;
 	
 	if (local.type) {
 		local.start = 2;
@@ -2069,8 +2944,8 @@ IsCharDataSafe local.string local.type:
 	local.result = 1;
 	local.strSize = local.string.size;
 	for (local.i = 0; local.i < local.strSize; local.i++) {
-		for (local.j = local.start; local.j <= local.blacklist.size; local.j++) {
-			if (local.string[local.i] == local.blacklist[local.j]) {
+		for (local.j = local.start; local.j <= local.blackList.size; local.j++) {
+			if (local.string[local.i] == local.blackList[local.j]) {
 				local.result = 0;
 				goto EXIT;
 			}
@@ -2086,18 +2961,18 @@ end local.result
 			filepaths, and removes them.
  INPUT|: 	<STRING string> [INT type]
  OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
-				string => processed string
-				NIL => error: invalid input
+			*	string => processed string
+			*	NIL => error: invalid input
  =========================================================================================== */
 MakeCharDataSafe local.string local.type:
-	if ( !(local.string) || !(waitthread __IsString local.string)) {
-		if (level.DEBUG > 0) {
-			conprintf "\n ~^~^~^~ ERROR|BOT4_ENGINE[lib/string.slib::MakeCharDataSafe]: Fatal error: the string does not exist! ~^~^~^~ \n\n";
+	if ( !local.string || !(waitthread __IsString local.string)) {
+		if (level.DEBUG) {
+			conprintf "\n ~^~^~^~ ERROR[lib/string.slib::MakeCharDataSafe]: Fatal error: the string does not exist! ~^~^~^~ \n\n";
 		}
 		end;
 	}
 
-	local.blacklist = waitthread level.funcStr.lib::BadCharData
+	local.blacklist = waitthread $Str.infoLib::BadCharData
 	
 	if (local.type) {
 		local.start = 2;
@@ -2117,6 +2992,302 @@ MakeCharDataSafe local.string local.type:
 		EOL:
 	}
 end local.result
+
+
+/** ==========================================================================================
+ IsDigit Function
+ ---------------------------------------------------------------------------------------------
+ DESCR|: 	Determines whether char represents a digit, i.e. whether it is numerical.
+ INPUT|: 	<CHAR char>
+ OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
+			*	1 => numerical char
+			*	0 => other char
+			*	NIL => error: uninitialized/inexistent char
+ =========================================================================================== */
+IsDigit local.char:
+	/* Error & Exception handling */
+	if (!local.char || !(typeof local.char == "char")) {
+		if (level.DEBUG) {
+			conprintf "\n ~^~^~^~ FATAL_ERROR[lib/string.slib::IsDigit]: specified char (type) variable <arg1> is either inexistent, uninitialized or invalid! ~^~^~^~\n\n";
+		}
+		end;
+	}
+
+	/*Main Logic*/
+	local.result = 0;
+	
+	if (waitthread $Str.infoLib::IsDecimalData (string local.char)) {
+		local.result = 1;
+	}
+end local.result;
+
+/** ==========================================================================================
+ IsLetter Function
+ ---------------------------------------------------------------------------------------------
+ DESCR|: 	Determines whether char represents a letter.
+ INPUT|: 	<CHAR char>
+ OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
+			*	1 => char is letter
+			*	0 => other char
+			*	NIL => error: uninitialized/inexistent char
+ =========================================================================================== */
+IsLetter local.char:
+	/* Error & Exception handling */
+	if (!local.char || !(typeof local.char == "char")) {
+		if (level.DEBUG) {
+			conprintf "\n ~^~^~^~ FATAL_ERROR[lib/string.slib::IsLetter]: specified char (type) variable <arg1> is either inexistent, uninitialized or invalid! ~^~^~^~\n\n";
+		}
+		end;
+	}
+
+	/*Main Logic*/
+	local.result = 0;
+	
+	if (waitthread $Str.infoLib::IsLetterData (string local.char)) {
+		local.result = 1;
+	}
+end local.result;
+
+/** ==========================================================================================
+ IsLetterOrDigit Function
+ ---------------------------------------------------------------------------------------------
+ DESCR|: 	Determines whether char represents a digit or a letter.
+ INPUT|: 	<CHAR char>
+ OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
+			*	1 => char is either a digit or a letter
+			*	0 => other char
+			*	NIL => error: uninitialized/inexistent char
+ =========================================================================================== */
+IsLetterOrDigit local.char:
+	/* Error & Exception handling */
+	if (!local.char || !(typeof local.char == "char")) {
+		if (level.DEBUG) {
+			conprintf "\n ~^~^~^~ FATAL_ERROR[lib/string.slib::IsLetterOrDigit]: specified char (type) variable <arg1> is either inexistent, uninitialized or invalid! ~^~^~^~\n\n";
+		}
+		end;
+	}
+
+	/*Main Logic*/
+	local.result = 0;
+
+	if ((waitthread $Str.infoLib::IsLetterData (string local.char)) || (waitthread $Str.infoLib::IsDecimalData (string local.char))) {
+		local.result = 1;
+	}
+end local.result;
+
+/** ==========================================================================================
+ IsWhiteSpace Function
+ ---------------------------------------------------------------------------------------------
+ DESCR|: 	Determines whether char represents a white space or not.
+ INPUT|: 	<CHAR char>
+ OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
+			*	1 => char is a space or a horizontal tab escape sequence.
+			*	0 => other char
+			*	NIL => error: uninitialized/inexistent char
+ =========================================================================================== */
+IsWhiteSpace local.char:
+	/* Error & Exception handling */
+	if (!local.char || !(typeof local.char == "char")) {
+		if (level.DEBUG) {
+			conprintf "\n ~^~^~^~ FATAL_ERROR[lib/string.slib::IsWhiteSpace]: specified char (type) variable <arg1> is either inexistent, uninitialized or invalid! ~^~^~^~\n\n";
+		}
+		end;
+	}
+
+	/*Main Logic*/
+	local.result = 0;
+	local.int = (charToInt local.char);
+	if (local.int == 32 || local.int == 9) {
+		local.result = 1;
+	}
+end local.result;
+
+/** ==========================================================================================
+ IsEscapeSeq Function
+ ---------------------------------------------------------------------------------------------
+ DESCR|: 	Determines whether char is an escape sequence or not.
+ INPUT|: 	<CHAR char>
+ OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
+			*	1 => char is an escape sequence.
+			*	0 => other char
+			*	NIL => error: uninitialized/inexistent char
+ =========================================================================================== */
+IsEscapeSeq local.char:
+	/* Error & Exception handling */
+	if (!local.char || !(typeof local.char == "char")) {
+		if (level.DEBUG) {
+			conprintf "\n ~^~^~^~ FATAL_ERROR[lib/string.slib::IsEscapeSeq]: specified char (type) variable <arg1> is either inexistent, uninitialized or invalid! ~^~^~^~\n\n";
+		}
+		end;
+	}
+
+	/*Main Logic*/
+	local.result = 0;
+
+	if (waitthread $Str.infoLib::IsEsc (string local.char)) {
+		local.result = 1;
+	}
+end local.result;
+
+/** ==========================================================================================
+ IsPunctuation Function
+ ---------------------------------------------------------------------------------------------
+ DESCR|: 	Determines whether char represents a punctuation symbol.
+ INPUT|: 	<CHAR char>
+ OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
+			*	1 => char is a punctuation character.
+			*	0 => other char
+			*	NIL => error: uninitialized/inexistent char
+ =========================================================================================== */
+IsPunctuation local.char:
+	/* Error & Exception handling */
+	if (!local.char || !(typeof local.char == "char")) {
+		if (level.DEBUG) {
+			conprintf "\n ~^~^~^~ FATAL_ERROR[lib/string.slib::IsPunctuation]: specified char (type) variable <arg1> is either inexistent, uninitialized or invalid! ~^~^~^~\n\n";
+		}
+		end;
+	}
+
+	/*Main Logic*/
+	local.result = 0;
+
+	if (waitthread $Str.infoLib::IsPunct (string local.char)) {
+		local.result = 1;
+	}
+end local.result;
+
+/** ==========================================================================================
+ IsSymbol Function
+ ---------------------------------------------------------------------------------------------
+ DESCR|: 	Determines whether char represents a symbol.
+ INPUT|: 	<CHAR char>
+ OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
+			*	1 => char is a symbol.
+			*	0 => other char
+			*	NIL => error: uninitialized/inexistent char
+ =========================================================================================== */
+IsSymbol local.char:
+	/* Error & Exception handling */
+	if (!local.char || !(typeof local.char == "char")) {
+		if (level.DEBUG) {
+			conprintf "\n ~^~^~^~ FATAL_ERROR[lib/string.slib::IsSymbol]: specified char (type) variable <arg1> is either inexistent, uninitialized or invalid! ~^~^~^~\n\n";
+		}
+		end;
+	}
+
+	/*Main Logic*/
+	local.result = 0;
+
+	if (waitthread $Str.infoLib::IsSymbol (string local.char)) {
+		local.result = 1;
+	}
+end local.result;
+
+/** ==========================================================================================
+ IsLower Function
+ ---------------------------------------------------------------------------------------------
+ DESCR|: 	Determines whether char is a lowercase letter.
+ INPUT|: 	<CHAR char>
+ OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
+			*	1 => char is a lowercase letter.
+			*	0 => other char
+			*	NIL => error: uninitialized/inexistent char
+ =========================================================================================== */
+IsLower local.char:
+	/* Error & Exception handling */
+	if (!local.char || !(typeof local.char == "char")) {
+		if (level.DEBUG) {
+			conprintf "\n ~^~^~^~ FATAL_ERROR[lib/string.slib::IsLower]: specified char (type) variable <arg1> is either inexistent, uninitialized or invalid! ~^~^~^~\n\n";
+		}
+		end;
+	}
+	
+	/*Main Logic*/
+	local.result = 0;
+
+	if (waitthread $Str.infoLib::IsLower (string local.char)) {
+		local.result = 1;
+	}
+end local.result;
+
+/** ==========================================================================================
+ IsUpper Function
+ ---------------------------------------------------------------------------------------------
+ DESCR|: 	Determines whether char is a uppercase letter.
+ INPUT|: 	<CHAR char>
+ OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
+			*	1 => char is a uppercase letter.
+			*	0 => other char
+			*	NIL => error: uninitialized/inexistent char
+ =========================================================================================== */
+IsUpper local.char:
+	/* Error & Exception handling */
+	if (!local.char || !(typeof local.char == "char")) {
+		if (level.DEBUG) {
+			conprintf "\n ~^~^~^~ FATAL_ERROR[lib/string.slib::IsUpper]: specified char (type) variable <arg1> is either inexistent, uninitialized or invalid! ~^~^~^~\n\n";
+		}
+		end;
+	}
+
+	/*Main Logic*/
+	local.result = 0;
+
+	if (waitthread $Str.infoLib::IsUpper (string local.char)) {
+		local.result = 1;
+	}
+end local.result;
+
+/** ==========================================================================================
+ CharToLower Function
+ ---------------------------------------------------------------------------------------------
+ DESCR|: 	Converts uppercase letter char to lowercase letter char.
+ INPUT|: 	<CHAR char>
+ OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
+			*	char -> lowercase char
+			*	NIL => error: uninitialized/inexistent char
+ =========================================================================================== */
+CharToLower local.char:
+	/* Error & Exception handling */
+	if (!local.char || !(typeof local.char == "char")) {
+		if (level.DEBUG) {
+			conprintf "\n ~^~^~^~ FATAL_ERROR[lib/string.slib::CharToLower]: specified char (type) variable <arg1> is either inexistent, uninitialized or invalid! ~^~^~^~\n\n";
+		}
+		end;
+	}
+	
+	local.tmp = (waitthread $Str.infoLib::CharData 1)[(string local.char)];
+	if !(local.tmp) {
+		local.result = local.char;
+	} else {
+		local.result = local.tmp[0];
+	}
+end local.result;
+
+/** ==========================================================================================
+ CharToUpper Function
+ ---------------------------------------------------------------------------------------------
+ DESCR|: 	Converts lowercase letter char to uppercase letter char.
+ INPUT|: 	<CHAR char>
+ OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
+			*	char -> uppercase char
+			*	NIL => error: uninitialized/inexistent char
+ =========================================================================================== */
+CharToUpper local.char:
+	/* Error & Exception handling */
+	if (!local.char || !(typeof local.char == "char")) {
+		if (level.DEBUG) {
+			conprintf "\n ~^~^~^~ FATAL_ERROR[lib/string.slib::CharToUpper]: specified char (type) variable <arg1> is either inexistent, uninitialized or invalid! ~^~^~^~\n\n";
+		}
+		end;
+	}
+	
+	local.tmp = (waitthread $Str.infoLib::CharData 0)[(string local.char)];
+	if !(local.tmp) {
+		local.result = local.char;
+	} else {
+		local.result = local.tmp[0];
+	}
+end local.result;
 
 __IsString local.string:
 end ((typeof local.string == "const string") || (typeof local.string == "string"));
