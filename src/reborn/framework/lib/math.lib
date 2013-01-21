@@ -4,7 +4,7 @@
  MATHEMATICS INFORMATION LIBRARY; 			Script Framework BETA
  ================================================================
  BY Sor	
- VERSION 1.0.225 (4/12/2012)
+ VERSION 1.1.01 (21/01/2013)
  =-------------------------------------------------------------=
  Copyright (c) 2009-2014  Lenny Knockx
  All rights reserved.
@@ -31,8 +31,8 @@ __info:
 	local.inf["library"] = "math.lib";
 	local.inf["namespace"] = "Math";		//targetname of class this script is part of...
 	local.inf["title"] = "MATHEMATICS INFORMATION LIBRARY";
-	local.inf["version"] = "1.0.225";
-	local.inf["lastmodified"] = "9/12/2012";
+	local.inf["version"] = "1.1.01";
+	local.inf["lastmodified"] = "21/01/2013";
 	local.inf["authors"][0] = "Sor";
 end local.inf;
 
@@ -40,113 +40,352 @@ end local.inf;
 ///						L	I	S	T	S					  ///
 /// ********************************************************* ///
 
+FibonacciSeq:
+	local.list[0] = 0;
+	local.list[1] = 1;
+	local.list[2] = 1;
+	local.list[3] = 2;
+	local.list[4] = 3;
+	local.list[5] = 5;
+	local.list[6] = 8;
+	local.list[7] = 13;
+	local.list[8] = 21;
+	local.list[9] = 34;
+	local.list[10] = 55;
+	local.list[11] = 89;
+	local.list[12] = 144;
+	local.list[13] = 233;
+	local.list[14] = 377;
+	local.list[15] = 610;
+	local.list[16] = 987;
+	local.list[17] = 1597;
+	local.list[18] = 2584;
+	local.list[19] = 4181;
+	local.list[20] = 6765;
+	local.list[21] = 10946;
+	local.list[22] = 17711;
+	local.list[23] = 28657;
+	local.list[24] = 46368;
+	local.list[25] = 75025;
+	local.list[26] = 121393;
+	local.list[27] = 196418;
+	local.list[28] = 317811;
+	local.list[29] = 514229;
+	local.list[30] = 832040;
+	local.list[31] = 1346269;
+	local.list[32] = 2178309;
+	local.list[33] = 3524578;
+	local.list[34] = 5702887;
+	local.list[35] = 9227465;
+	local.list[36] = 14930352;
+	local.list[37] = 24157817;
+	local.list[38] = 39088169;
+	local.list[39] = 63245986;
+	local.list[40] = 102334155;
+	local.list[41] = 165580141;
+	local.list[42] = 267914296;
+	local.list[43] = 433494437;
+	local.list[44] = 701408733;
+	local.list[45] = 1134903170;
+	local.list[46] = 1836311903;
+end local.list;
+
+Factorial:
+	local.list[0] = 0;
+	local.list[1] = 1;
+	local.list[2] = 2;
+	local.list[3] = 6;
+	local.list[4] = 24;
+	local.list[5] = 120;
+	local.list[6] = 720;
+	local.list[7] = 5040;
+	local.list[8] = 40320;
+	local.list[9] = 362880;
+	local.list[10] = 3628800;
+	local.list[11] = 39916800;
+	local.list[12] = 479001600;
+end local.list;
+
 DecimalData:
-end (waitthread $Str.infoLib::DecimalData);
+	local.constArray = "0"::"1"::"2"::"3"::"4"::"5"::"6"::"7"::"8"::"9";
+end local.constArray;
 
 BinaryData:
-	local.array[1] = "0";
-	local.array[2] = "0";
-end local.array;
+	local.constArray = 	"0"::"1";
+end local.constArray;
 
 OctalData:
-	local.hashArray = makeArray
-	"0"
-	"1"
-	"2"
-	"3"
-	"4"
-	"5"
-	"6"
-	"7"
-	endArray;
-end (waitthread $Array.fullPath::_HashToIdxArray local.hashArray);
+	local.constArray = "0"::"1"::"2"::"3"::"4"::"5"::"6"::"7";
+end local.constArray;
 
 HexadecimalData:
-	local.hashArray = makeArray
-	"0"
-	"1"
-	"2"
-	"3"
-	"4"
-	"5"
-	"6"
-	"7"
-	"8"
-	"9"
-	"A"
-	"B"
-	"C"
-	"D"
-	"E"
-	"F"
-	"a"
-	"b"
-	"c"
-	"d"
-	"e"
-	"f"
-	endArray;
-end (waitthread $Array.fullPath::_HashToIdxArray local.hashArray);
+	local.constArray = "0"::"1"::"2"::"3"::"4"::"5"::"6"::"7"::"8"::"9" \
+						::"A"::"B"::"C"::"D"::"E"::"F"::"a"::"b"::"c"::"d" \
+						::"e"::"f";
+end local.constArray;
 
 /// ********************************************************* ///
 ///						M	A	S	K	S					  ///
 /// ********************************************************* ///
 
-__BinaryMasks:
-	local.tmp["0"] = 	1;
-	local.tmp["1"] = 	1;
-end local.tmp;
+BinaryMasks:
+	local.mask["0"] = 	1;
+	local.mask["1"] = 	1;
+end local.mask;
 
-__OctalMasks:
-	local.tmp["0"] = 	1;
-	local.tmp["1"] = 	1;
-	local.tmp["2"] = 	1;
-	local.tmp["3"] = 	1;
-	local.tmp["4"] = 	1;
-	local.tmp["5"] = 	1;
-	local.tmp["6"] = 	1;
-	local.tmp["7"] = 	1;
-end local.tmp;
+OctalMasks:
+	local.mask["0"] = 	1;
+	local.mask["1"] = 	1;
+	local.mask["2"] = 	1;
+	local.mask["3"] = 	1;
+	local.mask["4"] = 	1;
+	local.mask["5"] = 	1;
+	local.mask["6"] = 	1;
+	local.mask["7"] = 	1;
+end local.mask;
 
-__DecimalMasks:
-	local.tmp["0"] = 	1;
-	local.tmp["1"] = 	1;
-	local.tmp["2"] = 	1;
-	local.tmp["3"] = 	1;
-	local.tmp["4"] = 	1;
-	local.tmp["5"] = 	1;
-	local.tmp["6"] = 	1;
-	local.tmp["7"] = 	1;
-	local.tmp["8"] = 	1;
-	local.tmp["9"] = 	1;
-end local.tmp;
+DecimalMasks:
+	local.mask["0"] = 	1;
+	local.mask["1"] = 	1;
+	local.mask["2"] = 	1;
+	local.mask["3"] = 	1;
+	local.mask["4"] = 	1;
+	local.mask["5"] = 	1;
+	local.mask["6"] = 	1;
+	local.mask["7"] = 	1;
+	local.mask["8"] = 	1;
+	local.mask["9"] = 	1;
+end local.mask;
 
-__HexadecimalMasks:
-	local.tmp["0"] = 	1;
-	local.tmp["1"] = 	1;
-	local.tmp["2"] = 	1;
-	local.tmp["3"] = 	1;
-	local.tmp["4"] = 	1;
-	local.tmp["5"] = 	1;
-	local.tmp["6"] = 	1;
-	local.tmp["7"] = 	1;
-	local.tmp["8"] = 	1;
-	local.tmp["9"] = 	1;
-	local.tmp["A"] = 	1;
-	local.tmp["B"] = 	1;
-	local.tmp["C"] = 	1;
-	local.tmp["D"] = 	1;
-	local.tmp["E"] = 	1;
-	local.tmp["F"] = 	1;
-	local.tmp["a"] = 	1;
-	local.tmp["b"] = 	1;
-	local.tmp["c"] = 	1;
-	local.tmp["d"] = 	1;
-	local.tmp["e"] = 	1;
-	local.tmp["f"] = 	1;
-end local.tmp;
+HexadecimalMasks:
+	local.mask["0"] = 	1;
+	local.mask["1"] = 	1;
+	local.mask["2"] = 	1;
+	local.mask["3"] = 	1;
+	local.mask["4"] = 	1;
+	local.mask["5"] = 	1;
+	local.mask["6"] = 	1;
+	local.mask["7"] = 	1;
+	local.mask["8"] = 	1;
+	local.mask["9"] = 	1;
+	local.mask["A"] = 	1;
+	local.mask["B"] = 	1;
+	local.mask["C"] = 	1;
+	local.mask["D"] = 	1;
+	local.mask["E"] = 	1;
+	local.mask["F"] = 	1;
+	local.mask["a"] = 	1;
+	local.mask["b"] = 	1;
+	local.mask["c"] = 	1;
+	local.mask["d"] = 	1;
+	local.mask["e"] = 	1;
+	local.mask["f"] = 	1;
+end local.mask;
+
+DecimalDataMasks:
+	local.mask["0"] = 	0;
+	local.mask["1"] = 	1;
+	local.mask["2"] = 	2;
+	local.mask["3"] = 	3;
+	local.mask["4"] = 	4;
+	local.mask["5"] =	5;
+	local.mask["6"] = 	6;
+	local.mask["7"] = 	7;
+	local.mask["8"] = 	8;
+	local.mask["9"] = 	9;
+	/* local.mask["__info"] = "0"::"1"::"2"::"3"::"4"::"5"::"6"::"7"::"8"::"9"; */	
+end local.mask;
+
+BinaryDataMasks:
+	local.mask["0"] = 	0;
+	local.mask["1"] = 	1;
+	/* local.mask["__info"] = "0"::"1"; */
+end local.mask;
+
+OctalDataMasks:
+	local.mask["0"] = 	0;
+	local.mask["1"] = 	1;
+	local.mask["2"] = 	2;
+	local.mask["3"] = 	3;
+	local.mask["4"] = 	4;
+	local.mask["5"] = 	5;
+	local.mask["6"] = 	6;
+	local.mask["7"] = 	7;
+	/* local.mask["__info"] = "0"::"1"::"2"::"3"::"4"::"5"::"6"::"7"; */
+end local.mask;
+
+HexadecimalDataMasks:
+	local.mask["0"] = 	0;
+	local.mask["1"] = 	1;
+	local.mask["2"] = 	2;
+	local.mask["3"] = 	3;
+	local.mask["4"] = 	4;
+	local.mask["5"] = 	5;
+	local.mask["6"] = 	6;
+	local.mask["7"] = 	7;
+	local.mask["8"] = 	8;
+	local.mask["9"] = 	9;
+	local.mask["A"] = 	10;
+	local.mask["B"] = 	11;
+	local.mask["C"] = 	12;
+	local.mask["D"] = 	13;
+	local.mask["E"] =	14;
+	local.mask["F"] = 	15;
+	local.mask["a"] = 	10;
+	local.mask["b"] = 	11;
+	local.mask["c"] = 	12;
+	local.mask["d"] = 	13;
+	local.mask["e"] = 	14;
+	local.mask["f"] = 	15;
+	/* local.mask["__info"] = "0"::"1"::"2"::"3"::"4"::"5"::"6"::"7"::"8"::"9"::"A"::"B"::"C"::"D"::"E"::"F"::"a"::"b"::"c"::"d"::"e"::"f"; */	
+end local.mask;
 
 /// ********************************************************* ///
 ///				S	W	I	T	C	H	E	S				  ///
 /// ********************************************************* ///
 
+IsDecimalData local.var:
+	switch (local.var) {
+		case "0":
+			local.result = "0";
+		break;
+		case "1":
+			local.result = "1";
+		break;
+		case "2":
+			local.result = "2";
+		break;
+		case "3":
+			local.result = "3";
+		break;
+		case "4":
+			local.result = "4";
+		break;
+		case "5":
+			local.result = "5";
+		break;
+		case "6":
+			local.result = "6";
+		break;
+		case "7":
+			local.result = "7";
+		break;
+		case "8":
+			local.result = "8";
+		break;
+		case "9":
+			local.result = "9";
+		break;
+		default:
+			local.result = 0;
+		break;
+	}
+end local.result;
+
+IsBinaryData local.var:
+	switch (local.var) {
+		case "0":
+			local.result = "0";
+		break;
+		case "1":
+			local.result = "1";
+		break;
+		default:
+			local.result = 0;
+		break;
+	}
+end local.result;
+
+IsOctalData local.var:
+	switch (local.var) {
+		case "0":
+			local.result = "0";
+		break;
+		case "1":
+			local.result = "1";
+		break;
+		case "2":
+			local.result = "2";
+		break;
+		case "3":
+			local.result = "3";
+		break;
+		case "4":
+			local.result = "4";
+		break;
+		case "5":
+			local.result = "5";
+		break;
+		case "6":
+			local.result = "6";
+		break;
+		case "7":
+			local.result = "7";
+		break;
+		default:
+			local.result = 0;
+		break;
+	}
+end local.result;
+
+IsHexadecimalData local.var:
+	switch (local.var) {
+		case "0":
+			local.result = "0";
+		break;
+		case "1":
+			local.result = "1";
+		break;
+		case "2":
+			local.result = "2";
+		break;
+		case "3":
+			local.result = "3";
+		break;
+		case "4":
+			local.result = "4";
+		break;
+		case "5":
+			local.result = "5";
+		break;
+		case "6":
+			local.result = "6";
+		break;
+		case "7":
+			local.result = "7";
+		break;
+		case "8":
+			local.result = "8";
+		break;
+		case "9":
+			local.result = "9";
+		break;
+		case "a":
+		case "A":
+			local.result = "A";
+		break;
+		case "b":
+		case "B":
+			local.result = "B";
+		break;
+		case "c":
+		case "C":
+			local.result = "C";
+		break;
+		case "d":
+		case "D":
+			local.result = "D";
+		break;
+		case "e":
+		case "E":
+			local.result = "E";
+		break;
+		case "f":
+		case "F":
+			local.result = "F";
+		break;
+		default:
+			local.result = 0;
+		break;
+	}
+end local.result;

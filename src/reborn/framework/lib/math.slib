@@ -4,7 +4,7 @@
  MATHEMATICAL FUNCTIONS LIBRARY; 			Script Framework BETA
  ================================================================
  BY Sor	
- VERSION 1.3.19 (4/12/2012)
+ VERSION 1.4.405 (21/01/2013)
  =-------------------------------------------------------------=
  Copyright (c) 2009-2014  Lenny Knockx
  All rights reserved.
@@ -27,180 +27,102 @@
  WEBSITE: 	http://www.x-null.net | www.mohaairborne.co.cc
  ================================================================
 */
-/** 
-FOR MATRICES! Also use $Array.CompareStruct function
-IsNumArray => ConsistsOf <array> "int"::"float"; Idx or Nrm; IsMultiDimensional==0? Support hash (row major)?
-ArrayEuclDiv => for IsNumArray arrays, optional dimension & entries.
-ArrayDiv
-ArrayMult
-ArrayAdd
-ArraySub
-ArrayMod
-ArrayPow
-=> obviously, make _thread shortcuts possible!
-*/
-/*!
-	ToColour => converts #RRGGBB & #RGB hex to ( R G B ) dec.
-*/
-///factorial => take max int val into account; _thread version uses solution table and no calc
-///fibonacci => take max int val into account
-/*!
-$Int.ToArray	=|
-$Float.ToArray	=|> converts 'int = data' to 'int[0/start] = local.data'
-$Bool.ToArray	=|
-
-$Int.ToVector	=|
-$Float.ToVector	=|> converts 'int = data' to 'int = ( data data data )'
-$Bool.ToVector	=|
-(or .ToVec)
-
-$Float.ToStr	//casting
-$Float.ToBool	//casting
-$Float.ToInt	//casting
-$Float.Fraction => returns decimal part of float; also $Float.Frac
-$Float.Mod => fmod
-$Float.Ceil => $Math.Ceil
-$Float.Floor => $Math.Floor
-$Float.Round => $Math.Round
-
-$Bool.ToStr	
-$Bool.ToInt	//only returns 0 if 0
-$Bool.ToFloat // only returns 0 if 0.0
-*/
-///add euclidian division function: ((num - (num % 10)) / 10) => RETURN INT
-///re-write/update median
-///ListPrimes			(use euclidian sieve)
-///IsPrime				(is number a prime? use int(sqrt) & modulo i)
-///GreatestCommonDivisor (also 'GCD', 'GreatestCommonFactor', 'GCF'; use euclid's algorithm)
-/** int big = int.Parse(Console.ReadLine());
-    int small = int.Parse(Console.ReadLine());
-    int rest = big % small;
-    while (rest > 0) {
-      big = small;
-      small = rest;
-      rest = big % small;
-    }*/
-///Convert HEX;OCT;BIN string representation of ints & floats to int/float and vice versa...
-///RoundToNearestMult	(round X to nearest multitude of Y)
-///CeilToNearestMult	(round X up to nearest multitude of Y)
-///FloorToNearestMult	(round X down to nearest multitude of Y)
-///FormatDecimalDegrees	(convert float (or int) of degrees to an array with [degrees, minutes, seconds]) //http://geography.about.com/library/howto/htdegrees.htm
-///GLOBAL VARS: Users can use group. objects.
-///SUPPORT NUMSTRINGS: use $Str.IsNumeric local.x 
-/// Leave function shortcut names as is but change actual function names to full names of their mathematical function
-NormalizeDegrees local.degrees:
-	if (local.degrees && (waitthread IsNumber local.degrees)) {
-		// This normalizes any multiplications back to the base degrees in the [-360,360] domain.
-		// Use default modulo operator on integers.
-		if (typeof local.degrees == "int") {
-			local.result = local.degrees % 360;
-		// Use reborn's new fmod command on floats ;-)
-		} else {
-			local.result = fmod local.degrees 360;
-		}
-		
-		// This normalizes any negative degrees to a positive [0, 360] domain.
-		if (local.result <= 0) {
-			local.result += 360;
-		}
-	}
-end local.result;
-
 __init:
+	/*TEMP*/
+	local.labelPrefix = "";
+	/*TEMP*/
 	if (self && self == $/*System.Library.*/Math) {
-		///MATHEMATICAL CONSTANTS:
-		self.PI = 3.141592654; 		
-		self.EU = 0.577215664;		/**Euler's number*/
-		self.E = 2.718281828;		/**e natural log*/
-		self.PHI = 1.618033988;		/**Golden ratio Phi*/
-		self.SQ2 = 1.414213562;		/**Square root of two*/
-
-		// Users need to use group.x and .y objects for multiple transformations
-		//parm.math = local CreateListener;
+		/// MATHEMATICAL CONSTANTS: ///
+		self.PI = 3.141592654; 			/**Circumference of a circle with a diameter of 1 unit*/
+		self.PI_2 = 1.570796327;		/**Half the circumference of a circle with a radius of 1 unit*/
+		self.EU = 0.577215664;			/**Euler's number*/
+		self.E = 2.718281828;			/**e natural log*/
+		self.PHI = 1.618033988;			/**Golden ratio Phi*/
+		self.SQ2 = 1.414213562;			/**Square root of two*/
 		
-		// Shortcuts
-		self.IsNum = 				self.fullPath::"IsNumber";
-		self.NaN = 					self.fullPath::"NotaNumber";
+		/// SPECIAL VALUES: ///
+		self.INF_MAX = pow 2 128; 		/**Positive infinity; http://www.gnu.org/software/libc/manual/html_node/Infinity-and-NaN.html*/
+		self.INF_MIN = pow -2 129;		/**Negative infinity; http://www.gnu.org/software/libc/manual/html_node/Infinity-and-NaN.html*/
+		self.SIGNZERO = -0.0;			/**-0 or signed zero*/
+		self.NaN = sqrt ( -1);			/**Special value: 'NaN' or 'NotaNumber'*/
+		
+		/// MATHEMATICAL METHODS & FUNCTIONS: ///
 		self.ToRadians = 			self.fullPath::"ToRadians";
 		self.ToDegrees = 			self.fullPath::"ToDegrees";
-		/*self.Rad = 				self.fullPath::"ToRadians";
-		self.Deg = 					self.fullPath::"ToDegrees";*/
-		// for radians input: 15
-		self.Cos = 					self.fullPath::"Cos";
-		self.Sin = 					self.fullPath::"Sin";
-		self.Tan =					self.fullPath::"Tan";
-		self.Acos =					self.fullPath::"Acos";
-		self.Asin =					self.fullPath::"Asin";
-		self.Atan =					self.fullPath::"Atan";
-		self.Atan2 =				self.fullPath::"Atan2";
-		//self.Cosec =				self.fullPath::"Csc";
-		self.Csc =					self.fullPath::"Csc";
-		self.Sec =					self.fullPath::"Sec";
-		self.Cot =					self.fullPath::"Cot";
-		//self.Acosec =				self.fullPath::"Acsc";
-		self.Acsc =					self.fullPath::"Acsc";
-		self.Asec =					self.fullPath::"Asec";
-		self.Acot =					self.fullPath::"Acot";
-		// Same as above, but for degrees input: 15
-		self.Cosd = 				self.fullPath::"Cosd";
-		self.Sind = 				self.fullPath::"Sind";
-		self.Tand =					self.fullPath::"Tand";
-		self.Acosd =				self.fullPath::"Acosd";
-		self.Asind =				self.fullPath::"Asind";
-		self.Atand =				self.fullPath::"Atand";
-		self.Atan2d =				self.fullPath::"Atan2d";
-		self.Cotd =					self.fullPath::"Cotd";
-		self.Acotd =				self.fullPath::"Acotd";
-		//self.Cosecd =				self.fullPath::"Cscd";
-		self.Cscd =					self.fullPath::"Cscd";
-		self.Secd =					self.fullPath::"Secd";
-		self.Cotd =					self.fullPath::"Cotd";
-		//self.Acosecd =			self.fullPath::"Acscd";
-		self.Acscd =				self.fullPath::"Acscd";
-		self.Asecd =				self.fullPath::"Asecd";
-		self.Acotd =				self.fullPath::"Acotd";
-		// Remaining trimmed functions :) thanks to Razo's new scripting commands
+		self.NormalizeDegrees =		self.fullPath::"NormalizeDegrees";
+		self.FormatDegrees = 		self.fullPath::"FormatDegrees";
+		self.Cos = 					self.fullPath::"Cosine";
+		self.Sin = 					self.fullPath::"Sine";
+		self.Tan =					self.fullPath::"Tangent";
+		self.Acos =					self.fullPath::"ArcCosine";
+		self.Asin =					self.fullPath::"ArcSine";
+		self.Atan =					self.fullPath::"ArcTangent";
+		self.Atan2 =				self.fullPath::"ArcTangent2";
+		self.Csc =					self.fullPath::"Cosecant";
+		self.Sec =					self.fullPath::"Secant";
+		self.Cot =					self.fullPath::"Cotangent";
+		self.Acsc =					self.fullPath::"ArcCosecant";
+		self.Asec =					self.fullPath::"ArcSecant";
+		self.Acot =					self.fullPath::"ArcCotangent";
+		self.Cosh =					self.fullPath::"HyperbolicCosine";
+		self.Sinh = 				self.fullPath::"HyperbolicSine";
+		self.Tanh = 				self.fullPath::"HyperbolicTangent";
+		self.Coth = 				self.fullPath::"HyperbolicCotangent";
+		self.Sech = 				self.fullPath::"HyperbolicSecant";
+		self.Csch = 				self.fullPath::"HyperbolicCosecant";
 		self.Exp =					self.fullPath::"Exp";
 		self.Frexp =				self.fullPath::"Frexp";
 		self.Ldexp =				self.fullPath::"Ldexp";
+		self.Lb =					self.fullPath::"Lb";
 		self.Ln =					self.fullPath::"Log";
 		self.Log =					self.fullPath::"Log";
-		self.Log2 =					self.fullPath::"Log2";
+		self.Log10 =				self.fullPath::"Log10";
+		self.Logc =					self.fullPath::"Logc";
 		self.Modf =					self.fullPath::"Modf";
 		self.Pow =					self.fullPath::"Pow";
 		self.Floor =				self.fullPath::"Floor";
 		self.Ceil =					self.fullPath::"Ceil";
 		self.Fmod =					self.fullPath::"Fmod";
 		self.Sqrt =					self.fullPath::"Sqrt";
-		// Square root different methods & versions.
-		self.Sqrt1 =				self.fullPath::"Sqrt1";
-		self.Sqrt2 =				self.fullPath::"Sqrt2";
-		self.Sqrt3 =				self.fullPath::"Sqrt3";
 		// General functions...
+		self.Empty = 				self.fullPath::"Empty";
+		self.IsNum = 				self.fullPath::"IsNumber";
+		self.IsNaN = 				self.fullPath::"IsNotaNumber"
+		self.IsInfinite = 			self.fullPath::"IsInfinite";
 		self.IsPowOf2 = 			self.fullPath::"IsPowOf2";
+		self.IsMultipleOf = 		self.fullPath::"IsMultipleOf";
+		self.IsDivisibleBy = 		self.fullPath::"IsDivisibleBy";
 		self.Round = 				self.fullPath::"Round";
+		self.RoundToMultOf = 		self.fullPath::"RoundToMultOf";
+		self.CeilToMultOf = 		self.fullPath::"CeilToMultOf";
+		self.FloorToMultOf = 		self.fullPath::"FloorToMultOf";
 		self.FloorToPowOf = 		self.fullPath::"FloorToPowOf";
 		self.CeilToPowOf = 			self.fullPath::"CeilToPowOf";
 		self.RoundToPowOf = 		self.fullPath::"RoundToPowOf";
-		self.Median = 				self.fullPath::"Median";
-		self.Average = 				self.fullPath::"Average";		
-		/*self.Med = 				self.fullPath::"Median";
-		self.Avg = 					self.fullPath::"Average";
-		self.Eucl = 				self.fullPath::"EuclDivision";*/
-		self.EuclDiv = 				self.fullPath::"EuclDivision";
-		self.NormalizeDegrees =		self.fullPath::"NormalizeDegrees";
-		/*self.NormDeg = 			self.fullPath::"NormalizeDegrees";*/
+		self.Average = 				self.fullPath::(local.labelPrefix + "Average");		
+		self.PositionalCompare = 	self.fullPath::"PositionalCompare";
+		self.Compare = 				self.fullPath::"Compare";
+		self.OppositeSigns = 		self.fullPath::"OppositeSigns";
+		self.EuclDiv = 				self.fullPath::"EuclideanDivision";
+		self.Median = 				self.fullPath::(local.labelPrefix + "Median");
+		self.Gcd = 					self.fullPath::"GreatestCommonDivisor";
+		self.Lcm = 					self.fullPath::"LeastCommonMultiple";
+		self.ListPrimes = 			self.fullPath::"ListPrimes";
+		self.IsPrime = 				self.fullPath::"IsPrime";
+		self.NthRoot = 				self.fullPath::"NthRoot";
 		
-		// There are 51 methods in this function library.
-		self.methodSize += 51;
+		// There are 62 methods in this function library.
+		self.methodSize += 62;
 		
-		// There are 5 properties defined.
-		self.propertySize += 5;
+		// There are 10 properties defined.
+		self.propertySize += 10;
 		
-		// $Math class has 3 children or 'subclasses'.
+		// Set path to information library:
+		self.info = 				$Library.infoMath;
+		
+		// $Math class has 2 children or 'subclasses'.
 		self waitthread $System.fullPath::#DefineClass "Int" self.fullPath::"__initInt"; self.Int = $Int;
-		self waitthread $System.fullPath::#DefineClass "Float" self.fullPath::"__initFloat" 1; self.Int = $Float;
-		self waitthread $System.fullPath::#DefineClass "Bool" self.fullPath::"__initBool" 1; self.Int = $Bool;
+		self waitthread $System.fullPath::#DefineClass "Float" self.fullPath::"__initFloat"; self.Float = $Float;
 	}
 end;
 
@@ -208,96 +130,199 @@ __info:
 	local.inf["library"] = "math.slib";		//filename
 	local.inf["namespace"] = "Math";		//targetname of class this script is part of...
 	local.inf["title"] = "MATHEMATICAL FUNCTIONS LIBRARY";
-	local.inf["version"] = "1.3.19";
-	local.inf["lastmodified"] = "4/12/2012";
+	local.inf["version"] = "1.4.405";
+	local.inf["lastmodified"] = "21/01/2013";
 	local.inf["authors"][0] = "Sor";
-	local.inf["authors"][1] = "jv_map";
-	local.inf["authors"][2] = "veers";
+	local.inf["authors"][1] = "Razo[R]apiD";
 end local.inf;
 
 __initInt:
-	if (self && self == $Math.Int) {
+	if (self && self == $Int) {
+		/// Signed Int32 format PROPERTIES: ///
 		self.MAX_VALUE = 2147483647;
-		self.MAX_VALUE_POW = 31; 	//from -2^31 to (2^31) - 1
 		self.MIN_VALUE = -2147483648;
-		self.SIGNED = true;
-
-		// Method shortcuts
-		self.IsPowOf2 = 		self.fullPath::"IsPowOf2";
+		self.BITS = 31; 			/**from -2^31 to (2^31)-1*/
+		self.SIGNED = 1;			/**32nd bit is a sign bit*/
+		
+		/// Int32 METHODS & FUNCTIONS: ///
 		self.ToStr = 			self.fullPath::"IntToStr";
 		self.ToFloat = 			self.fullPath::"IntToFloat";
 		self.ToBool = 			self.fullPath::"IntToBool";
-		self.FloorToPowOf = 	self.fullPath::"FloorToPowOf";
-		self.CeilToPowOf = 		self.fullPath::"CeilToPowOf";
-		self.RoundToPowOf = 	self.fullPath::"RoundToPowOf";
+		self.ToArray = 			self.fullPath::"ToArray";
+		self.ToVector = 		self.fullPath::"ToVector";
 		
-		// There are 7 methods registered in this function library;
-		self.methodSize += 7;
+		self.EuclDiv = 			self.fullPath::"EuclideanDivision";
+		self.IsEven = 			self.fullPath::"IsEven";
+		
+		// There are 3 methods registered in this function library;
+		self.methodSize += 3;
 		
 		// There are 4 properties defined;
 		self.propertySize += 4;
 	}
 end;
 
-__InitFloat:
-	if (self && self == $Float) {
-
-		// There are 0 methods registered in this function library;
-		self.methodSize += 0;
-		
-		// There are 0 properties defined;
-		self.propertySize += 0;
-	}
-end;
-
-__InitBool:
-	if (self && self == $Bool) {
-	
-		// There are 0 methods registered in this function library;
-		self.methodSize += 0;
-		
-		// There are 0 properties defined;
-		self.propertySize += 0;
-	}
-end;
-
 IntToStr local.int:
-	if (local.int) {
-		if (typeof local.int == "int") {
-			local.result = string(local.int);
-		} else {
-			local.result = local.int;
-		}
+	if (typeof local.int == "int") {
+		local.result = string(local.int);
+	} else {
+		local.result = local.int;
 	}
 end local.result;
 
 IntToFloat local.int:
-	if (local.int) {
-		if (typeof local.int == "int") {
-			local.result = float(local.int);
-		} else {
-			local.result = local.int;
-		}
+	if (typeof local.int == "int") {
+		local.result = float(local.int);
+	} else {
+		local.result = local.int;
 	}
 end local.result;
 
 IntToBool local.int:
-	if (local.int) {
-		if (typeof local.int == "int") {
-			if (local.int == 0) {
-				local.result = false;
-			} else {
-				local.result = true;
-			}
+	if (typeof local.int == "int") {
+		if (local.int == 0) {
+			local.result = $Bool.false;
 		} else {
-			local.result = local.int;
+			local.result = $Bool.true;
+		}
+	} else {
+		local.result = local.int;
+	}
+end local.result;
+
+ToArray local.x:
+	if (waitthread IsNumber local.x) {
+		local.result[1] = local.x;
+	}
+end local.result;
+
+ToVector local.x:
+	if (waitthread IsNumber local.x) {
+		local.result = ( local.x local.x local.x );
+	}
+end local.result;
+
+/** ==========================================================================================
+ IsEven Function
+ ---------------------------------------------------------------------------------------------
+ DESCR|: 	Determines whether the specified floating point value represents an integral value
+			(i.e. whether it's fraction equals 0).
+ INPUT|: 	<INT/FLOAT X>
+ OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
+			* 	1	=> X is even
+			* 	0	=> X is odd
+			* 	NIL	=> X is not a number
+ =========================================================================================== */
+IsEven local.x:
+	if (typeof local.int == "int") {
+		if ((local.x % 2) == 0) {
+			local.result = 1;
+		} else {
+			local.result = 0;
+		}
+	} else if ((typeof local.int) == "float") {
+		if ((fmod local.x 2) == 0.0) {
+			local.result = 1;
+		} else {
+			local.result = 0;
 		}
 	}
 end local.result;
 
+/** ==========================================================================================
+ EuclideanDivision Function
+ ---------------------------------------------------------------------------------------------
+ DESCR|: 	Divides X integrally by Y and returns the quotient. An integral division is more
+			commonly known as a Euclidean division.
+			In MorpheusScript, an integral division will only take place if '/'-operator 
+			has two integers as operands.
+ INPUT|: 	<INT/FLOAT X>
+ OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
+			* 	int		=> quotient of dividing X by Y
+			* 	float 	=> +infinity if Y is 0.
+			* 	NIL		=> error: inexistent, uninitialized or invalid input
+ =========================================================================================== */
+EuclideanDivision local.x local.y:
+	/*Error & Exception handling*/
+	local.x = waitthread MakeNumber local.x;
+	if (local.x == NIL) {waitthread __Error1 "EuclideanDivision" NIL local.x; end;}
+	
+	local.y = waitthread MakeNumber local.y;
+	if (local.y == NIL) {waitthread __Error1 "EuclideanDivision" "y <arg2>" local.y; end;}
+	
+	/*Main Logic*/
+	if !(local.y) {
+		local.result = $Math.INF_MAX; // Divide by zero intercepted.
+	} else {
+		local.result = ((int local.x) / (int local.y));
+	}
+end local.result;
+
+__initFloat:
+	if (self && self == $Float) {
+		/// Signed Float32 format PROPERTIES: ///
+		self.MAX_VALUE = 16777216.000;
+		self.MIN_VALUE = -16777216.000;
+		self.MANTISSA_BITS = 23; 	/**from -2^(23+1) to 2^(23+1)*/
+		//self.IMPLICIT_BIT = 1;	/**the mantissa/significand actually has 24 bit precision because of the 24th 'implicit bit'*/
+		self.EXPONENT_BITS = 8;		/**from -2^(8-1) to 2^(8-1); determines the exponent field*/
+		self.SIGNED = 1;			/**32nd bit is a sign bit*/
+		self.EPSILON = 0.001;		/**Smallest value that is comparable with ==-operators*/
+		self.EPSILON6 = 0.000001;	/**Smallest value that is available and comparable with $Math.Compare*/
+	
+		/// Float32 METHODS & FUNCTIONS: ///
+		self.ToStr = 			self.fullPath::"FloatToStr";
+		self.ToInt = 			self.fullPath::"FloatToInt";
+		self.ToBool = 			self.fullPath::"FloatToBool";
+		self.ToArray = 			self.fullPath::"ToArray";
+		self.ToVector = 		self.fullPath::"ToVector";
+		
+		self.Floor =			self.fullPath::"Floor";
+		self.Ceil =				self.fullPath::"Ceil";
+		self.Round = 			self.fullPath::"Round";
+		self.Fraction = 		self.fullPath::"Fraction";
+		self.Mod = 				self.fullPath::"Fmod";
+		self.IsIntegral = 		self.fullPath::"IsIntegral";
+		
+		// There are 11 methods registered in this function library;
+		self.methodSize += 11;
+		
+		// There are 7 properties defined;
+		self.propertySize += 7;
+	}
+end;
+
+FloatToInt local.float local.mode:
+	if (typeof local.float == "float" && !(waitthread __IsNaN local.float)) {
+		local.finite = waitthread IsInfinite local.float;
+		if (local.finite) {
+			if (local.finite == -1) {
+				local.result = $Int.MIN_VALUE;
+			} else /*if (local.finite == 1)*/ {
+				local.result = $Int.MAX_VALUE;
+			}
+		} else {
+			switch (local.mode) {
+				case 1:
+					local.result = int(ceil local.float);
+				break;
+				case -1:
+					local.result = int(floor local.float);
+				break;
+				default:
+					// Simply cuts of the decimals.
+					local.result = int(local.float);
+				break;
+			}
+		}
+	} else {
+		local.result = local.float;
+	}
+end local.result;
+
 FloatToStr local.float:
-	if (local.float) {
-		if (typeof local.float == "float") {
+	if (typeof local.float == "float") {
+		if !(waitthread __IsNaN local.float) {
 			// Cast float to vector
 			local.tmpVec = ( local.float 0.0 0.0 );
 			
@@ -322,11 +347,235 @@ FloatToStr local.float:
 			// Not needed.
 			local.tmpStr = NIL;
 		} else {
-			local.result = local.float;
+			local.result = "NaN";
+		}
+	} else {
+		local.result = local.float;
+	}
+end local.result;
+
+FloatToBool local.float:
+	if (typeof local.float == "float") {
+		if (local.float == 0.0 || waitthread __IsNaN local.float) {
+			local.result = $Bool.false;
+		} else {
+			local.result = $Bool.true;
+		}
+	} else {
+		local.result = local.float;
+	}
+end local.result;
+
+/** ==========================================================================================
+ Fraction Function
+ ---------------------------------------------------------------------------------------------
+ DESCR|: 	Returns the fractional part of the specified floating point value. In other words,
+			the opposite of casting a float to an integer is being done.
+ INPUT|: 	<INT/FLOAT X>
+ OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
+			* 	float	=> fractional value (-1 < result < 1)
+			*	NIL		=> error: invalid or inexistent input
+ =========================================================================================== */
+Fraction local.float:
+	if ((typeof local.float) == "float") {
+		local.result = (modf(local.float))["fractional"];
+	} else if ((typeof local.float) == "int") {
+		local.result = 0.0;
+	}
+end local.result;
+
+/** ==========================================================================================
+ IsIntegral Function
+ ---------------------------------------------------------------------------------------------
+ DESCR|: 	Determines whether the specified floating point value represents an integral value
+			(i.e. whether it's fraction equals 0).
+ INPUT|: 	<INT/FLOAT X>
+ OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
+			* 	1		=> X is integral
+			* 	0		=> X is fractional
+			*	NIL		=> X is not a number
+ =========================================================================================== */
+IsIntegral local.float:
+	if ((typeof local.float) == "float") {
+		local.result = (ceil(local.float) == local.float);
+	} else if ((typeof local.float) == "int") {
+		local.result = 1;
+	}
+end local.result;
+
+/** ==========================================================================================
+ Empty Function
+ ---------------------------------------------------------------------------------------------
+ DESCR|: 	Returns empty or 'valueless' number
+ INPUT|: 	/
+ OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
+			*	0  => empty/valueless number
+ =========================================================================================== */
+Empty:
+end 0;
+
+/** ==========================================================================================
+ IsNotaNumber Function
+ ---------------------------------------------------------------------------------------------
+ DESCR|: 	Determines whether X is Not a Number, i.e. whether X is $Math.NaN.
+ INPUT|: 	<INT/FLOAT X>
+ OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
+			* 	1	=> NaN detected
+			*	0  	=> X is not NaN
+ =========================================================================================== */
+IsNotaNumber local.x:
+	local.result = 0;
+	// If X is a float...
+	if (typeof local.x == "float") {
+		if (local.x == local.x) {
+			local.chk = 1;
+		} else if (local.x < 0.0) {
+			local.chk = 1;
+		} else if (local.x > 0.0) {
+			local.chk = 1;
+		}
+	
+		// ... and is not equal to itself, nor greater or smaller than anything else, 
+		if !(local.chk) {
+			// then X must be $Math.NaN or 'NotaNumber'.
+			local.result = 1;
 		}
 	}
 end local.result;
 
+__IsNaN local.float:
+	local.result = 0;
+	
+	if (local.x == local.x) {
+		local.chk = 1;
+	} else if (local.x < 0.0) {
+		local.chk = 1;
+	} else if (local.x > 0.0) {
+		local.chk = 1;
+	}
+	
+	// If X is a float and is not equal to itself, nor greater or smaller than anything else, 
+	if !(local.chk) {
+		// then X must be $Math.NaN or 'NotaNumber'.
+		local.result = 1;
+	}
+end local.result;
+
+/** ==========================================================================================
+ IsInfinite Function
+ ---------------------------------------------------------------------------------------------
+ DESCR|: 	Determines whether X is positive or negative infinity.
+ INPUT|: 	<INT/FLOAT X>
+ OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
+			* 	1	=> X is positive infinity
+			*	0  	=> X is not infinite
+			*   -1  => X is negative infinity
+ =========================================================================================== */
+IsInfinite local.x:
+	local.result = 0;
+	if (typeof local.x == "float") {
+		// Potentially dealing with negative infinity..
+		if (local.x < 0) {
+			// If X is not larger than negative infinity, then it is negative infinity.
+			if !($Math.INF_MIN < local.x) {
+				local.result = -1;
+			}
+		// Potentially dealing with positive infinity..
+		} else if (0 < local.x) {
+			// If X is not smaller than positive infinity, then it is positive infinity.
+			if !(local.x < $Math.INF_MAX) {
+				local.result = 1;
+			}
+		}
+	}
+end local.result;
+
+/** ==========================================================================================
+ IsNumber Function
+ ---------------------------------------------------------------------------------------------
+ DESCR|: 	Determines whether X is a valid number.
+ INPUT|: 	<INT/FLOAT X>
+ OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
+			* 	1	=> X is a valid number
+			*	0  	=> X is not a valid number
+ =========================================================================================== */
+IsNumber local.var:
+	switch(typeof local.var) {
+		case "int":
+			local.result = 1;
+		break;
+		case "float":
+			if !(waitthread __IsNaN local.x) {
+				local.result = 1;
+				break;
+			}
+		default:
+			local.result = 0;
+		break;
+	}
+end local.result;
+
+/** ==========================================================================================
+ MakeNumber Function
+ ---------------------------------------------------------------------------------------------
+ DESCR|: 	Returns valid integer and floating point numbers, even if the input was a 
+			stringified representation of one.
+ INPUT|: 	<INT/FLOAT X>
+ OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
+			* 	int/float 	=> valid number
+			*	NIL  		=> no numerical representation available
+ =========================================================================================== */
+MakeNumber local.x:
+	switch (typeof local.x) {
+		case "int": 
+			local.result = local.x;
+		break;
+		case "float":
+			if !(waitthread __IsNaN local.x) {
+				local.result = local.x;
+			}
+		break;
+		case "string":
+			switch (local.x) {
+				case true:
+					local.result = 1;
+				break;
+				case false:
+					local.result = 0;
+				break;
+				default:
+					local.numeric = waitthread reborn/framework/lib/string.slib::IsNumeric local.x;
+					if (local.numeric == 1) {
+						local.result = int (local.x);
+					} if (local.numeric == 2) {
+						local.result = float (local.x);
+					}
+				break;
+			}
+		break;
+	}
+end local.result;
+
+/** ==========================================================================================
+ IsPowOf2 Function
+ ---------------------------------------------------------------------------------------------
+ DESCR|: 	Returns whether the specified value is a power of 2 or not.
+ INPUT|: 	<INT/FLOAT X>
+ OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
+			* 	int 		=> 1 if x is a power of 2
+							=> 0 if x is not a power of 2
+			*	NIL  		=> error: uninitialized/inexistent/invalid input
+ =========================================================================================== */
+IsPowOf2 local.x:
+	/*Error & Exception handling*/
+	local.x = waitthread MakeNumber local.x;
+	if (local.x == NIL) {waitthread __Error1 "IsPowOf2" NIL local.x; end;}
+	else if ((typeof local.x) == "float" && ceil(local.x) != local.x) {end 0;}
+	
+	// Make x an integer and positive. We need the signed bit to be 0.
+	local.x = int(abs(local.x));
+	// This will convert bits so it returns 0 if x is 1,2,4,8,16,32,64,128,256,512,1024,2048,4096...
+end (local.x && !(local.x & (local.x - 1)));
 /**
 	Say we have a number 8, which is 2^3. In binary we get:
 			1000
@@ -356,58 +605,493 @@ end local.result;
 	Our algorithm returns 16 instead of 0, this means 20 is not a 
 	power of 2 like it should be.
 */
-IsPowOf2 local.x:
+
+/** ==========================================================================================
+ OppositeSigns Function
+ ---------------------------------------------------------------------------------------------
+ DESCR|: 	Determines whether X has a different sign bit than Y (i.e. whether X is positive
+			or negative and Y is not).
+			This is a particularly fast and useful function for detecting signed integer 
+			overflow.
+ INPUT|: 	<ARRAY:INT/FLOAT arrayOfNumbers>
+ OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
+			*	int/float	=> the average of the given set of values
+			*	NIL 		=> error: uninitialized/inexistent/invalid input
+ EXAMPLE|:	Initial operands are X (=2147483647) and Y (=1) which both have their sign bit
+			set to 0 since they are positive values. The subsequent operation adds X and Y to
+			form Z. OppositeSigns(X/Y, Z) will return 1 because Z now exceeds (2^31)-1,  
+			which is the greatest value an int32 can represent, and now Z equals -2147483648.
+			In such a case, we can say that the integer Z has overflown.
+ =========================================================================================== */
+OppositeSigns local.x local.y:
+end ((local.x ^ local.y) < 0);
+
+/** ==========================================================================================
+ IsPrime Function
+ ---------------------------------------------------------------------------------------------
+ DESCR|: 	Determines whether x is a prime number or not.
+ INPUT|: 	<INT/FLOAT X>
+ OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
+			* 	1		=> x is a prime number
+			* 	0		=> x is not a prime number
+			*	NIL  	=> error: uninitialized/inexistent/invalid input
+ =========================================================================================== */
+IsPrime local.x:
 	/*Error & Exception handling*/
 	local.x = waitthread MakeNumber local.x;
-	if (local.x == NIL) {waitthread __Error1 "IsPowOf2" NIL local.x; end;}
-	else if (typeof local.x == "float") {local.x = float(local.x);}
+	if (local.x == NIL) {waitthread __Error1 "IsPrime" NIL local.x; end;}
 	
-	// Make x positive. We need the signed bit to be 0.
-	local.x = abs(local.x);
-	// This will convert bits so it returns 1 if x is 1,2,4,8,16,32,64,128,256,512,1024,2048,4096...
-end ((local.i != 0) && ((local.i & (local.i - 1)) == 0));
+	/*Main Logic*/
+	if ((typeof local.x) == "int" || ceil(local.x) == local.x) {
+		local.x = int(local.x);
+		if (local.x <= 1) {
+			local.result = 0;
+		} else if (local.x == 2) {
+			local.result = 1;
+		} else {
+			local.result = 1;
+			local.sqrt = int(ceil(sqrt(local.x)));
+			for (local.i = 2; local.i < local.x; local.i++) {
+				// Divisible by a number other than 1 and itself?
+				if !(local.x % local.i) {
+					local.result = 0;
+					break;
+				}
+				
+				// If we are past the sqrt of x, then there won't need to search for more divisors.
+				if (local.sqrt < local.i) {
+					break;
+				}
+			}
+		}
+	} else {
+		local.result = 0;
+	}
+end local.result;
 
+/** ==========================================================================================
+ ListPrimes Function
+ ---------------------------------------------------------------------------------------------
+ DESCR|: 	Returns array with all prime numbers smaller than x.
+ INPUT|: 	<INT/FLOAT X>
+ OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
+			* 	array	=> [1-X]	=> int	=>	all prime numbers found
+						=> .size is 0 if no prime numbers found (i.e. x is smaller than 2)
+			*	NIL  	=> error: uninitialized/inexistent/invalid input
+ =========================================================================================== */
+ListPrimes local.x:
+	/*Error & Exception handling*/
+	local.x = waitthread MakeNumber local.x;
+	if (local.x == NIL) {waitthread __Error1 "ListPrimes" NIL local.x; end;}
+	
+	/*Main Logic*/
+	local.x = int(abs(local.x));
+	local.result[1] = NIL;
+	
+	if (1 < local.x) {
+		// Using the sieve of Eratosthenes method.
+		local.sieve[1] = NIL;
+		// Two is the smallest prime number and the only prime number that is an even number.
+		local.result[1] = 2;
+		// By starting from the second smallest prime number (3) and incrementing by 2, all
+		// other even numbers are hereby automatically omitted.
+		for (local.i = 3; local.i <= local.x; local.i += 2) {
+			// Check if i is already filtered out
+			if !(local.sieve[local.i]) {
+				local.sqrt = int(ceil(sqrt(local.i)));
+				// i/0=lol; i/1=pointless; i/2=redundant, therefore start checking for divisors at j=3.
+				for (local.j = 3; local.j < local.i; local.j++) {
+					// Divisible by a number other than 1 and itself?
+					if !(local.i % local.j) {
+						// All multiples of this non-prime number are automatically omitted from the search.
+						for (local.s = local.i; local.s <= local.x; local.s = (local.s * local.i)) {
+							local.sieve[local.s] = 1;
+						}
+						// Immediately break and check next i.
+						goto Continue;
+					}
+					
+					// If we are past the sqrt of i, then we don't need to search for any more divisors.
+					if (local.sqrt < local.j) {
+						break;
+					}
+				}
+				local.result[(local.result.size + 1)] = local.i;
+			}
+			Continue:
+		}
+		// Free mem.
+		local.sieve = NIL;
+	}
+end local.result;
+
+/** ==========================================================================================
+ GreatestCommonDivisor Function
+ ---------------------------------------------------------------------------------------------
+ DESCR|: 	Returns the GCD (Greatest Common Divisor), also known as the HCF (Highest Common
+			Factor), of specified x and y.
+ INPUT|: 	<INT X> <INT Y>
+ OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
+			* 	int		=> gcd() of x
+			*	NIL  	=> error: uninitialized/inexistent/invalid input
+ =========================================================================================== */
+_GreatestCommonDivisor local.x local.y: goto internal2;
+GreatestCommonDivisor local.x local.y:
+	/*Error & Exception handling*/
+	if (local.x == NIL || (typeof local.x) != "int") {waitthread __Error1 "GreatestCommonDivisor" NIL local.x; end;}
+	if (local.y == NIL || (typeof local.x) != "int") {waitthread __Error1 "GreatestCommonDivisor" "y <arg2>" local.y; end;}
+
+	internal2:
+	
+	/*Main Logic*/
+	local.r = local.x % local.y
+	while (local.r) {
+		local.x = local.y;
+		local.y = local.r;
+		local.r = local.x % local.y;
+	}
+end (abs(local.y));
+
+/** ==========================================================================================
+ LeastCommonMultiple Function
+ ---------------------------------------------------------------------------------------------
+ DESCR|: 	Returns the LCM (Least Common Multiple) of specified x and y.
+ INPUT|: 	<INT X> <INT Y>
+ OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
+			* 	int		=> lcm() of x
+			*	NIL  	=> error: uninitialized/inexistent/invalid input
+ =========================================================================================== */
+LeastCommonMultiple local.x local.y:
+	/*Error & Exception handling*/
+	if (local.x == NIL || (typeof local.x) != "int") {waitthread __Error1 "LeastCommonMultiple" NIL local.x; end;}
+	if (local.y == NIL || (typeof local.x) != "int") {waitthread __Error1 "LeastCommonMultiple" "y <arg2>" local.y; end;}
+	
+	/*Main Logic*/
+end ((abs(local.x * local.y)) / (waitthread _GreatestCommonDivisor local.x local.y));
+
+/** ==========================================================================================
+ Median Function
+ ---------------------------------------------------------------------------------------------
+ DESCR|: 	Calculates the median value of the specified array of integer and floating point 
+			values.
+ INPUT|: 	<ARRAY:INT/FLOAT arrayOfNumbers>
+ OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
+			*	int/float	=> the median of the given set of values
+			*	NIL 		=> error: uninitialized/inexistent/invalid input
+ =========================================================================================== */
+_Median local.array local.forceDiv: goto internal1;
+Median local.array local.forceDiv:
+	/*Error & Exception handling*/
+	if (!local.array || local.array.size <= 0 || ((typeof local.array) != "array" && (typeof local.array) != "const array")) {
+		if (level.DEBUG) {
+			conprintf "\n ~^~^~^~ FATAL_ERROR[lib/math.slib::Median]: array <arg1> is either inexistent, uninitialized or invalid! ~^~^~^~ \n\n";
+		}
+		end;
+	} else if !(waitthread reborn/framework/lib/array.slib::_ConsistsOf local.array "int"::"float") {
+		if (level.DEBUG) {
+			conprintf "\n ~^~^~^~ FATAL_ERROR[lib/math.slib::Median]: array <arg1> either is not one-dimensional or is not homogeneous with int/float variables! ~^~^~^~ \n\n";
+		}
+		end;
+	}
+	
+	internal1:
+	
+	/*Main Logic*/
+	local.arraySizes = waitthread reborn/framework/lib/array.slib::__AnalyzeArray local.array;
+	local.array = waitthread reborn/framework/lib/array.slib::_QuickSort local.array 0 local.arraySizes[1] (local.arraySizes[2] - 1);
+	
+	// Note: using integral division on array indexes. 
+	// Note: in case of two middle values, the avg() calculation will always divide fractionally.
+	if !(local.array.size % 2) {
+		// Align middle element with array indexing 
+		local.i = (local.arraySizes[1] + ((local.array.size / 2) - 1));
+		// Take average of middle element and the next
+		local.result = (local.array[local.i] + local.array[(local.i + 1)]) / 2.0;
+	} else {
+		local.result = local.array[(local.arraySizes[1] + (local.array.size / 2))];
+	}
+end local.result;
+
+
+/** ==========================================================================================
+ Average Function
+ ---------------------------------------------------------------------------------------------
+ DESCR|: 	Calculates the average of the specified array of integer and floating point values.
+ INPUT|: 	<ARRAY:INT/FLOAT arrayOfNumbers>
+ OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
+			*	int/float	=> the average of the given set of values
+			*	NIL 		=> error: uninitialized/inexistent/invalid input
+ =========================================================================================== */
+_Average local.array: goto internal0;
+Average local.array:
+	/*Error & Exception handling*/
+	if (!local.array || local.array.size <= 0 || !(waitthread reborn/framework/lib/array.slib::IsUserArray local.array)) {
+		if (level.DEBUG) {
+			conprintf "\n ~^~^~^~ FATAL_ERROR[lib/math.slib::Average]: array <arg1> is either inexistent, uninitialized or invalid! ~^~^~^~ \n\n";
+		}
+		end;
+	} else if !(waitthread reborn/framework/lib/array.slib::_ConsistsOf local.array "int"::"float" 1) {
+		if (level.DEBUG) {
+			conprintf "\n ~^~^~^~ FATAL_ERROR[lib/math.slib::Average]: array <arg1> either is not one-dimensional or is not homogeneous with int/float variables! ~^~^~^~ \n\n";
+		}
+		end;
+	}
+	
+	internal0:
+	
+	/*Main Logic*/
+	local.sum = 0;
+	local.total = local.array.size;
+	for (local.i = 1; local.i <= local.total; local.i++) {
+		local.sum += local.array[local.i];
+	}
+end (local.result / local.total);
+
+/** ==========================================================================================
+ Compare Function
+ ---------------------------------------------------------------------------------------------
+ DESCR|: 	Compares X to Y and returns the whether X is smaller than, greater than or equal
+			to Y.
+ INPUT|: 	<INT/FLOAT X> <INT/FLOAT Y>
+ OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
+			*	1		=> X is larger than Y
+			* 	0		=> X is equal to Y
+			* 	-1 		=> X is smaller than Y
+			*	NIL 	=> error: uninitialized/inexistent/invalid input
+ NOTE|:		When floats are printed, they always show 3 decimals. When vector floats are
+			printed, they always show 6 decimals. So we know a float can hold 6 decimals, yet
+				(0.0001 == 0.00001)
+			is true! This is ABSURD! I'm not sure what's at fault here, the engine or float32.
+			What I am sure of, is that this can be fairly easily circumvented with this method, 
+			so modders can compare their floats up to the 6th decimal accuracy if they need it.
+ =========================================================================================== */
+Compare local.x local.y:
+	/*Error & Exception handling*/
+	local.x = waitthread MakeNumber local.x;
+	if (local.x == NIL) {waitthread __Error1 "Compare" NIL local.x; end;}
+	
+	local.y = waitthread MakeNumber local.y;
+	if (local.y == NIL) {waitthread __Error1 "Compare" "y <arg2>" local.y; end;}
+	
+	/*Main Logic*/
+	local.typex = typeof local.x;
+	local.typey = typeof local.y
+
+	if (local.typex == "float" && local.typey == "float") {
+		/** First we need split the floats in their integral and fractional parts. */
+		local.X = modf local.x;
+		local.Y = modf local.y;
+		
+		/** Next, compare both integral parts */
+		if (local.X["intpart"] < local.Y["intpart"]) {
+			local.result = -1;
+		} else if (local.Y["intpart"] < local.X["intpart"]) {
+			local.result = 1;
+		} else /*if (local.Y["intpart"] == local.X["intpart"])*/ {
+			/** In case the integral values are equal, we have to check the 
+				fractional values.
+				
+				An auto-cast to int would immediately cut off all decimals, 
+				rather than just the 5th and the 6th. Therefore all  
+				fractional values must be converted to integral values first. 
+				Since the 6th decimal must become an int, all decimal
+				digits are shifted six positions forward by multiplying them
+				by their precision, i.e. 10^6, or 1 milion.
+				*/
+			local.X["fractional"] = local.X["fractional"] * 1000000;
+			local.Y["fractional"] = local.Y["fractional"] * 1000000;
+				
+			/** All decimals are now within [999999.0, 1.0] domain. 
+				Now cast them to integers. */
+			local.X["fractional"] = int(local.X["fractional"]);
+			local.Y["fractional"] = int(local.Y["fractional"]);
+				
+			/** Decisive comparison */
+			if (local.X["fractional"] < local.Y["fractional"]) {
+				local.result = -1;
+			} else if (local.Y["fractional"] < local.X["fractional"]) {
+				local.result = 1;
+			} else /*if (local.Y["fractional"] == local.X["fractional"])*/ {
+				local.result = 0;
+			}
+		}
+	} else {
+		if (local.x < local.y) {
+			local.result = -1;
+		} else if (local.y < local.x) {
+			local.result = 1;
+		} else /*if (local.x == local.y)*/ {
+			local.result = 0;
+		}
+	}
+end;
+
+/** ==========================================================================================
+ PositionalCompare Function
+ ---------------------------------------------------------------------------------------------
+ DESCR|: 	Compares string representations (X and Y) of finite values in either binary, octal, 
+			decimal or hexadecimal (positional) numeral systems and returns whether the X is 
+			equal to, greater than or smaller than Y. 
+			
+			Binaries, octals and hexadecimals have to be an equal length if there are  
+			insignificant zeroes up front.
+ INPUT|: 	<STRING X> <STRING Y>
+ OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
+			*	1		=> X is larger than Y
+			* 	0		=> X is equal to Y
+			* 	-1 		=> X is smaller than Y
+			*	NIL 	=> error: uninitialized/inexistent/invalid input
+ =========================================================================================== */
+/// Finalize later when working on bin/hex stuff in $Common library
+PositionalCompare local.stringX local.stringY /*local.bin*/:
+	group.masks = waitthread $Library.infoMath::HexadecimalDataMasks;
+	
+	local.x = waitthread reborn/framework/lib/string.slib::_Split local.stringX ".";
+	local.y = waitthread reborn/framework/lib/string.slib::_Split local.stringY ".";
+
+	if (local.x.size == 1) {
+		local.x[2] = "0";
+	} if (local.y.size == 1) {
+		local.y[2] = "0";
+	}
+	
+	// XOR conditional ;-) 
+	// Translated into words: if one is negative/positive but not the other.
+	if ((local.x[1][0] == "-") ^ (local.y[1][0] == "-")) {
+		if (local.x[1][0] == "-") {
+			local.result = -1;
+		} else {
+			local.result = 1;
+		}
+	} else {
+		local.result = waitthread __PositionalCompare local.x[1] local.y[1];
+		
+		if !(local.result) {
+			// Make both fractional strings of same length while retaining their values.
+			while(local.x[2].size < local.y[2].size) {
+				local.x[2] += "0";
+			}
+			while(local.y[2].size < local.x[2].size) {
+				local.y[2] += "0";
+			}
+		
+			// Final comparison...
+			local.result = waitthread __PositionalCompare local.x[2] local.y[2];
+		}
+	}
+	
+	// In case we operated in an entirely negative domain, 
+	// the results need to be reversed if necessary.
+	if (local.result && local.x[1][0] == "-" && local.y[1][0] == "-") {
+		// The only options are -1 and 1, so we can just switch the sign bit:
+		local.result = ~(local.result) + 1;
+	}
+	
+	// Clear group. var:
+	group.masks = NIL;
+end local.result;
+
+__PositionalCompare local.x local.y:
+	local.result = 0;
+	if (local.x != local.y) {
+		if (local.x.size < local.y.size) {
+			local.result = -1;
+		} else if (local.y.size < local.x.size) {
+			local.result = 1
+		} else {
+			local.strSize = local.x.size;
+			for (local.i = 0; local.i < local.strSize; local.i++) {
+				local.xChar = string(local.x[local.i]);
+				local.yChar = string(local.y[local.i]);
+
+				if (local.xChar != local.yChar) {
+					if (group.masks[local.xChar] < group.masks[local.yChar]) {
+						local.result = -1;
+						break;
+					} else if (group.masks[local.yChar] < group.masks[local.xChar]) {
+						local.result = 1;
+						break;
+					}
+					continue;
+				}
+			}
+		}
+	}
+end local.result;
+
+/** ==========================================================================================
+ NthRoot Function
+ ---------------------------------------------------------------------------------------------
+ DESCR|: 	Returns the root in n of specified x (up to fifth decimal precision). 
+			Root n must be a natural number (i.e. positive integer) while x may be real.
+ INPUT|: 	<INT/FLOAT X> <UINT x>
+ OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
+			* 	float	=> n'th root of x
+						=> NaN 		 if x is negative and n is an even number
+						=> +infinity if n is 0 and x is not 1 (divide by zero)
+			*	NIL  	=> error: uninitialized/inexistent/invalid input
+ =========================================================================================== */
+NthRoot local.x local.n:
+	/*Error & Exception handling*/
+	local.x = waitthread MakeNumber local.x;
+	if (local.x == NIL) {waitthread __Error1 "NthRoot" NIL local.x; end;}
+	if (local.n == NIL || (typeof local.n) != "int" || local.n < 0) {waitthread __Error1 "NthRoot" "n <arg2>" local.n; end;}
+
+	if (local.n == 0) {
+		if (local.x == 1.0) {
+			local.result = local.x;
+		} else {
+			// Division by zero, infinite possibilities...
+			local.result = $Math.INF_MAX;
+		}
+	} else if (1 <= local.n) {
+		if (local.x < 0.0 && (local.n % 2)) {
+			local.sav = local.x
+			local.result = local.x / local.n
+			while (abs(local.result - local.sav) > $Float.EPSILON) {
+				local.sav = local.result;
+				local.result = ((local.n - 1) * local.result + (local.x / (pow local.result (local.n - 1)))) / local.n;
+			}
+		} else {
+			// In R, a negative number cannot have an even root
+			local.result = $Math.NaN;
+		}
+	}
+end local.result;
+
+/** ==========================================================================================
+ Round Function
+ ---------------------------------------------------------------------------------------------
+ DESCR|: 	Rounds floating point X to nearest integral value.
+ INPUT|: 	<STRING string>
+ OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
+			*	int/float => rounded X
+			*	NIL 	  => error: uninitialized/inexistent/invalid input
+ =========================================================================================== */
 Round local.x:
 	local.x = waitthread MakeNumber local.x;
-	if (local.x == NIL) {waitthread __Error1 "RoundToPowOf" NIL local.x; end;}
+	if (local.x == NIL) {waitthread __Error1 "Round" NIL local.x; end;}
 	
 	/*Main Logic*/
 	local.y = floor local.x;
 	local.z = ceil local.x;
 	
-	if ((local.x - local.y) < (local.z - local.x)) {
+	if (abs(local.x - local.y) < abs(local.x - local.z)) {
 		local.result = local.y;
 	} else {
 		local.result = local.z;
 	}
 end local.result;
 
-Average local.array local.abs:
-	/*Error & Exception handling*/
-	if (!local.array || local.array.size <= 0 || !(waitthread $Array.IsUserArray local.array)) {
-		if (level.DEBUG) {
-			conprintf "\n ~^~^~^~ FATAL_ERROR[LIB::math.slib::Average]: array <arg1> is either inexistent, uninitialized or invalid! ~^~^~^~ \n\n";
-		}
-	} else if !(waitthread $Array.HasType local.array "int"::"float" 1) {
-		if (level.DEBUG) {
-			conprintf "\n ~^~^~^~ FATAL_ERROR[LIB::math.slib::Average]: array <arg1> either is not one-dimensional or is not homogeneous with int/float variables! ~^~^~^~ \n\n";
-		}
-	}
-	
-	/*Main Logic*/
-	local.sum = 0;
-	local.total = local.array.size;
-	for (local.i = 1; local.i <= local.total; local.i++) {
-		if !(local.abs) {
-			local.sum += local.array[local.i];
-		} else {
-			local.sum += abs(local.array[local.i]);
-		}
-	}
-end (local.result / local.total);
-
-// (round X to nearest power of Y)
-_RoundToPowOf local.x local.y: goto internal3;
+/** ==========================================================================================
+ RoundToPowOf Function
+ ---------------------------------------------------------------------------------------------
+ DESCR|: 	Rounds X to nearest (fractional or integral) power of Y.
+ INPUT|: 	<STRING string>
+ OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
+			*	int/float => rounded X
+			*	NIL 	  => error: uninitialized/inexistent/invalid input
+ =========================================================================================== */
 RoundToPowOf local.x local.y:
 	/*Error & Exception handling*/
 	local.x = waitthread MakeNumber local.x;
@@ -415,32 +1099,58 @@ RoundToPowOf local.x local.y:
 	
 	local.y = waitthread MakeNumber local.y;
 	if (local.y == NIL) {waitthread __Error1 "RoundToPowOf" "y <arg2>" local.y; end;}
-	
-	if (local.y < 0) {
-		if (level.DEBUG) {
-			conprintf "~^~^~^~ EXCEPTION[lib/math.slib::RoundToPowOf]: power/exponent <arg2> is cannot be negative! Making positive... ~^~^~^~ \n";
-		}
-		local.y = abs(local.y);
-	} 
-	
-	/*Main Logic*/
-	internal3:
-	if (local.y == 0) {
-		local.result = 0; //by definition: 0^X=0. Only power is nearest power.
-	} if (local.x <= 0) {
-		local.result = 1; //Nearest power is always going to be this X^0 which, by definition, always equals to 1.
-	}
-	
-	if (waitthread IsNumber local.x) {
-		local.j = 0;
-		for (local.i = 0; local.j <= local.x; local.i++) {
-			local.j = (pow local.y local.i);
-		}
-	
-		local.min = (pow local.y (local.i - 2));
-		local.max = local.j;
 
-		if ((local.x - local.min) < (local.max - local.x)) {
+	/*Main Logic*/
+	if (local.y == 0.0) {
+		local.result = 0; // By definition: 0^X=0. Only power is nearest power.
+	} if (local.x == 1.0) {
+		local.result = 1; // By definition: Y^0 always equals 1.
+	} else {
+		//if (local.y < 0.0) {
+		//	local.crement = 2
+		// Use negative exponents in this domain.
+		if ( -1.0 < local.x && local.x < 1.0) {
+			local.j = pow local.y -10;
+			if (local.x < 0.0 && local.y < 0.0) {
+				for (local.i = -9; local.x < local.j; local.i += 2) {
+					local.j = (pow local.y local.i);
+				}
+			} else {
+				for (local.i = -9; local.j < local.x; local.i++) {
+					local.j = (pow local.y local.i);
+				}
+			}
+		// If x is equal to or larger than 1 (or smaller than -1), use positive exponents.
+		} else {
+			local.j = 1;
+			// Something interesting happens when x is negative and y is positive.
+			// Normally, if one disregards this, you'd end up in an infinite loop
+			// since no power of a positive base can ever return a negative value.
+			// Our best estimated rounded number is j, which is by default 1 (i.e. 
+			// the 0th power).
+			if (local.x < 0.0 && local.y < 0.0) {
+				for (local.i = 1; local.x < local.j; local.i += 2) {
+					local.j = (pow local.y local.i);
+				}
+			} else {
+				// In the case just described, the second loop would be entered and 
+				// while the exponent 'i' gets initialized as 0, but the condition will 
+				// always return false since a negative number is always smaller than +1.
+				for (local.i = 0; local.j < local.x; local.i++) {
+					local.j = (pow local.y local.i);
+				}
+				
+			}
+		}
+		// Thus, the loop will never be run, however our minimum estimate will
+		// be Y^(i-2) power which, as all negative exponents do, returns a floating 
+		// point number that's smaller than 1.
+		local.min = (pow local.y (local.i - 2));
+		local.max = local.j; // ...which is pow local.y (local.i - 1);
+		
+		// This will automatically be chosen as best estimate by the following check,
+		// and indeed a value smaller than 1 is the best result for this particular case.
+		if (abs(local.x - local.min) < abs(local.x - local.max)) {
 			local.result = local.min;
 		} else {
 			local.result = local.max;
@@ -448,8 +1158,15 @@ RoundToPowOf local.x local.y:
 	}
 end local.result;
 
-//(round X up to nearest power of Y)
-_CeilToPowOf local.x local.y: goto internal2;
+/** ==========================================================================================
+ CeilToPowOf Function
+ ---------------------------------------------------------------------------------------------
+ DESCR|: 	Rounds X to smallest (fractional or integral) power of Y that is not less than X.
+ INPUT|: 	<STRING string>
+ OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
+			*	int/float => ceiled X
+			*	NIL 	  => error: uninitialized/inexistent/invalid input
+ =========================================================================================== */
 CeilToPowOf local.x local.y:
 	/*Error & Exception handling*/
 	local.x = waitthread MakeNumber local.x;
@@ -458,32 +1175,51 @@ CeilToPowOf local.x local.y:
 	local.y = waitthread MakeNumber local.y;
 	if (local.y == NIL) {waitthread __Error1 "CeilToPowOf" "y <arg2>" local.y; end;}
 	
-	if (local.y < 0) {
-		if (level.DEBUG) {
-			conprintf "~^~^~^~ EXCEPTION[lib/math.slib::CeilToPowOf]: power/exponent <arg2> is cannot be negative! Making positive... ~^~^~^~ \n";
-		}
-		local.y = abs(local.y);
-	} 
-	
 	/*Main Logic*/
-	internal2:
-	if (local.y == 0) {
-		local.result = 0; //by definition: 0^X=0. Only power is nearest power.
-	} if (local.x <= 0) {
-		local.result = 1; //Nearest power is always going to be this X^0 which, by definition, always equals to 1.
-	}
-	
-	if (waitthread IsNumber local.x) {
-		local.j = 0;
-		for (local.i = 0; local.j <= local.x; local.i++;) {
-			local.j = (pow local.y local.i);
+	if (local.y == 0.0) {
+		local.result = 0; // By definition: 0^X=0. Only power is nearest power.
+	} if (local.x == 1.0) {
+		local.result = 1; // By definition: Y^0 always equals 1.
+	} else {
+		// Use negative exponents in this domain.
+		if ( -1.0 < local.x && local.x < 1.0) {
+			local.j = pow local.y -10;
+			if (local.x < 0.0 && local.y < 0.0) {
+				for (local.i = -9; local.x < local.j; local.i += 2) {
+					local.j = (pow local.y local.i);
+				}
+			} else {
+				for (local.i = -9; local.j < local.x; local.i++) {
+					local.j = (pow local.y local.i);
+				}
+			}
+		// If x is equal to or larger than 1, use positive exponents.
+		} else {
+			local.j = 1;
+			if (local.x < 0.0 && local.y < 0.0) {
+				for (local.i = 1; local.x < local.j; local.i += 2) {
+					local.j = (pow local.y local.i);
+				}
+			} else {
+				for (local.i = 0; local.j < local.x; local.i++) {
+					local.j = (pow local.y local.i);
+				}
+				
+			}
 		}
 		local.result = local.j;
 	}
 end local.result;
 
-//(round X down to nearest power of Y)
-_FloorToPowOf local.x local.y: goto internal1;
+/** ==========================================================================================
+ FloorToPowOf Function
+ ---------------------------------------------------------------------------------------------
+ DESCR|: 	Rounds X to largest (fractional or integral) power of Y that is not more than X.
+ INPUT|: 	<STRING string>
+ OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
+			*	int/float => floored X
+			*	NIL 	  => error: uninitialized/inexistent/invalid input
+ =========================================================================================== */
 FloorToPowOf local.x local.y:
 	/*Error & Exception handling*/
 	local.x = waitthread MakeNumber local.x;
@@ -491,644 +1227,1107 @@ FloorToPowOf local.x local.y:
 	
 	local.y = waitthread MakeNumber local.y;
 	if (local.y == NIL) {waitthread __Error1 "FloorToPowOf" "y <arg2>" local.y; end;}
-	
-	if (local.y < 0) {
-		if (level.DEBUG) {
-			conprintf "~^~^~^~ EXCEPTION[lib/math.slib::FloorToPowOf]: power/exponent <arg2> is cannot be negative! Making positive... ~^~^~^~ \n";
-		}
-		local.y = abs(local.y);
-	} 
-	
+
 	/*Main Logic*/
-	internal1:
-	if (local.y == 0) {
-		local.result = 0; //by definition: 0^X=0. Only power is nearest power.
-	} if (local.x <= 0) {
-		local.result = 1; //Nearest power is always going to be this X^0 which, by definition, always equals to 1.
-	}
-	
-	if (waitthread IsNumber local.x) {
-		local.j = 0;
-		for (local.i = 0; local.j < local.x; ) {
-			local.i++; // Avoids ++ operator lag.
-			local.j = (pow local.y local.i);
+	if (local.y == 0.0) {
+		local.result = 0; // By definition: 0^X=0. Only power is nearest power.
+	} if (local.x == 1.0) {
+		local.result = 1; // By definition: Y^0 always equals 1.
+	} else {
+		// Use negative exponents in this domain.
+		if ( -1.0 < local.x && local.x < 1.0) {
+			local.j = pow local.y -10;
+			if (local.x < 0.0 && local.y < 0.0) {
+				for (local.i = -9; local.x < local.j; local.i += 2) {
+					local.j = (pow local.y local.i);
+				}
+			} else {
+				for (local.i = -9; local.j < local.x; local.i++) {
+					local.j = (pow local.y local.i);
+				}
+			}
+		// If x is equal to or larger than 1, use positive exponents.
+		} else {
+			local.j = 1;
+			if (local.x < 0.0 && local.y < 0.0) {
+				for (local.i = 1; local.x < local.j; local.i += 2) {
+					local.j = (pow local.y local.i);
+				}
+			} else {
+				for (local.i = 0; local.j < local.x; local.i++) {
+					local.j = (pow local.y local.i);
+				}
+				
+			}
 		}
-		local.result = (pow local.y (local.i - 1));
+		local.result = (pow local.y (local.i - 2));
 	}
 end local.result;
 
-NotaNumber local.var:
-end !(waitthread IsNumber local.var);
-
-IsNumber local.var:
-	local.type = typeof local.var;
-end (local.type == "int" || local.type == "float");
-
-MakeNumber local.x:
-	if (local.x != NIL) {
-		local.type = typeof local.x;
-		if (local.type == "int" || local.type == "float") {
-			local.result = local.x;
-		} else if (local.type == "string") {
-			local.numeric = waitthread $Str.IsNumeric local.x;
-			if (local.numeric == 1) {
-				local.result = int (local.x);
-			if (local.numeric == 2) {
-				local.result = float (local.x);
+/** ==========================================================================================
+ RoundToMultOf Function
+ ---------------------------------------------------------------------------------------------
+ DESCR|: 	Rounds X to nearest (fractional or integral) multiple of Y.
+ INPUT|: 	<STRING string>
+ OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
+			*	int/float => rounded X
+			*	NIL 	  => error: uninitialized/inexistent/invalid input
+ =========================================================================================== */
+RoundToMultOf local.x local.y:
+	/*Error & Exception handling*/
+	local.x = waitthread MakeNumber local.x;
+	if (local.x == NIL) {waitthread __Error1 "RoundToMultOf" NIL local.x; end;}
+	
+	local.y = waitthread MakeNumber local.y;
+	if (local.y == NIL) {waitthread __Error1 "RoundToMultOf" "y <arg2>" local.y; end;}
+	
+	/*Main Logic*/
+	if (local.y == 0.0) {
+		local.result = 0; // By definition: 0*X=0. Only multitude is nearest multitude.
+	} else {
+		local.min = 0;
+		local.max = 0;
+		
+		// Use fractional factors in this domain.
+		if ( -1.0 < local.x && local.x < 1.0) {
+			local.incr = local.y * 0.001;
+			if (local.x < 0.0) {
+				local.incr = local.incr * -1;
+				for (local.i = local.incr; local.x < local.max; local.i = (local.i * 2)) {
+					local.min = local.max;
+					local.max = local.y * local.i;
+				}
 			} else {
-				switch (local.x) {
-					case "true":
-						local.result = 1;
-					break;
-					case "false":
-						local.result = 0;
-					break;
-					default:
-					break;
+				for (local.i = local.incr; local.max < local.x; local.i = (local.i * 2)) {
+					local.min = local.max;
+					local.max = local.y * local.i;
+				}
+			}
+		// If x is equal to or larger than 1 (or equal to/smaller than -1), use integral factors.
+		} else {
+			local.incr = 1;
+			if (local.x < 0.0) {
+				if (local.y > 0.0) {
+					local.incr = -1;
+				} 
+				for (local.i = 0; local.x < local.max; local.i += local.incr) {
+					local.min = local.max;
+					local.max = local.y * local.i;
+				}
+			} else {
+				if (local.y < 0.0) {
+					local.incr = -1;
+				}
+				for (local.i = 0; local.max < local.x; local.i += local.incr) {
+					local.min = local.max;
+					local.max = local.y * local.i;
 				}
 			}
 		}
+		
+		if (abs(local.x - local.min) < abs(local.x - local.max)) {
+			local.result = local.min;
+		} else {
+			local.result = local.max;
+		}
 	}
 end local.result;
 
+/** ==========================================================================================
+ CeilToMultOf Function
+ ---------------------------------------------------------------------------------------------
+ DESCR|: 	Rounds X to smallest (fractional or integral) multiple of Y that is not less than X.
+ INPUT|: 	<STRING string>
+ OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
+			*	int/float => ceiled X
+			*	NIL 	  => error: uninitialized/inexistent/invalid input
+ =========================================================================================== */
+CeilToMultOf local.x local.y:
+	/*Error & Exception handling*/
+	local.x = waitthread MakeNumber local.x;
+	if (local.x == NIL) {waitthread __Error1 "CeilToMultOf" NIL local.x; end;}
+	
+	local.y = waitthread MakeNumber local.y;
+	if (local.y == NIL) {waitthread __Error1 "CeilToMultOf" "y <arg2>" local.y; end;}
+
+	/*Main Logic*/
+	if (local.y == 0.0) {
+		local.result = 0; // By definition: 0*X=0. Only multitude is nearest multitude.
+	} else {
+		local.min = 0;
+		local.max = 0;
+		
+		// Use fractional factors in this domain.
+		if ( -1.0 < local.x && local.x < 1.0) {
+			local.incr = local.y * 0.001;
+			if (local.x < 0.0) {
+				local.incr = local.incr * -1;
+				for (local.i = local.incr; local.x < local.max; local.i = (local.i * 2)) {
+					local.min = local.max;
+					local.max = local.y * local.i;
+				}
+			} else {
+				for (local.i = local.incr; local.max < local.x; local.i = (local.i * 2)) {
+					local.min = local.max;
+					local.max = local.y * local.i;
+				}
+			}
+		// If x is equal to or larger than 1 (or equal to/smaller than -1), use integral factors.
+		} else {
+			local.incr = 1;
+			if (local.x < 0.0) {
+				if (local.y > 0.0) {
+					local.incr = -1;
+				} 
+				for (local.i = 0; local.x < local.max; local.i += local.incr) {
+					local.min = local.max;
+					local.max = local.y * local.i;
+				}
+			} else {
+				if (local.y < 0.0) {
+					local.incr = -1;
+				}
+				for (local.i = 0; local.max < local.x; local.i += local.incr) {
+					local.min = local.max;
+					local.max = local.y * local.i;
+				}
+			}
+		}
+		
+		if (local.max < local.min) {
+			local.result = local.min;
+		} else {
+			local.result = local.max;
+		}
+	}
+end local.result;
+
+/** ==========================================================================================
+ FloorToMultOf Function
+ ---------------------------------------------------------------------------------------------
+ DESCR|: 	Rounds X to largest (fractional or integral) multiple of Y that is not more than X.
+ INPUT|: 	<STRING string>
+ OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
+			*	int/float => floored X
+			*	NIL 	  => error: uninitialized/inexistent/invalid input
+ =========================================================================================== */
+FloorToMultOf local.x local.y:
+	/*Error & Exception handling*/
+	local.x = waitthread MakeNumber local.x;
+	if (local.x == NIL) {waitthread __Error1 "FloorToMultOf" NIL local.x; end;}
+	
+	local.y = waitthread MakeNumber local.y;
+	if (local.y == NIL) {waitthread __Error1 "FloorToMultOf" "y <arg2>" local.y; end;}
+	
+	/*Main Logic*/
+	if (local.y == 0.0) {
+		local.result = 0; // By definition: 0*X=0. Only multitude is nearest multitude.
+	} else {
+		local.min = 0;
+		local.max = 0;
+		
+		// Use fractional factors in this domain.
+		if ( -1.0 < local.x && local.x < 1.0) {
+			local.incr = local.y * 0.001;
+			if (local.x < 0.0) {
+				local.incr = local.incr * -1;
+				for (local.i = local.incr; local.x < local.max; local.i = (local.i * 2)) {
+					local.min = local.max;
+					local.max = local.y * local.i;
+				}
+			} else {
+				for (local.i = local.incr; local.max < local.x; local.i = (local.i * 2)) {
+					local.min = local.max;
+					local.max = local.y * local.i;
+				}
+			}
+		// If x is equal to or larger than 1 (or equal to/smaller than -1), use integral factors.
+		} else {
+			local.incr = 1;
+			if (local.x < 0.0) {
+				if (local.y > 0.0) {
+					local.incr = -1;
+				} 
+				for (local.i = 0; local.x < local.max; local.i += local.incr) {
+					local.min = local.max;
+					local.max = local.y * local.i;
+				}
+			} else {
+				if (local.y < 0.0) {
+					local.incr = -1;
+				}
+				for (local.i = 0; local.max < local.x; local.i += local.incr) {
+					local.min = local.max;
+					local.max = local.y * local.i;
+				}
+			}
+		}
+		
+		if (local.min < local.max) {
+			local.result = local.min;
+		} else {
+			local.result = local.max;
+		}
+	}
+end local.result;
+
+/** ==========================================================================================
+ IsDivisibleBy Function
+ ---------------------------------------------------------------------------------------------
+ DESCR|: 	Determines whether X can be divided by Y with no remainder (=0).
+ INPUT|: 	<INT/FLOAT X> <INT/FLOAT Y>
+ OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
+			*	1		=> X can be integrally divided by Y
+			* 	0		=> X cannot be integrally divided by Y
+			*	NIL 	=> error: uninitialized/inexistent/invalid input
+ =========================================================================================== */
+IsDivisibleBy local.x local.y:
+	if (typeof local.x == "int" && typeof local.y == "int" && local.y != 0) {
+		local.result = ((int(local.x) % int(local.y)) == 0);
+	} else {
+		local.result = 0;
+	}
+end local.result;
+
+/** ==========================================================================================
+ IsMultipleOf Function
+ ---------------------------------------------------------------------------------------------
+ DESCR|: 	Determines whether X is a multiple of Y.
+ INPUT|: 	<INT/FLOAT X> <INT/FLOAT Y>
+ OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
+			*	1		=> X is a multiple of Y
+			* 	0		=> X is not a multiple of Y
+			*	NIL 	=> error: uninitialized/inexistent/invalid input
+ =========================================================================================== */
+IsMultipleOf local.x local.y:
+	if (typeof local.x == "int" && typeof local.y == "int" && local.y != 0) {
+		local.result = ((int(local.x) % int(local.y)) == 0);
+	} else {
+		local.result = 0;
+	}
+end local.result;
+
+/** ==========================================================================================
+ ToRadians Function
+ ---------------------------------------------------------------------------------------------
+ DESCR|: 	Converts specified degrees to radians.
+ INPUT|: 	<INT/FLOAT degrees>
+ OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
+			*	int/float 	=> radians
+			*	NIL 		=> error: uninitialized/inexistent/invalid input
+ =========================================================================================== */
 ToRadians local.value:
-	if (local.value && waitthread IsNumber local.value) {
+	if (waitthread IsNumber local.value) {
 		local.result = local.value * ( level.PI / 180.0 );
 	} 
 end local.result;
 
-ToDegrees local.degrees:
-	if (local.degrees && waitthread IsNumber local.degrees) {
+/** ==========================================================================================
+ ToDegrees Function
+ ---------------------------------------------------------------------------------------------
+ DESCR|: 	Converts specified radians to degrees.
+ INPUT|: 	<INT/FLOAT degrees>
+ OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
+			*	int/float 	=> degrees
+			*	NIL 		=> error: uninitialized/inexistent/invalid input
+ =========================================================================================== */
+ToDegrees local.value:
+	if (waitthread IsNumber local.value) {
 		local.result = local.value * ( 180.0 / level.PI );
 	}
 end local.result;
 
-/** -------------------------------------------------------------------------------------------------------------------
-*** 		S c r i p t i n g		C m d s 		W r i t t e n		b y 		R a z o [R] a p i d				***
--------------------------------------------------------------------------------------------------------------------- */
-// These are for reference, really...
-Cos local.x:
+/** ==========================================================================================
+ NormalizeDegrees Function
+ ---------------------------------------------------------------------------------------------
+ DESCR|: 	Normalizes any angle degrees back to the positive [0, 360] domain.
+ INPUT|: 	<INT/FLOAT degrees>
+ OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
+			*	int/float 	=> normalized degrees
+			*	NIL 		=> error: uninitialized/inexistent/invalid input
+ =========================================================================================== */
+NormalizeDegrees local.degrees:
+	local.degrees = waitthread MakeNumber local.degrees;
+	if (local.degrees == NIL) {waitthread __Error1 "NormalizeDegrees" "degrees <arg1>" local.degrees; end;}
+	
+	// This normalizes any multiplications back to the base degrees in the [-360,360] domain.
+	// Use default modulo operator on integers.
+	if (typeof local.degrees == "int") {
+		local.result = local.degrees % 360;
+	// Use reborn's new fmod command on floats ;-)
+	} else {
+		local.result = fmod local.degrees 360.0;
+	}
+		
+	// This normalizes any negative degrees to a positive [0, 360] domain.
+	if (local.result < 0) {
+		local.result += 360;
+	}
+end local.result;
+
+/** ==========================================================================================
+ FormatDegrees Function
+ ---------------------------------------------------------------------------------------------
+ DESCR|: 	Formats the specified decimals degrees to [degrees, minutes, seconds]-format.
+			Optionally, the function can output a formatted string representation instead of
+			an array.
+ INPUT|: 	<INT/FLOAT X>
+ OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
+			* 	array	=> 	[1]	=>	(integral) degrees
+							[2]	=>	minutes
+							[3] => 	seconds
+			* 	string	=> representation with standard D°M'S.S" notation.
+			* 	NIL		=> error: inexistent, uninitialized or invalid input
+ =========================================================================================== */
+FormatDegrees local.deg local.stringify:
+	/*Error & Exception handling*/
+	local.deg = waitthread MakeNumber local.deg;
+	if (local.deg == NIL) {waitthread __Error1 "FormatDegrees" "degrees <arg1>" local.deg; end;}
+	
+	// Normalize degrees to [-360, 360] while converting any integer to a float at the same time ;)
+	local.deg = fmod local.deg 360.0;
+
+	// Seperate degrees.
+	local.tmp[1] = int(local.deg);
+	// Only need sign in degrees.
+	local.deg = abs(local.deg);
+	
+	// Get minutes.
+	local.tmp[2] = (modf(local.deg))["fractional"] * 60;
+	
+	// Get Seconds
+	local.tmp[3] = (modf(local.tmp[2]))["fractional"] * 60;
+	
+	// Now we can integralize minutes
+	local.tmp[2] = int(local.tmp[2]);
+	// If there are no seconds, we integralize it:
+	if !(local.tmp[3]) {
+		local.tmp[3] = int(local.tmp[3]);
+	}
+	
+	// No longer needed...
+	local.deg = NIL;
+	
+	if (local.stringify) {
+		local.result = (local.tmp[1] + "°" + local.tmp[2] + "\'" + local.tmp[3] + "\"");
+	} else {
+		local.result = local.tmp;
+		local.tmp = NIL;
+	}
+end local.result;
+
+/** =======================================================================================================================================
+*** 				S c r i p t i n g		C m d s 		W r i t t e n			b y 		R a z o [R] a p i d						***
+======================================================================================================================================== */
+/// 		These are for reference, really.. except for the variations I wrote based on the trigonometric scripting cmds. 				///
+
+/** ==========================================================================================
+ Cosine Function
+ ---------------------------------------------------------------------------------------------
+ DESCR|: 	Returns the cosine of x. Consider:
+			DOMAIN/INPUT: 	R or (-inf, +inf);
+			RANGE/OUTPUT:	[-1, 1]
+ INPUT|: 	<INT/FLOAT x>
+ OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
+			*	float 	=> cos() of x
+			*	NIL 	=> error: uninitialized/inexistent/invalid input
+ =========================================================================================== */
+Cosine local.x:
 	/*Error & Exception handling*/
 	local.x = waitthread MakeNumber local.x;
-	if (local.x == NIL) {waitthread __Error1 "Cos" NIL local.x; end;}
+	if (local.x == NIL) {waitthread __Error1 "Cosine" NIL local.x; end;}
 	
 	/*Main Logic*/
-end (cos local.x);
+end (cos(local.x));
 
-Sin local.x:
+/** ==========================================================================================
+ Sine Function
+ ---------------------------------------------------------------------------------------------
+ DESCR|: 	Returns the sine of x. Consider:
+			DOMAIN/INPUT: 	R or (-inf, +inf);
+			RANGE/OUTPUT:	[-1, 1]
+ INPUT|: 	<INT/FLOAT x>
+ OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
+			*	float 	=> sin() of x
+			*	NIL 	=> error: uninitialized/inexistent/invalid input
+ =========================================================================================== */
+Sine local.x:
 	/*Error & Exception handling*/
 	local.x = waitthread MakeNumber local.x;
-	if (local.x == NIL) {waitthread __Error1 "Sin" NIL local.x; end;}
+	if (local.x == NIL) {waitthread __Error1 "Sine" NIL local.x; end;}
 	
 	/*Main Logic*/
-end (sin local.x);
+end (sin(local.x));
 
-Tan local.x:
+/** ==========================================================================================
+ Tangent Function
+ ---------------------------------------------------------------------------------------------
+ DESCR|: 	Returns the tangent of x. Consider:
+			DOMAIN/INPUT: 	R except for PI/2 + k*PI, where k is any integer (including zero). 
+			RANGE/OUTPUT:	R or (-inf, +inf);
+ INPUT|: 	<INT/FLOAT x>
+ OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
+			*	float 	=> tan() of x
+						=> +infinity if x is out of range
+			*	NIL 	=> error: uninitialized/inexistent/invalid input
+ =========================================================================================== */
+Tangent local.x:
 	/*Error & Exception handling*/
 	local.x = waitthread MakeNumber local.x;
-	if (local.x == NIL) {waitthread __Error1 "Tan" NIL local.x; end;}
+	if (local.x == NIL) {waitthread __Error1 "Tangent" NIL local.x; end;}
 	
 	/*Main Logic*/
-end (tan local.x);
+	// Blasphemy, I know. But the inaccuracy inherent to
+	// float comparison comes in really handy here. All 
+	// values that are closer to PI/2 than 0.001 will be omitted.
+	if ((fmod local.x $Math.PI) == $Math.PI_2) {
+		local.result = $Math.INF_MAX;	//error
+	} else {
+		local.result = tan(local.x);
+	}
+end local.result;
 
-Acos local.x:
+/** ==========================================================================================
+ ArcCosine Function
+ ---------------------------------------------------------------------------------------------
+ DESCR|: 	Returns the inverse cosine (also known as the arc cosine) of x. 
+			DOMAIN/INPUT: 	[-1, +1]
+			RANGE/OUTPUT:	[0, PI]
+ INPUT|: 	<INT/FLOAT x>
+ OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
+			*	float 	=> acos() of x
+						=> NaN if x is out of range
+			*	NIL 	=> error: uninitialized/inexistent/invalid input
+ =========================================================================================== */
+ArcCosine local.x:
 	/*Error & Exception handling*/
 	local.x = waitthread MakeNumber local.x;
-	if (local.x == NIL) {waitthread __Error1 "Acos" NIL local.x; end;}
+	if (local.x == NIL) {waitthread __Error1 "ArcCosine" NIL local.x; end;}
 	
 	/*Main Logic*/
-end (acos local.x);
+end (acos(local.x));
 
-Asin local.x:
+/** ==========================================================================================
+ ArcSine Function
+ ---------------------------------------------------------------------------------------------
+ DESCR|: 	Returns the inverse sine (also known as the arc sine) of x. 
+			DOMAIN/INPUT: 	[-1, +1]
+			RANGE/OUTPUT:	[-(PI/2), PI/2]
+ INPUT|: 	<INT/FLOAT x>
+ OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
+			*	float 	=> asin() of x
+						=> NaN if x is out of range
+			*	NIL 	=> error: uninitialized/inexistent/invalid input
+ =========================================================================================== */
+ArcSine local.x:
 	/*Error & Exception handling*/
 	local.x = waitthread MakeNumber local.x;
-	if (local.x == NIL) {waitthread __Error1 "Asin" NIL local.x; end;}
+	if (local.x == NIL) {waitthread __Error1 "ArcSine" NIL local.x; end;}
 	
 	/*Main Logic*/
-end (asin local.x);
+end (asin(local.x));
 
-Atan local.x:
+/** ==========================================================================================
+ ArcTangent Function
+ ---------------------------------------------------------------------------------------------
+ DESCR|: 	Returns the inverse tangent (also known as the arc tangent) of x. 
+			DOMAIN/INPUT: 	R or (-inf, +inf)
+			RANGE/OUTPUT:	[-(PI/2), PI/2]
+ INPUT|: 	<INT/FLOAT x>
+ OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
+			*	float 	=> atan() of x
+						=> NaN if x is out of range
+			*	NIL 	=> error: uninitialized/inexistent/invalid input
+ =========================================================================================== */
+ArcTangent local.x:
 	/*Error & Exception handling*/
 	local.x = waitthread MakeNumber local.x;
-	if (local.x == NIL) {waitthread __Error1 "Atan" NIL local.x; end;}
+	if (local.x == NIL) {waitthread __Error1 "ArcTangent" NIL local.x; end;}
 	
 	/*Main Logic*/
-end (atan local.x);
+end (atan(local.x));
 
-Atan2 local.y local.x:
+/** ==========================================================================================
+ ArcTangent2 Function
+ ---------------------------------------------------------------------------------------------
+ DESCR|: 	Returns the inverse tangent (also known as the arc tangent) of x and y. 
+			DOMAIN/INPUT: 	R or (-inf, +inf) where x and y aren't both zero.
+			RANGE/OUTPUT:	(-PI, PI]
+ INPUT|: 	<INT/FLOAT y> <INT/FLOAT x>
+ OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
+			*	float 	=> atan2() of x and y
+			*	NIL 	=> error: uninitialized/inexistent/invalid input
+ =========================================================================================== */
+ArcTangent2 local.y local.x:
 	/*Error & Exception handling*/
 	local.x = waitthread MakeNumber local.x;
 	if (local.x == NIL) {waitthread __Error1 "Atan2" "x <arg2>" local.x; end;}
 
 	local.y = waitthread MakeNumber local.y;
-	if (local.x == NIL) {waitthread __Error1 "Atan2" "y <arg1>" local.x; end;}
+	if (local.y == NIL) {waitthread __Error1 "Atan2" "y <arg1>" local.y; end;}
 	
 	/*Main Logic*/
 end (atan2 local.y local.x);
 
-Cot local.x:
+/** ==========================================================================================
+ Cotangent Function
+ ---------------------------------------------------------------------------------------------
+ DESCR|: 	Returns the cotangent of x.
+			DOMAIN/INPUT: 	R except for k*PI where k is any integer (including zero).
+			RANGE/OUTPUT:	R
+ INPUT|: 	<INT/FLOAT x>
+ OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
+			*	float 	=> cot() of x
+						=> +infinity if x is out of range.
+			*	NIL 	=> error: uninitialized/inexistent/invalid input
+ =========================================================================================== */
+Cotangent local.x:
 	/*Error & Exception handling*/
 	local.x = waitthread MakeNumber local.x;
-	if (local.x == NIL) {waitthread __Error1 "Cot" NIL local.x; end;}
+	if (local.x == NIL) {waitthread __Error1 "Cotangent" NIL local.x; end;}
 	
 	/*Main Logic*/
-	if (local.x == 0.0) {
-		local.result = 0.0;
+	if !(fmod local.x $Math.PI) {
+		local.result = $Math.INF_MAX;	//error
 	} else {
-		local.result = tan (1.0 / local.x);
+		local.result = 1.0 / (tan(local.x));
 	}
 end local.result;
 
-Csc local.x:
+/** ==========================================================================================
+ Cosecant Function
+ ---------------------------------------------------------------------------------------------
+ DESCR|: 	Returns the cosecant of x. 
+			DOMAIN/INPUT: 	R except for k*PI where k is any integer (including zero).
+			RANGE/OUTPUT:	(-inf, -1]U[1, +inf)
+ INPUT|: 	<INT/FLOAT x>
+ OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
+			*	float 	=> csc() of x
+						=> +infinity if x is out of range.
+			*	NIL 	=> error: uninitialized/inexistent/invalid input
+ =========================================================================================== */
+Cosecant local.x:
 	/*Error & Exception handling*/
 	local.x = waitthread MakeNumber local.x;
-	if (local.x == NIL) {waitthread __Error1 "Csc" NIL local.x; end;}
+	if (local.x == NIL) {waitthread __Error1 "Cosecant" NIL local.x; end;}
 	
 	/*Main Logic*/
 	if (local.x == 0.0) {
-		local.result = 0.0;
+		local.result = $Math.INF_MAX;	//error
 	} else {
-		local.result = cos (1.0 / local.x);
+		local.result = 1.0 / (sin(local.x));
 	}
 end local.result;
 
-Sec local.x:
+/** ==========================================================================================
+ Secant Function
+ ---------------------------------------------------------------------------------------------
+ DESCR|: 	Returns the secant of x. 
+			DOMAIN/INPUT: 	R except for PI/2 + k*PI, where k is any integer (including zero). 
+			RANGE/OUTPUT:	(-inf, -1]U[1, +inf)
+ INPUT|: 	<INT/FLOAT x>
+ OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
+			*	float 	=> sec() of x
+						=> +infinity if x is out of range.
+			*	NIL 	=> error: uninitialized/inexistent/invalid input
+ =========================================================================================== */
+Secant local.x:
 	/*Error & Exception handling*/
 	local.x = waitthread MakeNumber local.x;
-	if (local.x == NIL) {waitthread __Error1 "Sec" NIL local.x; end;}
+	if (local.x == NIL) {waitthread __Error1 "Secant" NIL local.x; end;}
 	
 	/*Main Logic*/
-	if (local.x == 0.0) {
-		local.result = 0.0;
+	if ((fmod local.x $Math.PI) == $Math.PI_2) {
+		local.result = $Math.INF_MAX;	//error
 	} else {
-		local.result = sin (1.0 / local.x);
-	}
-end local.result;
-	
-Acot local.x:
-	/*Error & Exception handling*/
-	local.x = waitthread MakeNumber local.x;
-	if (local.x == NIL) {waitthread __Error1 "Acot" NIL local.x; end;}
-	
-	/*Main Logic*/
-	if (local.x == 0.0) {
-		local.result = 0.0;
-	} else {
-		local.result = atan (1.0 / local.x);
-	}
-end local.result;
-
-Acsc local.x:
-	/*Error & Exception handling*/
-	local.x = waitthread MakeNumber local.x;
-	if (local.x == NIL) {waitthread __Error1 "Acsc" NIL local.x; end;}
-	
-	/*Main Logic*/
-	if (local.x == 0.0) {
-		local.result = 0.0;
-	} else {
-		local.result = acos (1.0 / local.x);
+		local.result = 1.0 / (cos(local.x));
 	}
 end local.result;
 
-Asec local.x:
+/** ==========================================================================================
+ ArcCotangent Function
+ ---------------------------------------------------------------------------------------------
+ DESCR|: 	Returns the inverse cotangent (also known as the arc cotangent) of x. 
+			DOMAIN/INPUT: 	R or (-inf , + inf)
+			RANGE/OUTPUT:	(0, PI)
+ INPUT|: 	<INT/FLOAT x>
+ OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
+			*	float 	=> acot() of x
+			*	NIL 	=> error: uninitialized/inexistent/invalid input
+ =========================================================================================== */
+ArcCotangent local.x:
 	/*Error & Exception handling*/
 	local.x = waitthread MakeNumber local.x;
-	if (local.x == NIL) {waitthread __Error1 "Acsc" NIL local.x; end;}
+	if (local.x == NIL) {waitthread __Error1 "ArcCotangent" NIL local.x; end;}
 	
 	/*Main Logic*/
-	if (local.x == 0.0) {
-		local.result = 0.0;
+end ($Math.PI_2 - (atan(local.x)));
+
+/** ==========================================================================================
+ ArcCosecant Function
+ ---------------------------------------------------------------------------------------------
+ DESCR|: 	Returns the inverse cosecant (also known as the arc cosecant) of x. 
+			DOMAIN/INPUT: 	(-inf, -1]U[1, +inf)
+			RANGE/OUTPUT:	[-PI/2; +PI/2]
+ INPUT|: 	<INT/FLOAT x>
+ OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
+			*	float 	=> acsc() of x
+						=> NaN if x is out of range
+			*	NIL 	=> error: uninitialized/inexistent/invalid input
+ =========================================================================================== */
+ArcCosecant local.x:
+	/*Error & Exception handling*/
+	local.x = waitthread MakeNumber local.x;
+	if (local.x == NIL) {waitthread __Error1 "ArcCosecant" NIL local.x; end;}
+	
+	/*Main Logic*/
+	if ( -1 < local.x && local.x < 1) {
+		local.result = $Math.NaN; //NaN
 	} else {
-		local.result = asin (1.0 / local.x);
+		local.result = asin(1.0 / local.x);
 	}
 end local.result;
 
-Cosh local.x:
+/** ==========================================================================================
+ ArcSecant Function
+ ---------------------------------------------------------------------------------------------
+ DESCR|: 	Returns the inverse secant (also known as the arc secant) of x. 
+			DOMAIN/INPUT: 	(-inf, -1]U[1, +inf)
+			RANGE/OUTPUT:	[0, PI]
+ INPUT|: 	<INT/FLOAT x>
+ OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
+			*	float 	=> asec() of x
+						=> NaN if x is out of range
+			*	NIL 	=> error: uninitialized/inexistent/invalid input
+ =========================================================================================== */
+ArcSecant local.x:
+	/*Error & Exception handling*/
+	local.x = waitthread MakeNumber local.x;
+	if (local.x == NIL) {waitthread __Error1 "ArcSecant" NIL local.x; end;}
+	
+	/*Main Logic*/
+	if ( -1 < local.x && local.x < 1) {
+		local.result = $Math.NaN; //NaN
+	} else {
+		local.result = acos(1.0 / local.x);
+	}
+end local.result;
+
+/** ==========================================================================================
+ HyperbolicCosine Function
+ ---------------------------------------------------------------------------------------------
+ DESCR|: 	Returns the hyperbolic cosine of x. 
+			DOMAIN/INPUT: 	R or (-inf , + inf)
+			RANGE/OUTPUT:	[1, +inf)
+ INPUT|: 	<INT/FLOAT x>
+ OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
+			*	float 	=> cosh() of x
+			*	NIL 	=> error: uninitialized/inexistent/invalid input
+ =========================================================================================== */
+HyperbolicCosine local.x:
 	/*Error & Exception handling*/
 	local.x = waitthread MakeNumber local.x;
 	if (local.x == NIL) {waitthread __Error1 "Cosh" NIL local.x; end;}
 	
 	/*Main Logic*/
-end (cosh local.x);
+end (cosh(local.x));
 
-Sinh local.x:
+/** ==========================================================================================
+ HyperbolicSine Function
+ ---------------------------------------------------------------------------------------------
+ DESCR|: 	Returns the hyperbolic sine of x. 
+			DOMAIN/INPUT: 	R or (-inf , + inf)
+			RANGE/OUTPUT:	R or (-inf , + inf)
+ INPUT|: 	<INT/FLOAT x>
+ OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
+			*	float 	=> sinh() of x
+			*	NIL 	=> error: uninitialized/inexistent/invalid input
+ =========================================================================================== */
+HyperbolicSine local.x:
 	/*Error & Exception handling*/
 	local.x = waitthread MakeNumber local.x;
 	if (local.x == NIL) {waitthread __Error1 "Sinh" NIL local.x; end;}
 	
 	/*Main Logic*/
-end (sinh local.x);
+end (sinh(local.x));
 
-Tanh local.x:
+/** ==========================================================================================
+ HyperbolicTangent Function
+ ---------------------------------------------------------------------------------------------
+ DESCR|: 	Returns the hyperbolic tangent of x. 
+			DOMAIN/INPUT: 	R or (-inf , + inf)
+			RANGE/OUTPUT:	(-1, +1)
+ INPUT|: 	<INT/FLOAT x>
+ OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
+			*	float 	=> tanh() of x
+			*	NIL 	=> error: uninitialized/inexistent/invalid input
+ =========================================================================================== */
+HyperbolicTangent local.x:
 	/*Error & Exception handling*/
 	local.x = waitthread MakeNumber local.x;
 	if (local.x == NIL) {waitthread __Error1 "Tanh" NIL local.x; end;}
 	
 	/*Main Logic*/
-end (tanh local.x);
+end (tanh(local.x));
 
-///=================================================================================================================///
-/// SUPPORT FOR DEGREES INPUT																					    ///
-///=================================================================================================================///
-Cosd local.x:
-	if (local.x == NIL) {if (group.x != NIL) {local.x = group.x;} else {waitthread __Error1 "Cosd"; end;}};
-	if (waitthread IsNumber local.x) {
-		local.x = waitthread ToRadians local.x;
-		local.result = cos local.x;
-	}
-end local.result;
-
-Sind local.x:
-	if (local.x == NIL) {if (group.x != NIL) {local.x = group.x;} else {waitthread __Error1 "Sind"; end;}};
-	if (waitthread IsNumber local.x) {
-		local.x = waitthread ToRadians local.x;
-		local.result = sin local.x;
-	}
-end local.result;
-
-Tand local.x:
-	if (local.x == NIL) {if (group.x != NIL) {local.x = group.x;} else {waitthread __Error1 "Sind"; end;}};
-	if (waitthread IsNumber local.x) {
-		local.x = waitthread ToRadians local.x;
-		local.result = tan local.x;
-	}
-end local.result;
-
-Acosd local.x:
-	if (local.x == NIL) {if (group.x != NIL) {local.x = group.x;} else {waitthread __Error1 "Acosd"; end;}};
-	if (waitthread IsNumber local.x) {
-		local.x = waitthread ToRadians local.x;
-		local.result = acos local.x;
-	}
-end local.result;
-
-Asind local.x:
-	if (local.x == NIL) {if (group.x != NIL) {local.x = group.x;} else {waitthread __Error1 "Asind"; end;}};
-	if (waitthread IsNumber local.x) {
-		local.x = waitthread ToRadians local.x;
-		local.result = asin local.x;
-	}
-end local.result;
-
-Atand local.x:
-	if (local.x == NIL) {if (group.x != NIL) {local.x = group.x;} else {waitthread __Error1 "Atand"; end;}};
-	if (waitthread IsNumber local.x) {
-		local.x = waitthread ToRadians local.x;
-		local.result = atan local.x;
-	}
-end local.result;
-
-Atan2d local.x local.y:
-	if (local.y == NIL) {if (group.y != NIL) {local.y = group.y;} else {waitthread __Error1 "Atan2d" "y <arg1>"; end;}};
-	if (local.x == NIL) {if (group.x != NIL) {local.x = group.x;} else {waitthread __Error1 "Atan2d" "x <arg2>"; end;}};
-	if ((waitthread IsNumber local.y) && (waitthread IsNumber local.x)) {
-		local.y = waitthread ToRadians local.y;
-		local.x = waitthread ToRadians local.x;
-		local.result = atan2 local.y local.x;
-	}
-end local.result;
-
-Coshd local.x:
-	if (local.x == NIL) {if (group.x != NIL) {local.x = group.x;} else {waitthread __Error1 "Coshd"; end;}};
-	if (waitthread IsNumber local.x) {
-		local.x = waitthread ToRadians local.x;
-		local.result = cosh local.x;
-	}
-end local.result;
-
-Sinhd local.x:
-	if (local.x == NIL) {if (group.x != NIL) {local.x = group.x;} else {waitthread __Error1 "Sinhd"; end;}};
-	if (waitthread IsNumber local.x) {
-		local.x = waitthread ToRadians local.x;
-		local.result = sinh local.x;
-	}
-end local.result;
-
-Tanhd local.x:
-	if (local.x == NIL) {if (group.x != NIL) {local.x = group.x;} else {waitthread __Error1 "Tanhd"; end;}};
-	if (waitthread IsNumber local.x) {
-		local.x = waitthread ToRadians local.x;
-		local.result = tanh local.x;
-	}
-end local.result;
-
-Cscd local.x:
-	if (local.x == NIL) {if (group.x != NIL) {local.x = group.x;} else {waitthread __Error1 "Cosecd"; end;}};
-	if (waitthread IsNumber local.x) {
-		if (local.x == 0.0) {
-			local.result = 0.0;
-		} else {
-			local.result = cos (1.0 / local.x);
-		}
-	}
-end local.result;
-
-Secd local.x:
-	if (local.x == NIL) {if (group.x != NIL) {local.x = group.x;} else {waitthread __Error1 "Secd"; end;}};
-	if (waitthread IsNumber local.x) {
-		if (local.x == 0.0) {
-			local.result = 0.0;
-		} else {
-			local.result = sin (1.0 / local.x);
-		}
-	}
-end local.result;
-
-Cotd local.x:
-	if (local.x == NIL) {if (group.x != NIL) {local.x = group.x;} else {waitthread __Error1 "Cotd"; end;}};
-	if (waitthread IsNumber local.x) {
-		if (local.x == 0.0) {
-			local.result = 0.0;
-		} else {
-			local.x = waitthread ToRadians local.x;
-			local.result = tan (1.0 / local.x);
-		}
-	}
-end local.result;
-
-Acotd local.x:
-	if (local.x == NIL) {if (group.x != NIL) {local.x = group.x;} else {waitthread __Error1 "Acotd"; end;}};
-	if (waitthread IsNumber local.x) {
-		if (local.x == 0.0) {
-			local.result = 0.0;
-		} else {
-			local.x = waitthread ToRadians local.x;
-			local.result = atan (1.0 / local.x);
-		}
-	}
-end local.result;
-
-Acscd local.x:
-	if (local.x == NIL) {if (group.x != NIL) {local.x = group.x;} else {waitthread __Error1 "Acosecd"; end;}};
-	if (waitthread IsNumber local.x) {
-		if (local.x == 0.0) {
-			local.result = 0.0;
-		} else {
-			local.result = acos (1.0 / local.x);
-		}
-	}
-end local.result;
-
-Asecd local.x:
-	if (local.x == NIL) {if (group.x != NIL) {local.x = group.x;} else {waitthread __Error1 "Secd"; end;}};
-	if (waitthread IsNumber local.x) {
-		if (local.x == 0.0) {
-			local.result = 0.0;
-		} else {
-			local.result = asin (1.0 / local.x);
-		}
-	}
-end local.result;
-
-///=================================================================================================================///
-
-/// Returns the base-e exponential function of x, which is the e number raised to the power x.
-Exp local.x:
-	if (local.x == NIL) {if (group.x != NIL) {local.x = group.x;} else {waitthread __Error1 "Exp"; end;}};
-	if (waitthread IsNumber local.x) {
-		local.result = exp local.x;
-	}
-end local.result;
-
-/** Breaks the floating point number x into its binary significand (a floating point value between 0.5(included) and 1.0(excluded)) and an integral exponent for 2, such that:
-x = significand * 2exponent
-If x is zero, both parts (significand and exponent) are zero.*/
-Frexp local.x:
-	if (local.x == NIL) {if (group.x != NIL) {local.x = group.x;} else {waitthread __Error1 "Frexp"; end;}};
-	if (waitthread IsNumber local.x) {
-		local.result = frexp local.x;
-	}
-end local.result;
-
-/// Returns the resulting floating point value from multiplying x (the significand) by 2 raised to the power of exp (the exponent).
-Ldexp local.x local.exp:
-	if (local.x == NIL) {if (group.x != NIL) {local.x = group.x;} else {waitthread __Error1 "Ldexp"; end;}};
-	if ((waitthread IsNumber local.x) && (waitthread IsNumber local.exp)) {
-		local.result = ldexp local.x local.exp;
-	}
-end local.result;
-
-Log local.x:
-	if (local.x == NIL) {if (group.x != NIL) {local.x = group.x;} else {waitthread __Error1 "Log"; end;}};
-	if (waitthread IsNumber local.x) {
-		local.result = log local.x;
-	}
-end local.result;
-
-	//argument	//base number
-Log2 local.x local.b:
-	if (local.x == NIL) {if (group.x != NIL) {local.x = group.x;} else {waitthread __Error1 "Log2"; end;}};
-	if ((waitthread IsNumber local.x) && (waitthread IsNumber local.b)) {
-		local.result = (log local.x) / (log local.b);
-	}
-end local.result;
-
-//Breaks x into two parts: the integer part and the fractional part.
-Modf local.x:
-	if (local.x == NIL) {if (group.x != NIL) {local.x = group.x;} else {waitthread __Error1 "Modf"; end;}};
-	if (typeof local.x == "float") {
-		local.result = modf local.x;
-	}
-end local.result;
-
-Pow local.x local.exp:
-	if (local.x == NIL) {if (group.x != NIL) {local.x = group.x;} else {waitthread __Error1 "Pow"; end;}};
-	if ((waitthread IsNumber local.x) && (waitthread IsNumber local.exp)) {
-		local.result = pow local.x local.exp;
-	}
-end local.result;
-
-//Returns the smallest integral value that is not less than x.
-Ceil local.x:
-	if (local.x == NIL) {if (group.x != NIL) {local.x = group.x;} else {waitthread __Error1 "Ceil"; end;}};
-	if ((waitthread IsNumber local.x) && (waitthread IsNumber local.exp)) {
-		local.result = ceil local.x;
-	}
-end local.result;
-
-//Returns the largest integral value that is not less than x.
-Floor local.x:
-	if (local.x == NIL) {if (group.x != NIL) {local.x = group.x;} else {waitthread __Error1 "Floor"; end;}};
-	if ((waitthread IsNumber local.x) && (waitthread IsNumber local.exp)) {
-		local.result = floor local.x;
-	}
-end local.result;
-
-/** Returns the floating-point remainder of numerator/denominator.
-The remainder of a division operation is the result of subtracting the integral quotient multiplied by the denominator from the numerator:
-
-remainder = numerator - quotient * denominator
-
-x=numerator
-y=denominator*/
-Fmod local.x local.y:
-	if (local.y == NIL) {if (group.y != NIL) {local.y = group.y;} else {waitthread __Error1 "Fmod" "y <arg1>"; end;}};
-	if (local.x == NIL) {if (group.x != NIL) {local.x = group.x;} else {waitthread __Error1 "Fmod" "x <arg2>"; end;}};
-	if ((waitthread IsNumber local.x) && (waitthread IsNumber local.y)) {
-		local.result = fmod local.x local.y;
-	}
-end local.result;
-
-Sqrt local.x:
-	if (local.x == NIL) {if (group.x != NIL) {local.x = group.x;} else {waitthread __Error1 "Sqrt"; end;}};
-	if ((waitthread IsNumber local.x) && (waitthread IsNumber local.exp)) {
-		local.result = sqrt local.x;
-	}
-end local.result;
-
-/** -----------------------------------------------------------------------------------
-*** 								Written by jv_map								***
------------------------------------------------------------------------------------- */
-// fast square-root
-// only usuable near x=1
-// great for normalizing
-Sqrt1 local.x:
-	if (local.x == NIL) {if (group.x != NIL) {local.x = group.x;} else {waitthread __Error1 "Sqrt"; end;}};
-	// McLaurin expansion
-	if (waitthread IsNumber local.x) {
-		local.result = 0.5 + 0.5 * local.x - 0.125 * (local.x - 1.0) * (local.x - 1.0);
-	}
-end local.result
-
-//square root 
-// by jv_map
-Sqrt2 local.x:
-	if (local.x == NIL) {if (group.x != NIL) {local.x = group.x;} else {waitthread __Error1 "Sqrt"; end;}};
-	if (waitthread IsNumber local.x) {
-		// sqrt(2)
-		local.SQRT_2 = 1.4142135623730951;
-
-		// known values, how convenient
-		if(local.x == 0.0)
-		{
-			local.result = 0.0;
-		}
-		else if(local.x == 1.0)
-		{
-			local.result = 1.0;
-		}
-		else if(local.x == 2.0)
-		{
-			local.result = local.SQRT_2;
-		}
-		else if (local.x < 0.0)
-		{
-			// error
-			conprintf "\n ~^~^~^~ FATAL_ERROR[LIB::math.slib::Sqrt2]: sqrt(" local.x ") has no real solution! ~^~^~^~ \n\n";
-			local.result = 0.0;
-		}
-		else
-		{
-			// reduce x to [1,2] domain
-			local.wx = local.x;
-			local.steps = 0;
-			local.dividesteps = 0;
-		
-			// reduce below 2.0
-			while (local.wx > 2.0)
-			{
-				local.wx = 0.5 * local.wx;
-				local.steps++;
-			}
-		
-			// increase above 1.0
-			while(local.wx < 1.0)
-			{
-				local.wx = 2.0 * local.wx;
-				local.dividesteps++;
-			}
-		
-			// evaluate in [1,2] domain
-			if(local.wx == 1.0)
-			{
-				local.eval = 1.0;
-			}
-			else if (local.wx == 2.0)
-			{
-				local.eval = local.SQRT_2;
-			}
-			else
-			{
-				// approximation
-				local.EVALSLOPE = 0.4267766953;
-				local.EVALMOD = 1.224744871 - 1.51 * local.EVALSLOPE;
-				local.eval = local.EVALSLOPE * local.wx + local.EVALMOD;
-			}
-		
-			// multiply back to original domain
-			for(local.i = 1; local.i <= local.steps; local.i++)
-			{
-				local.eval = local.eval * local.SQRT_2;
-			}
-		
-			// divide back to original domain
-			for(local.i = 1; local.i <= local.dividesteps; local.i++)
-			{
-				local.eval = local.eval / local.SQRT_2;
-			}
+/** ==========================================================================================
+ HyperbolicCotangent Function
+ ---------------------------------------------------------------------------------------------
+ DESCR|: 	Returns the hyperbolic cotangent of x. 
+			DOMAIN/INPUT: 	R/{0} or (-inf, 0)U(0, +inf)
+			RANGE/OUTPUT:	(-inf, -1)U(1, +inf)
+ INPUT|: 	<INT/FLOAT x>
+ OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
+			*	float 	=> coth() of x
+						=> +infinity if x is out of range
+			*	NIL 	=> error: uninitialized/inexistent/invalid input
+ =========================================================================================== */
+HyperbolicCotangent local.x:
+	/*Error & Exception handling*/
+	local.x = waitthread MakeNumber local.x;
+	if (local.x == NIL) {waitthread __Error1 "Coth" NIL local.x; end;}
 	
-			// correct until required accuracy has been reached
-			local.MAXREFINEMENTSTEPS = 2;
-
-			for(local.i = 1; local.i <= local.MAXREFINEMENTSTEPS; local.i++)
-			{
-				local.fact = local.eval * local.eval / local.x;
-				local.eval = local.eval / (waitthread sqrt1 local.fact);
-			}
-		
-			local.result = local.eval;
-		}
+	if (local.x == 0.0) {
+		local.result = $Math.INF_MAX; 	//infinity
+	} else {
+		local.result = 1.0 / (tanh(local.x));
 	}
 end local.result;
 
-/** -----------------------------------------------------------------------------------
-*** 								Written by veers								***
------------------------------------------------------------------------------------- */
-// Bakhshali approximation
-// indian mathematical manuscript
-// by veers
-Sqrt3 local.x:
-	if (local.x == NIL) {if (group.x != NIL) {local.x = group.x;} else {waitthread __Error1 "Sqrt3"; end;}};
-	if (waitthread IsNumber local.x) {
-		if (local.x < 0.0)
-			end 0.0;
+/** ==========================================================================================
+ HyperbolicSecant Function
+ ---------------------------------------------------------------------------------------------
+ DESCR|: 	Returns the hyperbolic secant of x. 
+			DOMAIN/INPUT: 	R or (-inf, +inf)
+			RANGE/OUTPUT:	(0, 1)
+ INPUT|: 	<INT/FLOAT x>
+ OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
+			*	float 	=> sech() of x
+			*	NIL 	=> error: uninitialized/inexistent/invalid input
+ =========================================================================================== */
+HyperbolicSecant local.x:
+	/*Error & Exception handling*/
+	local.x = waitthread MakeNumber local.x;
+	if (local.x == NIL) {waitthread __Error1 "Sech" NIL local.x; end;}
+	
+	/*Main Logic*/
+end (1.0 / (cosh(local.x)));
 
-		local.num = local.x;
-
-		// reducing below the accurate squares
-		while ( local.num * local.num > local.x )
-		local.num = 0.1 * local.num;
-
-		local.num_add = local.num;
-
-		// increasing to the environment of the accurate squares
-		while ( local.num * local.num < local.x )
-			local.num += local.num_add;
-
-		local.num -= local.num_add;
-
-		// more accurate approximation to the real squares
-		while ( local.num * local.num < local.x )
-			local.num += 0.1 * local.num_add;
-
-		local.S = local.x;
-		local.N = local.num;
-		local.divisor = 4.0 * local.N * local.N * local.N + 4.0 * local.N * local.S;
-
-		if (local.divisor == 0.0)
-			end 0.0;
-		else
-		{
-			// Bakhshali approximation
-			local.result = (local.N * local.N * local.N * local.N + 6.0 * local.N * local.N * local.S + local.S * local.S) / local.divisor;
-		}
+/** ==========================================================================================
+ HyperbolicCosecant Function
+ ---------------------------------------------------------------------------------------------
+ DESCR|: 	Returns the hyperbolic cosecant of x. 
+			DOMAIN/INPUT: 	R/{0} or (-inf, 0)U(0, +inf)
+			RANGE/OUTPUT:	R/{0} or (-inf, 0)U(0, +inf)
+ INPUT|: 	<INT/FLOAT x>
+ OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
+			*	float 	=> csch() of x
+						=> +infinity if x is out of range
+			*	NIL 	=> error: uninitialized/inexistent/invalid input
+ =========================================================================================== */
+HyperbolicCosecant local.x:
+	/*Error & Exception handling*/
+	local.x = waitthread MakeNumber local.x;
+	if (local.x == NIL) {waitthread __Error1 "Csch" NIL local.x; end;}
+	
+	if (local.x == 0.0) {
+		local.result = $Math.INF_MAX; 	//infinity
+	} else {
+		local.result = 1.0 / (sinh(local.x));
 	}
 end local.result;
 
-/** -----------------------------------------------------------------------------------
-*** 								Stuff...										***
------------------------------------------------------------------------------------- */
+/** ==========================================================================================
+ Exp Function
+ ---------------------------------------------------------------------------------------------
+ DESCR|: 	Returns the base-e exponential function of x, which is the e (cf. $Math.E) number 
+			raised to the power x.
+ INPUT|: 	<INT/FLOAT x>
+ OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
+			*	float 	=> exp() of x
+			*	NIL 	=> error: uninitialized/inexistent/invalid input
+ =========================================================================================== */
+Exp local.x:
+	/*Error & Exception handling*/
+	local.x = waitthread MakeNumber local.x;
+	if (local.x == NIL) {waitthread __Error1 "Exp" NIL local.x; end;}
+	
+	/*Main Logic*/
+end (exp local.x);
+
+/** ==========================================================================================
+ Frexp Function
+ ---------------------------------------------------------------------------------------------
+ DESCR|: 	Returns the specified floating point's binary significand (24-bit precision value)
+			in [0.5, 1.0) and an integral exponent of 2, such that:
+				x = <significand> * 2^<exponent>
+			If x is zero, both the significand and exponent are zero.
+ INPUT|: 	<FLOAT x>
+ OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
+			*	array 	=> ["significand"] 	=> float => binary significand of x 
+						=> ["exponent"]		=> int 	 => exponent of 2
+			*	NIL 	=> error: uninitialized/inexistent/invalid input
+ =========================================================================================== */
+Frexp local.x:
+	/*Error & Exception handling*/
+	local.x = waitthread MakeNumber local.x;
+	if (local.x == NIL) {waitthread __Error1 "Frexp" NIL local.x; end;}
+
+	/*Main Logic*/
+	if ((typeof local.x) != "float") {
+		if (level.DEBUG) {
+			conprintf "~^~^~^~ EXCEPTION[lib/math.slib::Frexp]: X <arg1> has to be of type float! ~^~^~^~ \n";
+		}
+		local.x = float(local.x);
+	}
+end (frexp local.x);
+
+/** ==========================================================================================
+ Ldexp Function
+ ---------------------------------------------------------------------------------------------
+ DESCR|: 	Returns the resulting floating point value from multiplying x (the significand) 
+			by 2 raised to the power of exp (the exponent).
+ INPUT|: 	<FLOAT significand> <INT exponent>
+ OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
+			*	float 	=> ldexp() of significand and exponent
+			*	NIL 	=> error: uninitialized/inexistent/invalid input
+ =========================================================================================== */
+Ldexp local.x local.exp:
+	/*Error & Exception handling*/
+	local.x = waitthread MakeNumber local.x;
+	if (local.x == NIL) {waitthread __Error1 "Ldexp" NIL local.x; end;}
+
+	local.exp = waitthread MakeNumber local.exp;
+	if (local.exp == NIL) {waitthread __Error1 "Ldexp" "exp <arg2>" local.exp; end;}
+	
+	/*Main Logic*/
+end (ldexp local.x local.exp);
+
+/** ==========================================================================================
+ Log|Ln Function
+ ---------------------------------------------------------------------------------------------
+ DESCR|: 	Returns the natural logarithm (i.e. the logarithm with base e (cf. $Math.E)) of x.
+ INPUT|: 	<INT/FLOAT x>
+ OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
+			*	float 	=> ln() of x
+						=> -infinity 			if x==0
+						=> NaN (cf. $Math.NaN) 	if x<0
+			*	NIL 	=> error: uninitialized/inexistent/invalid input
+ =========================================================================================== */
+Log local.x:
+	/*Error & Exception handling*/
+	local.x = waitthread MakeNumber local.x;
+	if (local.x == NIL) {waitthread __Error1 "Log" NIL local.x; end;}
+	
+	/*Main Logic*/
+end (log local.x);
+
+/** ==========================================================================================
+ Log10|Lg Function
+ ---------------------------------------------------------------------------------------------
+ DESCR|: 	Returns the common logarithm (i.e. the logarithm with base 10) of x.
+ INPUT|: 	<INT/FLOAT x>
+ OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
+			*	float 	=> lg() of x
+						=> -infinity 			if x==0
+						=> NaN (cf. $Math.NaN) 	if x<0
+			*	NIL 	=> error: uninitialized/inexistent/invalid input
+ =========================================================================================== */
+Log10 local.x:
+	/*Error & Exception handling*/
+	local.x = waitthread MakeNumber local.x;
+	if (local.x == NIL) {waitthread __Error1 "Log10" NIL local.x; end;}
+	
+	/*Main Logic*/
+end (log10 local.x);
+
+/** ==========================================================================================
+ Lb Function
+ ---------------------------------------------------------------------------------------------
+ DESCR|: 	Returns the binary logarithm (i.e. the logarithm with base 2) of x.
+ INPUT|: 	<INT/FLOAT x>
+ OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
+			*	float 	=> lb() of x
+						=> -infinity 			if x==0
+						=> NaN (cf. $Math.NaN) 	if x<0
+			*	NIL 	=> error: uninitialized/inexistent/invalid input
+ =========================================================================================== */
+Lb local.x:
+end (waitthread Logc local.x 2);
+
+/** ==========================================================================================
+ Logc Function
+ ---------------------------------------------------------------------------------------------
+ DESCR|: 	Returns the custom logarithm (i.e. the logarithm with base b) of x.
+ INPUT|: 	<INT/FLOAT x> <INT/FLOAT b>
+ OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
+			*	float 	=> logc() of x
+						=> -infinity 			if x==0||b==0
+						=> NaN (cf. $Math.NaN) 	if x<0||b<0
+			*	NIL 	=> error: uninitialized/inexistent/invalid input
+ =========================================================================================== */
+Logc local.x local.b:
+	/*Error & Exception handling*/
+	local.x = waitthread MakeNumber local.x;
+	if (local.x == NIL) {waitthread __Error1 "Logc" NIL local.x; end;}
+	
+	local.b = waitthread MakeNumber local.b;
+	if (local.b == NIL) {waitthread __Error1 "Logc" "b <arg2>" local.b; end;}
+	
+	/*Main Logic*/
+	if (local.x == 0.0 || local.b == 0.0) {
+		local.result = $Math.INF_MIN; 	// -infinity
+	} else {
+		/// Negative cases for x and b will be handled by the respective log10() commands.
+		/// In such an event, NaN will be produced and any operation involving NaN will
+		/// automatically result in NaN. Therefore it won't matter which variable is 
+		/// negative, the correct result will always be returned.
+		local.result = ((log10 local.x) / (log10 local.b));
+	}
+end local.result;
+
+/** ==========================================================================================
+ Modf Function
+ ---------------------------------------------------------------------------------------------
+ DESCR|: 	Returns the integral part and fractional part of the specified float.
+ INPUT|: 	<FLOAT x>
+ OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
+			*	array 	=> ["intpart"] 		=> float => integral result of modf() of x 
+						=> ["fractional"]	=> float => fractional result of modf() of x 
+			*	NIL 	=> error: uninitialized/inexistent/invalid input
+ =========================================================================================== */
+Modf local.x:
+	/*Error & Exception handling*/
+	local.x = waitthread MakeNumber local.x;
+	if (local.x == NIL) {waitthread __Error1 "Modf" NIL local.x; end;}
+	
+	/*Main Logic*/
+end (modf(float(local.x)));
+
+/** ==========================================================================================
+ Pow Function
+ ---------------------------------------------------------------------------------------------
+ DESCR|: 	Returns the x raised to the power of exp.
+ INPUT|: 	<INT/FLOAT x> <INT/FLOAT exp>
+ OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
+			*	float	=> pow() of x and exp
+						=> +infinity 	if x is zero and exp is negative.
+						=> NaN 			if x is negative and exp is not an integral value
+			*	NIL 	=> error: uninitialized/inexistent/invalid input
+ =========================================================================================== */
+Pow local.x local.exp:
+	/*Error & Exception handling*/
+	local.x = waitthread MakeNumber local.x;
+	if (local.x == NIL) {waitthread __Error1 "Pow" NIL local.x; end;}
+	
+	local.exp = waitthread MakeNumber local.exp;
+	if (local.exp == NIL) {waitthread __Error1 "Pow" "exp <arg2>" local.exp; end;}
+	
+	/*Main Logic*/
+	/// If X is negative and the exponent is not an integral value, return NaN.
+	if (local.x < 0.0 && ceil(local.exp) != local.exp) {
+		local.result = $Math.NaN;
+	} else {
+		/// If X is zero and the exponent is negative, the pow() command will return +inf
+		local.result = (pow local.x local.exp);
+	}
+end local.result;
+
+/** ==========================================================================================
+ Ceil Function
+ ---------------------------------------------------------------------------------------------
+ DESCR|: 	Returns the smallest integral value that is not less than x.
+ INPUT|: 	<INT/FLOAT x>
+ OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
+			*	float	=> ceil() of x
+			*	NIL 	=> error: uninitialized/inexistent/invalid input
+ =========================================================================================== */
+Ceil local.x:
+	/*Error & Exception handling*/
+	local.x = waitthread MakeNumber local.x;
+	if (local.x == NIL) {waitthread __Error1 "Ceil" NIL local.x; end;}
+	
+	/*Main Logic*/
+	if ((typeof local.x) == "float") {
+		local.result = ceil(local.x);
+	} else {
+		local.result = local.x;
+	}
+end local.result;
+
+/** ==========================================================================================
+ Floor Function
+ ---------------------------------------------------------------------------------------------
+ DESCR|: 	Returns the largest integral value that is not less than x.
+ INPUT|: 	<INT/FLOAT x>
+ OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
+			*	float	=> floor() of x
+			*	NIL 	=> error: uninitialized/inexistent/invalid input
+ =========================================================================================== */
+Floor local.x:
+	/*Error & Exception handling*/
+	local.x = waitthread MakeNumber local.x;
+	if (local.x == NIL) {waitthread __Error1 "Floor" NIL local.x; end;}
+	
+	/*Main Logic*/
+	if ((typeof local.x) == "float") {
+		local.result = floor(local.x);
+	} else {
+		local.result = local.x;
+	}
+end local.result;
+
+/** ==========================================================================================
+ Fmod Function
+ ---------------------------------------------------------------------------------------------
+ DESCR|: 	Returns the floating-point remainder of a Euclidean division (also known as 
+			an integral division) of numerator x and denominator y such that:
+				(numerator x - quotient) * denominator y = remainder
+			This is an expanded version of the internal modulo operation '%' and can therefore
+			take floating points as arguments.
+ INPUT|: 	<INT/FLOAT x> <INT/FLOAT y>
+ OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
+			*	float	=> fmod() of x and y
+			*	NIL 	=> error: uninitialized/inexistent/invalid input
+ =========================================================================================== */
+Fmod local.x local.y:
+	/*Error & Exception handling*/
+	local.x = waitthread MakeNumber local.x;
+	if (local.x == NIL) {waitthread __Error1 "Fmod" NIL local.x; end;}
+	
+	local.b = waitthread MakeNumber local.b;
+	if (local.b == NIL) {waitthread __Error1 "Fmod" "y <arg2>" local.b; end;}
+	
+	/*Main Logic*/
+end (fmod local.x local.y);
+
+/** ==========================================================================================
+ Sqrt Function
+ ---------------------------------------------------------------------------------------------
+ DESCR|: 	Returns the square root of x.
+ INPUT|: 	<INT/FLOAT x>
+ OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
+			*	float	=> sqrt() of x
+						=> NaN (cf. $Math.NaN) if x<0
+			*	NIL 	=> error: uninitialized/inexistent/invalid input
+ =========================================================================================== */
+Sqrt local.x:
+	/*Error & Exception handling*/
+	local.x = waitthread MakeNumber local.x;
+	if (local.x == NIL) {waitthread __Error1 "Sqrt" NIL local.x; end;}
+	
+	/*Main Logic*/
+	if (local.x == 2.0) {
+		local.result = $Math.SQ2;
+	} else {
+		/// If X is negative, sqrt() will return NaN.
+		local.result = sqrt(local.x);
+	}
+end local.result;
+
+/** ===========================================================================================================
+*** 										S	t	u	f	f	...											***
+============================================================================================================ */
 __Error1 local.func local.arg local.var:
 	if !(local.arg) {
 		local.arg = "x <arg1>";

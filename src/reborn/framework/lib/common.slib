@@ -1,0 +1,365 @@
+/**
+ Medal of Honor: Allied Assault v1.12 REBORN  -  Morpheus Script
+ ================================================================
+ COMMON FUNCTIONS LIBRARY; 					Script Framework BETA 
+ ================================================================
+ BY Sor
+ VERSION 1.0.08 (13/01/2013)
+ =-------------------------------------------------------------=		
+ Copyright (c) 2008-2014  Lenny Knockx
+ All rights reserved.
+ =-------------------------------------------------------------=
+ Permission to use, copy, modify, and/or distribute this software 
+ for any purpose with or without fee is hereby granted, provided 
+ that the above copyright notice and this permission notice appear
+ in all copies.
+ ---------------
+ THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL 
+ WARRANTIES WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED 
+ WARRANTIES OF MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL 
+ THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT, OR 
+ CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM 
+ LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, 
+ NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR 
+ IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+ =-------------------------------------------------------------=
+ CONTACT: 	http://www.x-null.net/forums/member.php?185-Sor
+ WEBSITE: 	http://www.x-null.net | www.mohaairborne.co.cc
+ ================================================================
+*/
+///decode flags function
+/** $Common subclasses:
+	-> $Waittill	=> SoundDone() ...
+	-> $Bool		=> XOR, EQUIV, IMPLI, TRUE, EXISTS, ...
+*/
+__init:
+	if (self && self == $Common) {
+		// Functions:
+		self.IntToBinaryString = 			self.fullPath::"IntegerToBinaryString";
+		self.ByteToBinaryString = 			self.fullPath::"ByteToBinaryString";
+		self.BinaryStringToInt = 			self.fullPath::"BinaryStringToInteger";
+		self.PrintBinaryString = 			self.fullPath::"PrintBinaryString";
+		self.IsBinaryString = 				self.fullPath::"IsBinaryString";
+		self.IsByte = 						self.fullPath::"IsByte";
+		
+		// There are 6 methods in this function library.
+		self.methodSize += 6;
+		
+		// There are 0 properties defined.
+		self.propertySize += 0;
+		
+		// Set path to information library:
+		//self.info = 				$Library.infoCommon;
+		
+		// $Common class has 2 children or 'subclasses'.
+		//self waitthread $System.fullPath::#DefineClass "Waittill" 	self.fullPath::"__initWaittill" 1; 	self.Waittill = $Waittill;
+		self waitthread $System.fullPath::#DefineClass "Bool" 		self.fullPath::"__initBool"; 		self.Bool = $Bool;
+	}
+end;
+
+__info:
+	local.inf["library"] 		= "common.slib";
+	local.inf["namespace"] 		= "Common";
+	local.inf["title"]			= "COMMON FUNCTIONS LIBRARY";
+	local.inf["version"] 		= "1.0.08";
+	local.inf["lastmodified"] 	= "13/01/2013";
+	local.inf["authors"][0] 	= "Sor";
+end local.inf;
+
+__initBool:
+	if (self && self == $Bool) {
+		/// BOOLEAN format PROPERTIES: ///
+		self.true = 1;
+		self.True = true;
+		self.false = 0;
+		self.False = false;
+		
+		/// BOOLEAN METHODS/FUNCTIONS: ///
+		self.Parse =			self.fullPath::"ToBool";
+		self.IsBool = 			self.fullPath::"IsBool";
+		
+		// There are 2 methods registered in this function library;
+		self.methodSize += 2;
+		
+		// There are 4 properties defined;
+		self.propertySize += 4;
+	}
+end;
+
+BoolToStr local.bool:
+	if ((typeof local.bool) == "int") {
+		if (local.bool) {
+			local.result = $Bool.True;
+		} else {
+			local.result = $Bool.False;
+		}
+	} else if ((typeof local.bool) == "const string") {
+		if (local.bool != $Bool.True && local.bool != $Bool.False) {
+			local.result = string(local.bool);
+		}
+	} else {
+		local.result = string(local.bool);
+	}
+end local.result;
+
+BoolToInt local.bool:
+	if ((typeof local.bool) == "int") {
+		local.result = bool(local.bool);
+	} else if ((typeof local.bool) == "const string") {
+		switch (local.bool) {
+			case "0":
+			case "0.0":
+			case "false":
+				local.result = $Bool.false;
+			break;
+			default:
+				local.result = $Bool.true;
+			break;
+		}
+	} else {
+		// Converts any type to integer bool. "bool"-casts only properly work on integers.
+		local.result = !(!(local.bool));
+	}
+end local.result;
+
+ToBool local.var:
+	switch (local.bool) {
+		case "0":
+		case "0.0":
+		case "false":
+			local.result = $Bool.false;
+		break;
+		default:
+			local.result = !(!(local.bool));
+		break;
+	}
+end local.result;
+
+IsBool local.var:
+	switch (local.bool) {
+		case 0:
+		case "false":
+		case 1:
+		case "true":
+			local.result = $Bool.true;
+		break;
+		default:
+			local.result = $Bool.false;
+		break;
+	}
+end local.result;
+
+//Convert HEX;BIN string representation of ints to int and vice versa.. 
+ByteToBinaryString local.byte:
+	if (waitthread IsByte local.byte) {
+		local.result = "";
+		if (local.byte < 0) {
+			local.byte += 1;
+			while (local.result.size < 8) {
+				local.result = !(local.byte % -2) + local.result;
+				local.byte = int(local.byte / 2)
+			}
+		} else {
+			while (local.result.size < 8) {
+				local.result = (local.byte % 2) + local.result;
+				local.byte = int(local.byte / 2)
+			}
+		}
+	} else {
+		if (level.DEBUG) {
+			conprintf ("\n ~^~^~^~ FATAL_ERROR[lib/common.slib::ByteToBinaryString]: specified byte <arg1> is either inexistent or not an invalid integer! ~^~^~^~ \n\n");
+		}
+	} 
+end local.result;
+
+IsByte local.byte:
+	local.result = 0;
+	if (local.byte.size > 0 && (typeof local.byte) == "int") {
+		if ( -256 <= local.byte && local.byte < 256) {
+			local.result = 1
+		}
+	}
+end local.result;
+
+IntegerToBinaryString local.int:
+	if (local.int.size > 0 && (typeof local.int) == "int") {
+		local.result = "";
+		if (local.int < 0) {
+			/// Negative integers ought to be converted to be bitstrings like this:
+			local.int += 1;
+			while (local.result.size < 32) {
+				local.result = !(local.int % -2) + local.result;
+				local.int = int(local.int / 2)
+			}
+		} else {
+			/// Positive integers ought to be converted to be bitstrings like this:
+			while (local.result.size < 32) {
+				local.result = (local.int % 2) + local.result;
+				local.int = int(local.int / 2)
+			}
+		}
+	} else {
+		if (level.DEBUG) {
+			conprintf ("\n ~^~^~^~ FATAL_ERROR[lib/common.slib::IntegerToBinaryString]: specified integer <arg1> is either inexistent or not an integer! ~^~^~^~ \n\n");
+		}
+	}
+end local.result;
+
+BinaryStringToInteger local.bin:
+	if (local.bin && (waitthread IsBinaryString local.bin)) {
+		if (local.bin.size > 32) {
+			// check if value can be represented in a float using frexp()
+		} 
+		
+	} else {
+		if (level.DEBUG) {
+			conprintf ("\n ~^~^~^~ FATAL_ERROR[lib/common.slib::BinaryStringToInteger]: Cannot convert an inexistent or invalid binary string <arg1>! ~^~^~^~ \n\n");
+		}
+	}
+end local.result;
+
+// nybbles= (1 nybble = 4 bits, 2 nybbles = 1 byte), determines after how much nybbles must there be a space character. default, no spaces.
+PrintBinaryString local.bin local.nybbles:
+	if (local.bin && (waitthread IsBinaryString local.bin)) {
+		if (local.nybbles && (typeof local.nybbles) == "int") {
+			local.nybbles = (local.nybbles * 4);
+				
+			// Format integral part:
+			while ((local.bin[1].size % local.nybbles) != 0) {
+				local.bin[1] = "0" + local.bin[1];
+			}
+			
+			// Print integral part:
+			for (local.i = 0; local.i < local.bin[1].size; local.i++) {
+				if (local.i && !(local.i % local.nybbles)) {
+					conprintf(" ");
+				}
+				conprintf(local.bin[1][local.i]);
+			}
+		} else {
+			conprintf(local.bin);
+		}
+	} else {
+		if (level.DEBUG) {
+			conprintf ("\n ~^~^~^~ FATAL_ERROR[lib/common.slib::PrintBinaryString]: Attempting to print an inexistent or invalid binary string <arg1>! ~^~^~^~ \n\n");
+		}
+	}
+end;
+
+IsBinaryString local.bin:
+	local.result = 0;
+	if (local.bin && ((typeof local.bin) == "string" || (typeof local.bin) == "const string")) {
+		local.strSize = local.bin.size;
+		local.result = 1;
+		for (local.i = 0; local.result && local.i < local.strSize; local.i++) {
+			switch (local.bin[local.i]) {
+				case "0":
+				case "1":
+				break;
+				case ".":
+					if (local.dot) {
+						local.result = 0;
+					} else {
+						local.dot = 1;
+					}
+				break;
+				default:
+					local.result = 0;
+				break;
+			}
+		}
+	}
+end local.result;
+
+IntegerToHexadecimalString local.int:
+
+end local.result;
+
+HexadecimalStringToInteger local.hex:
+
+end local.result;
+
+HexadecimalStringToColour local.hex:
+
+end local.result;
+
+PrintHexadecimalString local.hex:
+
+end;
+
+// format= default normal; 1 is '#' format; 2 is '0x' format
+// letterCase= default upper; 1 lower
+FormatHexadecimalString local.hex local.format local.letterCase:
+
+end local.result;
+
+__SplitPath local.path:
+	local.result[0] = ""; 	//filePath
+	local.result[1] = ""; 	//fileName
+	for (local.i = (local.path.size - 1); local.i >= 0; local.i--) {
+		if (local.path[local.i] == "/") {
+			for (local.j = (local.i + 1); local.j < local.path.size; local.j++) {
+				local.result[1] += string(local.path[local.j]);
+			}
+			
+			for (local.j = 0; local.j <= local.i; local.j++) {
+				local.result[0] += string(local.path[local.j]);
+			}
+			end local.result;
+		}
+	}
+	
+	// Base directory?
+	local.result[0] = "/";
+	local.result[1] = local.path;
+end local.result;
+
+__GetFilename local.path:
+	local.result = "";
+	for (local.i = (local.path.size - 1); local.i >= 0; local.i--) {
+		if (local.path[local.i] == "/") {
+			for (local.j = local.i; local.j < local.path.size; local.j++) {
+				local.result += string(local.path[local.j]);
+			}
+			break;
+		}
+	}
+end local.result;
+
+__GetFilePath local.path:
+	local.result = "";
+	for (local.i = (local.path.size - 1); local.i >= 0; local.i--) {
+		if (local.path[local.i] == "/") {
+			for (local.j = 0; local.j <= local.i; local.j++) {
+				local.result += string(local.path[local.j]);
+			}
+			break;
+		}
+	}
+end local.result;
+
+
+// => rename to $Bool.IsTrue alongside $Bool.IMPLI, $Bool.EQUIV & $Bool.XOR
+IsTrue local.var:
+	local.result = 0;
+	if (local.var && local.var.size > 0) {
+		switch (local.var) {
+			case false:
+			case "0":
+			break;	 // filters out all false values;
+			default: // case true; case 1; case "1"; all other cases (i.e. something)
+				local.result = 1;
+			break;
+		}
+	}
+end local.result;
+
+/** For reference:
+	println local.o.size ==> prints -1 i.e. inexistent
+	local.o[0] = NIL;
+	println local.o.size; ==> prints 0 i.e. uninitialized
+	local.o[0] = NULL;
+	println local.o.size; ==> prints 1 i.e. apparently NOT empty?
+*/
+Exists local.var:
+end (local.var.size > 0 /*&& local.var != NIL*/ && local.var != NULL);

@@ -1,0 +1,1576 @@
+/**
+ Medal of Honor: Allied Assault v1.12 REBORN  -  Morpheus Script
+ ================================================================
+ INTERNET PROTOCOL INFORMATION LIBRARY; 	Script Framework BETA
+ ================================================================
+ BY Sor	
+ VERSION 1.0.05 (15/01/2012)
+ =-------------------------------------------------------------=
+ Copyright (c) 2009-2014  Lenny Knockx
+ All rights reserved.
+ =-------------------------------------------------------------=
+ Permission to use, copy, modify, and/or distribute this software 
+ for any purpose with or without fee is hereby granted, provided 
+ that the above copyright notice and this permission notice appear
+ in all copies.
+ ---------------
+ THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL 
+ WARRANTIES WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED 
+ WARRANTIES OF MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL 
+ THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT, OR 
+ CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM 
+ LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, 
+ NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR 
+ IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+ =-------------------------------------------------------------=
+ CONTACT: 	http://www.x-null.net/forums/member.php?185-Sor
+ WEBSITE: 	http://www.x-null.net | www.mohaairborne.co.cc
+ ================================================================
+*/
+__info:
+	local.inf["library"] = "ip.lib";
+	local.inf["namespace"] = "IP";		//targetname of class this script is part of...
+	local.inf["title"] = "INTERNET PROTOCOL INFORMATION LIBRARY";
+	local.inf["version"] = "1.0.05";
+	local.inf["lastmodified"] = "15/01/2012";
+	local.inf["authors"][0] = "Sor";
+end local.inf;
+
+/**==================================================================================================================
+//			C	O	U	N	T	R	Y		A	R	R	A	Y		&		T	H	R	E	A	D	S			   //
+================================================================================================================== */
+__CountryArray:
+	local.tmp[0] = "N/A";
+	local.tmp[1] = "Asia/Pacific Region";
+	local.tmp[2] = "Europe";
+	local.tmp[3] = "Andorra";
+	local.tmp[4] = "United Arab Emirates";
+	local.tmp[5] = "Afghanistan";
+	local.tmp[6] = "Antigua and Barbuda";
+	local.tmp[7] = "Anguilla";
+	local.tmp[8] = "Albania";
+	local.tmp[9] = "Armenia";
+	local.tmp[10] = "Curacao";
+	local.tmp[11] = "Angola";
+	local.tmp[12] = "Antarctica";
+	local.tmp[13] = "Argentina";
+	local.tmp[14] = "American Samoa";
+	local.tmp[15] = "Austria";
+	local.tmp[16] = "Australia";
+	local.tmp[17] = "Aruba";
+	local.tmp[18] = "Azerbaijan";
+	local.tmp[19] = "Bosnia and Herzegovina";
+	local.tmp[20] = "Barbados";
+	local.tmp[21] = "Bangladesh";
+	local.tmp[22] = "Belgium";
+	local.tmp[23] = "Burkina Faso";
+	local.tmp[24] = "Bulgaria";
+	local.tmp[25] = "Bahrain";
+	local.tmp[26] = "Burundi";
+	local.tmp[27] = "Benin";
+	local.tmp[28] = "Bermuda";
+	local.tmp[29] = "Brunei Darussalam";
+	local.tmp[30] = "Bolivia";
+	local.tmp[31] = "Brazil";
+	local.tmp[32] = "Bahamas";
+	local.tmp[33] = "Bhutan";
+	local.tmp[34] = "Bouvet Island";
+	local.tmp[35] = "Botswana";
+	local.tmp[36] = "Belarus";
+	local.tmp[37] = "Belize";
+	local.tmp[38] = "Canada";
+	local.tmp[39] = "Cocos (Keeling) Islands";
+	local.tmp[40] = "Congo, The Democratic Republic of the";
+	local.tmp[41] = "Central African Republic";
+	local.tmp[42] = "Congo";
+	local.tmp[43] = "Switzerland";
+	local.tmp[44] = "Cote D'Ivoire";
+	local.tmp[45] = "Cook Islands";
+	local.tmp[46] = "Chile";
+	local.tmp[47] = "Cameroon";
+	local.tmp[48] = "China";
+	local.tmp[49] = "Colombia";
+	local.tmp[50] = "Costa Rica";
+	local.tmp[51] = "Cuba";
+	local.tmp[52] = "Cape Verde";
+	local.tmp[53] = "Christmas Island";
+	local.tmp[54] = "Cyprus";
+	local.tmp[55] = "Czech Republic";
+	local.tmp[56] = "Germany";
+	local.tmp[57] = "Djibouti";
+	local.tmp[58] = "Denmark";
+	local.tmp[59] = "Dominica";
+	local.tmp[60] = "Dominican Republic";
+	local.tmp[61] = "Algeria";
+	local.tmp[62] = "Ecuador";
+	local.tmp[63] = "Estonia";
+	local.tmp[64] = "Egypt";
+	local.tmp[65] = "Western Sahara";
+	local.tmp[66] = "Eritrea";
+	local.tmp[67] = "Spain";
+	local.tmp[68] = "Ethiopia";
+	local.tmp[69] = "Finland";
+	local.tmp[70] = "Fiji";
+	local.tmp[71] = "Falkland Islands (Malvinas)";
+	local.tmp[72] = "Micronesia, Federated States of";
+	local.tmp[73] = "Faroe Islands";
+	local.tmp[74] = "France";
+	local.tmp[75] = "Sint Maarten (Dutch part)";
+	local.tmp[76] = "Gabon";
+	local.tmp[77] = "United Kingdom";
+	local.tmp[78] = "Grenada";
+	local.tmp[79] = "Georgia";
+	local.tmp[80] = "French Guiana";
+	local.tmp[81] = "Ghana";
+	local.tmp[82] = "Gibraltar";
+	local.tmp[83] = "Greenland";
+	local.tmp[84] = "Gambia";
+	local.tmp[85] = "Guinea";
+	local.tmp[86] = "Guadeloupe";
+	local.tmp[87] = "Equatorial Guinea";
+	local.tmp[88] = "Greece";
+	local.tmp[89] = "South Georgia and the South Sandwich Islands";
+	local.tmp[90] = "Guatemala";
+	local.tmp[91] = "Guam";
+	local.tmp[92] = "Guinea-Bissau";
+	local.tmp[93] = "Guyana";
+	local.tmp[94] = "Hong Kong";
+	local.tmp[95] = "Heard Island and McDonald Islands";
+	local.tmp[96] = "Honduras";
+	local.tmp[97] = "Croatia";
+	local.tmp[98] = "Haiti";
+	local.tmp[99] = "Hungary";
+	local.tmp[100] = "Indonesia";
+	local.tmp[101] = "Ireland";
+	local.tmp[102] = "Israel";
+	local.tmp[103] = "India";
+	local.tmp[104] = "British Indian Ocean Territory";
+	local.tmp[105] = "Iraq";
+	local.tmp[106] = "Iran, Islamic Republic of";
+	local.tmp[107] = "Iceland";
+	local.tmp[108] = "Italy";
+	local.tmp[109] = "Jamaica";
+	local.tmp[110] = "Jordan";
+	local.tmp[111] = "Japan";
+	local.tmp[112] = "Kenya";
+	local.tmp[113] = "Kyrgyzstan";
+	local.tmp[114] = "Cambodia";
+	local.tmp[115] = "Kiribati";
+	local.tmp[116] = "Comoros";
+	local.tmp[117] = "Saint Kitts and Nevis";
+	local.tmp[118] = "Korea, Democratic People's Republic of";
+	local.tmp[119] = "Korea, Republic of";
+	local.tmp[120] = "Kuwait";
+	local.tmp[121] = "Cayman Islands";
+	local.tmp[122] = "Kazakhstan";
+	local.tmp[123] = "Lao People's Democratic Republic";
+	local.tmp[124] = "Lebanon";
+	local.tmp[125] = "Saint Lucia";
+	local.tmp[126] = "Liechtenstein";
+	local.tmp[127] = "Sri Lanka";
+	local.tmp[128] = "Liberia";
+	local.tmp[129] = "Lesotho";
+	local.tmp[130] = "Lithuania";
+	local.tmp[131] = "Luxembourg";
+	local.tmp[132] = "Latvia";
+	local.tmp[133] = "Libya";
+	local.tmp[134] = "Morocco";
+	local.tmp[135] = "Monaco";
+	local.tmp[136] = "Moldova, Republic of";
+	local.tmp[137] = "Madagascar";
+	local.tmp[138] = "Marshall Islands";
+	local.tmp[139] = "Macedonia";
+	local.tmp[140] = "Mali";
+	local.tmp[141] = "Myanmar";
+	local.tmp[142] = "Mongolia";
+	local.tmp[143] = "Macau";
+	local.tmp[144] = "Northern Mariana Islands";
+	local.tmp[145] = "Martinique";
+	local.tmp[146] = "Mauritania";
+	local.tmp[147] = "Montserrat";
+	local.tmp[148] = "Malta";
+	local.tmp[149] = "Mauritius";
+	local.tmp[150] = "Maldives";
+	local.tmp[151] = "Malawi";
+	local.tmp[152] = "Mexico";
+	local.tmp[153] = "Malaysia";
+	local.tmp[154] = "Mozambique";
+	local.tmp[155] = "Namibia";
+	local.tmp[156] = "New Caledonia";
+	local.tmp[157] = "Niger";
+	local.tmp[158] = "Norfolk Island";
+	local.tmp[159] = "Nigeria";
+	local.tmp[160] = "Nicaragua";
+	local.tmp[161] = "Netherlands";
+	local.tmp[162] = "Norway";
+	local.tmp[163] = "Nepal";
+	local.tmp[164] = "Nauru";
+	local.tmp[165] = "Niue";
+	local.tmp[166] = "New Zealand";
+	local.tmp[167] = "Oman";
+	local.tmp[168] = "Panama";
+	local.tmp[169] = "Peru";
+	local.tmp[170] = "French Polynesia";
+	local.tmp[171] = "Papua New Guinea";
+	local.tmp[172] = "Philippines";
+	local.tmp[173] = "Pakistan";
+	local.tmp[174] = "Poland";
+	local.tmp[175] = "Saint Pierre and Miquelon";
+	local.tmp[176] = "Pitcairn Islands";
+	local.tmp[177] = "Puerto Rico";
+	local.tmp[178] = "Palestinian Territory";
+	local.tmp[179] = "Portugal";
+	local.tmp[180] = "Palau";
+	local.tmp[181] = "Paraguay";
+	local.tmp[182] = "Qatar";
+	local.tmp[183] = "Reunion";
+	local.tmp[184] = "Romania";
+	local.tmp[185] = "Russian Federation";
+	local.tmp[186] = "Rwanda";
+	local.tmp[187] = "Saudi Arabia";
+	local.tmp[188] = "Solomon Islands";
+	local.tmp[189] = "Seychelles";
+	local.tmp[190] = "Sudan";
+	local.tmp[191] = "Sweden";
+	local.tmp[192] = "Singapore";
+	local.tmp[193] = "Saint Helena";
+	local.tmp[194] = "Slovenia";
+	local.tmp[195] = "Svalbard and Jan Mayen";
+	local.tmp[196] = "Slovakia";
+	local.tmp[197] = "Sierra Leone";
+	local.tmp[198] = "San Marino";
+	local.tmp[199] = "Senegal";
+	local.tmp[200] = "Somalia";
+	local.tmp[201] = "Suriname";
+	local.tmp[202] = "Sao Tome and Principe";
+	local.tmp[203] = "El Salvador";
+	local.tmp[204] = "Syrian Arab Republic";
+	local.tmp[205] = "Swaziland";
+	local.tmp[206] = "Turks and Caicos Islands";
+	local.tmp[207] = "Chad";
+	local.tmp[208] = "French Southern Territories";
+	local.tmp[209] = "Togo";
+	local.tmp[210] = "Thailand";
+	local.tmp[211] = "Tajikistan";
+	local.tmp[212] = "Tokelau";
+	local.tmp[213] = "Turkmenistan";
+	local.tmp[214] = "Tunisia";
+	local.tmp[215] = "Tonga";
+	local.tmp[216] = "Timor-Leste";
+	local.tmp[217] = "Turkey";
+	local.tmp[218] = "Trinidad and Tobago";
+	local.tmp[219] = "Tuvalu";
+	local.tmp[220] = "Taiwan";
+	local.tmp[221] = "Tanzania, United Republic of";
+	local.tmp[222] = "Ukraine";
+	local.tmp[223] = "Uganda";
+	local.tmp[224] = "United States Minor Outlying Islands";
+	local.tmp[225] = "United States";
+	local.tmp[226] = "Uruguay";
+	local.tmp[227] = "Uzbekistan";
+	local.tmp[228] = "Holy See (Vatican City State)";
+	local.tmp[229] = "Saint Vincent and the Grenadines";
+	local.tmp[230] = "Venezuela";
+	local.tmp[231] = "Virgin Islands, British";
+	local.tmp[232] = "Virgin Islands, U.S.";
+	local.tmp[233] = "Vietnam";
+	local.tmp[234] = "Vanuatu";
+	local.tmp[235] = "Wallis and Futuna";
+	local.tmp[236] = "Samoa";
+	local.tmp[237] = "Yemen";
+	local.tmp[238] = "Mayotte";
+	local.tmp[239] = "Serbia";
+	local.tmp[240] = "South Africa";
+	local.tmp[241] = "Zambia";
+	local.tmp[242] = "Montenegro";
+	local.tmp[243] = "Zimbabwe";
+	local.tmp[244] = "Anonymous Proxy";
+	local.tmp[245] = "Satellite Provider";
+	local.tmp[246] = "Other";
+	local.tmp[247] = "Aland Islands";
+	local.tmp[248] = "Guernsey";
+	local.tmp[249] = "Isle of Man";
+	local.tmp[250] = "Jersey";
+	local.tmp[251] = "Saint Barthelemy";
+	local.tmp[252] = "Saint Martin";
+	local.tmp[253] = "Bonaire, Saint Eustatius and Saba";
+end local.tmp;
+
+__CountryArray0:
+	end "N/A";
+__CountryArray1:
+	end "Asia/Pacific Region";
+__CountryArray2:
+	end "Europe";
+__CountryArray3:
+	end "Andorra";
+__CountryArray4:
+	end "United Arab Emirates";
+__CountryArray5:
+	end "Afghanistan";
+__CountryArray6:
+	end "Antigua and Barbuda";
+__CountryArray7:
+	end "Anguilla";
+__CountryArray8:
+	end "Albania";
+__CountryArray9:
+	end "Armenia";
+__CountryArray10:
+	end "Curacao";
+__CountryArray11:
+	end "Angola";
+__CountryArray12:
+	end "Antarctica";
+__CountryArray13:
+	end "Argentina";
+__CountryArray14:
+	end "American Samoa";
+__CountryArray15:
+	end "Austria";
+__CountryArray16:
+	end "Australia";
+__CountryArray17:
+	end "Aruba";
+__CountryArray18:
+	end "Azerbaijan";
+__CountryArray19:
+	end "Bosnia and Herzegovina";
+__CountryArray20:
+	end "Barbados";
+__CountryArray21:
+	end "Bangladesh";
+__CountryArray22:
+	end "Belgium";
+__CountryArray23:
+	end "Burkina Faso";
+__CountryArray24:
+	end "Bulgaria";
+__CountryArray25:
+	end "Bahrain";
+__CountryArray26:
+	end "Burundi";
+__CountryArray27:
+	end "Benin";
+__CountryArray28:
+	end "Bermuda";
+__CountryArray29:
+	end "Brunei Darussalam";
+__CountryArray30:
+	end "Bolivia";
+__CountryArray31:
+	end "Brazil";
+__CountryArray32:
+	end "Bahamas";
+__CountryArray33:
+	end "Bhutan";
+__CountryArray34:
+	end "Bouvet Island";
+__CountryArray35:
+	end "Botswana";
+__CountryArray36:
+	end "Belarus";
+__CountryArray37:
+	end "Belize";
+__CountryArray38:
+	end "Canada";
+__CountryArray39:
+	end "Cocos (Keeling) Islands";
+__CountryArray40:
+	end "Congo, The Democratic Republic of the";
+__CountryArray41:
+	end "Central African Republic";
+__CountryArray42:
+	end "Congo";
+__CountryArray43:
+	end "Switzerland";
+__CountryArray44:
+	end "Cote D'Ivoire";
+__CountryArray45:
+	end "Cook Islands";
+__CountryArray46:
+	end "Chile";
+__CountryArray47:
+	end "Cameroon";
+__CountryArray48:
+	end "China";
+__CountryArray49:
+	end "Colombia";
+__CountryArray50:
+	end "Costa Rica";
+__CountryArray51:
+	end "Cuba";
+__CountryArray52:
+	end "Cape Verde";
+__CountryArray53:
+	end "Christmas Island";
+__CountryArray54:
+	end "Cyprus";
+__CountryArray55:
+	end "Czech Republic";
+__CountryArray56:
+	end "Germany";
+__CountryArray57:
+	end "Djibouti";
+__CountryArray58:
+	end "Denmark";
+__CountryArray59:
+	end "Dominica";
+__CountryArray60:
+	end "Dominican Republic";
+__CountryArray61:
+	end "Algeria";
+__CountryArray62:
+	end "Ecuador";
+__CountryArray63:
+	end "Estonia";
+__CountryArray64:
+	end "Egypt";
+__CountryArray65:
+	end "Western Sahara";
+__CountryArray66:
+	end "Eritrea";
+__CountryArray67:
+	end "Spain";
+__CountryArray68:
+	end "Ethiopia";
+__CountryArray69:
+	end "Finland";
+__CountryArray70:
+	end "Fiji";
+__CountryArray71:
+	end "Falkland Islands (Malvinas)";
+__CountryArray72:
+	end "Micronesia, Federated States of";
+__CountryArray73:
+	end "Faroe Islands";
+__CountryArray74:
+	end "France";
+__CountryArray75:
+	end "Sint Maarten (Dutch part)";
+__CountryArray76:
+	end "Gabon";
+__CountryArray77:
+	end "United Kingdom";
+__CountryArray78:
+	end "Grenada";
+__CountryArray79:
+	end "Georgia";
+__CountryArray80:
+	end "French Guiana";
+__CountryArray81:
+	end "Ghana";
+__CountryArray82:
+	end "Gibraltar";
+__CountryArray83:
+	end "Greenland";
+__CountryArray84:
+	end "Gambia";
+__CountryArray85:
+	end "Guinea";
+__CountryArray86:
+	end "Guadeloupe";
+__CountryArray87:
+	end "Equatorial Guinea";
+__CountryArray88:
+	end "Greece";
+__CountryArray89:
+	end "South Georgia and the South Sandwich Islands";
+__CountryArray90:
+	end "Guatemala";
+__CountryArray91:
+	end "Guam";
+__CountryArray92:
+	end "Guinea-Bissau";
+__CountryArray93:
+	end "Guyana";
+__CountryArray94:
+	end "Hong Kong";
+__CountryArray95:
+	end "Heard Island and McDonald Islands";
+__CountryArray96:
+	end "Honduras";
+__CountryArray97:
+	end "Croatia";
+__CountryArray98:
+	end "Haiti";
+__CountryArray99:
+	end "Hungary";
+__CountryArray100:
+	end "Indonesia";
+__CountryArray101:
+	end "Ireland";
+__CountryArray102:
+	end "Israel";
+__CountryArray103:
+	end "India";
+__CountryArray104:
+	end "British Indian Ocean Territory";
+__CountryArray105:
+	end "Iraq";
+__CountryArray106:
+	end "Iran, Islamic Republic of";
+__CountryArray107:
+	end "Iceland";
+__CountryArray108:
+	end "Italy";
+__CountryArray109:
+	end "Jamaica";
+__CountryArray110:
+	end "Jordan";
+__CountryArray111:
+	end "Japan";
+__CountryArray112:
+	end "Kenya";
+__CountryArray113:
+	end "Kyrgyzstan";
+__CountryArray114:
+	end "Cambodia";
+__CountryArray115:
+	end "Kiribati";
+__CountryArray116:
+	end "Comoros";
+__CountryArray117:
+	end "Saint Kitts and Nevis";
+__CountryArray118:
+	end "Korea, Democratic People's Republic of";
+__CountryArray119:
+	end "Korea, Republic of";
+__CountryArray120:
+	end "Kuwait";
+__CountryArray121:
+	end "Cayman Islands";
+__CountryArray122:
+	end "Kazakhstan";
+__CountryArray123:
+	end "Lao People's Democratic Republic";
+__CountryArray124:
+	end "Lebanon";
+__CountryArray125:
+	end "Saint Lucia";
+__CountryArray126:
+	end "Liechtenstein";
+__CountryArray127:
+	end "Sri Lanka";
+__CountryArray128:
+	end "Liberia";
+__CountryArray129:
+	end "Lesotho";
+__CountryArray130:
+	end "Lithuania";
+__CountryArray131:
+	end "Luxembourg";
+__CountryArray132:
+	end "Latvia";
+__CountryArray133:
+	end "Libya";
+__CountryArray134:
+	end "Morocco";
+__CountryArray135:
+	end "Monaco";
+__CountryArray136:
+	end "Moldova, Republic of";
+__CountryArray137:
+	end "Madagascar";
+__CountryArray138:
+	end "Marshall Islands";
+__CountryArray139:
+	end "Macedonia";
+__CountryArray140:
+	end "Mali";
+__CountryArray141:
+	end "Myanmar";
+__CountryArray142:
+	end "Mongolia";
+__CountryArray143:
+	end "Macau";
+__CountryArray144:
+	end "Northern Mariana Islands";
+__CountryArray145:
+	end "Martinique";
+__CountryArray146:
+	end "Mauritania";
+__CountryArray147:
+	end "Montserrat";
+__CountryArray148:
+	end "Malta";
+__CountryArray149:
+	end "Mauritius";
+__CountryArray150:
+	end "Maldives";
+__CountryArray151:
+	end "Malawi";
+__CountryArray152:
+	end "Mexico";
+__CountryArray153:
+	end "Malaysia";
+__CountryArray154:
+	end "Mozambique";
+__CountryArray155:
+	end "Namibia";
+__CountryArray156:
+	end "New Caledonia";
+__CountryArray157:
+	end "Niger";
+__CountryArray158:
+	end "Norfolk Island";
+__CountryArray159:
+	end "Nigeria";
+__CountryArray160:
+	end "Nicaragua";
+__CountryArray161:
+	end "Netherlands";
+__CountryArray162:
+	end "Norway";
+__CountryArray163:
+	end "Nepal";
+__CountryArray164:
+	end "Nauru";
+__CountryArray165:
+	end "Niue";
+__CountryArray166:
+	end "New Zealand";
+__CountryArray167:
+	end "Oman";
+__CountryArray168:
+	end "Panama";
+__CountryArray169:
+	end "Peru";
+__CountryArray170:
+	end "French Polynesia";
+__CountryArray171:
+	end "Papua New Guinea";
+__CountryArray172:
+	end "Philippines";
+__CountryArray173:
+	end "Pakistan";
+__CountryArray174:
+	end "Poland";
+__CountryArray175:
+	end "Saint Pierre and Miquelon";
+__CountryArray176:
+	end "Pitcairn Islands";
+__CountryArray177:
+	end "Puerto Rico";
+__CountryArray178:
+	end "Palestinian Territory";
+__CountryArray179:
+	end "Portugal";
+__CountryArray180:
+	end "Palau";
+__CountryArray181:
+	end "Paraguay";
+__CountryArray182:
+	end "Qatar";
+__CountryArray183:
+	end "Reunion";
+__CountryArray184:
+	end "Romania";
+__CountryArray185:
+	end "Russian Federation";
+__CountryArray186:
+	end "Rwanda";
+__CountryArray187:
+	end "Saudi Arabia";
+__CountryArray188:
+	end "Solomon Islands";
+__CountryArray189:
+	end "Seychelles";
+__CountryArray190:
+	end "Sudan";
+__CountryArray191:
+	end "Sweden";
+__CountryArray192:
+	end "Singapore";
+__CountryArray193:
+	end "Saint Helena";
+__CountryArray194:
+	end "Slovenia";
+__CountryArray195:
+	end "Svalbard and Jan Mayen";
+__CountryArray196:
+	end "Slovakia";
+__CountryArray197:
+	end "Sierra Leone";
+__CountryArray198:
+	end "San Marino";
+__CountryArray199:
+	end "Senegal";
+__CountryArray200:
+	end "Somalia";
+__CountryArray201:
+	end "Suriname";
+__CountryArray202:
+	end "Sao Tome and Principe";
+__CountryArray203:
+	end "El Salvador";
+__CountryArray204:
+	end "Syrian Arab Republic";
+__CountryArray205:
+	end "Swaziland";
+__CountryArray206:
+	end "Turks and Caicos Islands";
+__CountryArray207:
+	end "Chad";
+__CountryArray208:
+	end "French Southern Territories";
+__CountryArray209:
+	end "Togo";
+__CountryArray210:
+	end "Thailand";
+__CountryArray211:
+	end "Tajikistan";
+__CountryArray212:
+	end "Tokelau";
+__CountryArray213:
+	end "Turkmenistan";
+__CountryArray214:
+	end "Tunisia";
+__CountryArray215:
+	end "Tonga";
+__CountryArray216:
+	end "Timor-Leste";
+__CountryArray217:
+	end "Turkey";
+__CountryArray218:
+	end "Trinidad and Tobago";
+__CountryArray219:
+	end "Tuvalu";
+__CountryArray220:
+	end "Taiwan";
+__CountryArray221:
+	end "Tanzania, United Republic of";
+__CountryArray222:
+	end "Ukraine";
+__CountryArray223:
+	end "Uganda";
+__CountryArray224:
+	end "United States Minor Outlying Islands";
+__CountryArray225:
+	end "United States";
+__CountryArray226:
+	end "Uruguay";
+__CountryArray227:
+	end "Uzbekistan";
+__CountryArray228:
+	end "Holy See (Vatican City State)";
+__CountryArray229:
+	end "Saint Vincent and the Grenadines";
+__CountryArray230:
+	end "Venezuela";
+__CountryArray231:
+	end "Virgin Islands, British";
+__CountryArray232:
+	end "Virgin Islands, U.S.";
+__CountryArray233:
+	end "Vietnam";
+__CountryArray234:
+	end "Vanuatu";
+__CountryArray235:
+	end "Wallis and Futuna";
+__CountryArray236:
+	end "Samoa";
+__CountryArray237:
+	end "Yemen";
+__CountryArray238:
+	end "Mayotte";
+__CountryArray239:
+	end "Serbia";
+__CountryArray240:
+	end "South Africa";
+__CountryArray241:
+	end "Zambia";
+__CountryArray242:
+	end "Montenegro";
+__CountryArray243:
+	end "Zimbabwe";
+__CountryArray244:
+	end "Anonymous Proxy";
+__CountryArray245:
+	end "Satellite Provider";
+__CountryArray246:
+	end "Other";
+__CountryArray247:
+	end "Aland Islands";
+__CountryArray248:
+	end "Guernsey";
+__CountryArray249:
+	end "Isle of Man";
+__CountryArray250:
+	end "Jersey";
+__CountryArray251:
+	end "Saint Barthelemy";
+__CountryArray252:
+	end "Saint Martin";
+__CountryArray253:
+	end "Bonaire, Saint Eustatius and Saba";
+
+
+/**==================================================================================================================
+//	C	O	U	N	T	R	Y 	C	O	D	E		A	R	R	A	Y		&		T	H	R	E	A	D	S	   //
+================================================================================================================== */
+__CountryCodeArray:
+	local.tmp[0] = "--";
+	local.tmp[1] = "AP";
+	local.tmp[2] = "EU";
+	local.tmp[3] = "AD";
+	local.tmp[4] = "AE";
+	local.tmp[5] = "AF";
+	local.tmp[6] = "AG";
+	local.tmp[7] = "AI";
+	local.tmp[8] = "AL";
+	local.tmp[9] = "AM";
+	local.tmp[10] = "CW";
+	local.tmp[11] = "AO";
+	local.tmp[12] = "AQ";
+	local.tmp[13] = "AR";
+	local.tmp[14] = "AS";
+	local.tmp[15] = "AT";
+	local.tmp[16] = "AU";
+	local.tmp[17] = "AW";
+	local.tmp[18] = "AZ";
+	local.tmp[19] = "BA";
+	local.tmp[20] = "BB";
+	local.tmp[21] = "BD";
+	local.tmp[22] = "BE";
+	local.tmp[23] = "BF";
+	local.tmp[24] = "BG";
+	local.tmp[25] = "BH";
+	local.tmp[26] = "BI";
+	local.tmp[27] = "BJ";
+	local.tmp[28] = "BM";
+	local.tmp[29] = "BN";
+	local.tmp[30] = "BO";
+	local.tmp[31] = "BR";
+	local.tmp[32] = "BS";
+	local.tmp[33] = "BT";
+	local.tmp[34] = "BV";
+	local.tmp[35] = "BW";
+	local.tmp[36] = "BY";
+	local.tmp[37] = "BZ";
+	local.tmp[38] = "CA";
+	local.tmp[39] = "CC";
+	local.tmp[40] = "CD";
+	local.tmp[41] = "CF";
+	local.tmp[42] = "CG";
+	local.tmp[43] = "CH";
+	local.tmp[44] = "CI";
+	local.tmp[45] = "CK";
+	local.tmp[46] = "CL";
+	local.tmp[47] = "CM";
+	local.tmp[48] = "CN";
+	local.tmp[49] = "CO";
+	local.tmp[50] = "CR";
+	local.tmp[51] = "CU";
+	local.tmp[52] = "CV";
+	local.tmp[53] = "CX";
+	local.tmp[54] = "CY";
+	local.tmp[55] = "CZ";
+	local.tmp[56] = "DE";
+	local.tmp[57] = "DJ";
+	local.tmp[58] = "DK";
+	local.tmp[59] = "DM";
+	local.tmp[60] = "DO";
+	local.tmp[61] = "DZ";
+	local.tmp[62] = "EC";
+	local.tmp[63] = "EE";
+	local.tmp[64] = "EG";
+	local.tmp[65] = "EH";
+	local.tmp[66] = "ER";
+	local.tmp[67] = "ES";
+	local.tmp[68] = "ET";
+	local.tmp[69] = "FI";
+	local.tmp[70] = "FJ";
+	local.tmp[71] = "FK";
+	local.tmp[72] = "FM";
+	local.tmp[73] = "FO";
+	local.tmp[74] = "FR";
+	local.tmp[75] = "SX";
+	local.tmp[76] = "GA";
+	local.tmp[77] = "GB";
+	local.tmp[78] = "GD";
+	local.tmp[79] = "GE";
+	local.tmp[80] = "GF";
+	local.tmp[81] = "GH";
+	local.tmp[82] = "GI";
+	local.tmp[83] = "GL";
+	local.tmp[84] = "GM";
+	local.tmp[85] = "GN";
+	local.tmp[86] = "GP";
+	local.tmp[87] = "GQ";
+	local.tmp[88] = "GR";
+	local.tmp[89] = "GS";
+	local.tmp[90] = "GT";
+	local.tmp[91] = "GU";
+	local.tmp[92] = "GW";
+	local.tmp[93] = "GY";
+	local.tmp[94] = "HK";
+	local.tmp[95] = "HM";
+	local.tmp[96] = "HN";
+	local.tmp[97] = "HR";
+	local.tmp[98] = "HT";
+	local.tmp[99] = "HU";
+	local.tmp[100] = "ID";
+	local.tmp[101] = "IE";
+	local.tmp[102] = "IL";
+	local.tmp[103] = "IN";
+	local.tmp[104] = "IO";
+	local.tmp[105] = "IQ";
+	local.tmp[106] = "IR";
+	local.tmp[107] = "IS";
+	local.tmp[108] = "IT";
+	local.tmp[109] = "JM";
+	local.tmp[110] = "JO";
+	local.tmp[111] = "JP";
+	local.tmp[112] = "KE";
+	local.tmp[113] = "KG";
+	local.tmp[114] = "KH";
+	local.tmp[115] = "KI";
+	local.tmp[116] = "KM";
+	local.tmp[117] = "KN";
+	local.tmp[118] = "KP";
+	local.tmp[119] = "KR";
+	local.tmp[120] = "KW";
+	local.tmp[121] = "KY";
+	local.tmp[122] = "KZ";
+	local.tmp[123] = "LA";
+	local.tmp[124] = "LB";
+	local.tmp[125] = "LC";
+	local.tmp[126] = "LI";
+	local.tmp[127] = "LK";
+	local.tmp[128] = "LR";
+	local.tmp[129] = "LS";
+	local.tmp[130] = "LT";
+	local.tmp[131] = "LU";
+	local.tmp[132] = "LV";
+	local.tmp[133] = "LY";
+	local.tmp[134] = "MA";
+	local.tmp[135] = "MC";
+	local.tmp[136] = "MD";
+	local.tmp[137] = "MG";
+	local.tmp[138] = "MH";
+	local.tmp[139] = "MK";
+	local.tmp[140] = "ML";
+	local.tmp[141] = "MM";
+	local.tmp[142] = "MN";
+	local.tmp[143] = "MO";
+	local.tmp[144] = "MP";
+	local.tmp[145] = "MQ";
+	local.tmp[146] = "MR";
+	local.tmp[147] = "MS";
+	local.tmp[148] = "MT";
+	local.tmp[149] = "MU";
+	local.tmp[150] = "MV";
+	local.tmp[151] = "MW";
+	local.tmp[152] = "MX";
+	local.tmp[153] = "MY";
+	local.tmp[154] = "MZ";
+	local.tmp[155] = "NA";
+	local.tmp[156] = "NC";
+	local.tmp[157] = "NE";
+	local.tmp[158] = "NF";
+	local.tmp[159] = "NG";
+	local.tmp[160] = "NI";
+	local.tmp[161] = "NL";
+	local.tmp[162] = "NO";
+	local.tmp[163] = "NP";
+	local.tmp[164] = "NR";
+	local.tmp[165] = "NU";
+	local.tmp[166] = "NZ";
+	local.tmp[167] = "OM";
+	local.tmp[168] = "PA";
+	local.tmp[169] = "PE";
+	local.tmp[170] = "PF";
+	local.tmp[171] = "PG";
+	local.tmp[172] = "PH";
+	local.tmp[173] = "PK";
+	local.tmp[174] = "PL";
+	local.tmp[175] = "PM";
+	local.tmp[176] = "PN";
+	local.tmp[177] = "PR";
+	local.tmp[178] = "PS";
+	local.tmp[179] = "PT";
+	local.tmp[180] = "PW";
+	local.tmp[181] = "PY";
+	local.tmp[182] = "QA";
+	local.tmp[183] = "RE";
+	local.tmp[184] = "RO";
+	local.tmp[185] = "RU";
+	local.tmp[186] = "RW";
+	local.tmp[187] = "SA";
+	local.tmp[188] = "SB";
+	local.tmp[189] = "SC";
+	local.tmp[190] = "SD";
+	local.tmp[191] = "SE";
+	local.tmp[192] = "SG";
+	local.tmp[193] = "SH";
+	local.tmp[194] = "SI";
+	local.tmp[195] = "SJ";
+	local.tmp[196] = "SK";
+	local.tmp[197] = "SL";
+	local.tmp[198] = "SM";
+	local.tmp[199] = "SN";
+	local.tmp[200] = "SO";
+	local.tmp[201] = "SR";
+	local.tmp[202] = "ST";
+	local.tmp[203] = "SV";
+	local.tmp[204] = "SY";
+	local.tmp[205] = "SZ";
+	local.tmp[206] = "TC";
+	local.tmp[207] = "TD";
+	local.tmp[208] = "TF";
+	local.tmp[209] = "TG";
+	local.tmp[210] = "TH";
+	local.tmp[211] = "TJ";
+	local.tmp[212] = "TK";
+	local.tmp[213] = "TM";
+	local.tmp[214] = "TN";
+	local.tmp[215] = "TO";
+	local.tmp[216] = "TL";
+	local.tmp[217] = "TR";
+	local.tmp[218] = "TT";
+	local.tmp[219] = "TV";
+	local.tmp[220] = "TW";
+	local.tmp[221] = "TZ";
+	local.tmp[222] = "UA";
+	local.tmp[223] = "UG";
+	local.tmp[224] = "UM";
+	local.tmp[225] = "US";
+	local.tmp[226] = "UY";
+	local.tmp[227] = "UZ";
+	local.tmp[228] = "VA";
+	local.tmp[229] = "VC";
+	local.tmp[230] = "VE";
+	local.tmp[231] = "VG";
+	local.tmp[232] = "VI";
+	local.tmp[233] = "VN";
+	local.tmp[234] = "VU";
+	local.tmp[235] = "WF";
+	local.tmp[236] = "WS";
+	local.tmp[237] = "YE";
+	local.tmp[238] = "YT";
+	local.tmp[239] = "RS";
+	local.tmp[240] = "ZA";
+	local.tmp[241] = "ZM";
+	local.tmp[242] = "ME";
+	local.tmp[243] = "ZW";
+	local.tmp[244] = "A1";
+	local.tmp[245] = "A2";
+	local.tmp[246] = "O1";
+	local.tmp[247] = "AX";
+	local.tmp[248] = "GG";
+	local.tmp[249] = "IM";
+	local.tmp[250] = "JE";
+	local.tmp[251] = "BL";
+	local.tmp[252] = "MF";
+	local.tmp[253] = "BQ";
+end local.tmp;
+
+__CountryCodeArray0:
+	end "--";
+__CountryCodeArray1:
+	end "AP";
+__CountryCodeArray2:
+	end "EU";
+__CountryCodeArray3:
+	end "AD";
+__CountryCodeArray4:
+	end "AE";
+__CountryCodeArray5:
+	end "AF";
+__CountryCodeArray6:
+	end "AG";
+__CountryCodeArray7:
+	end "AI";
+__CountryCodeArray8:
+	end "AL";
+__CountryCodeArray9:
+	end "AM";
+__CountryCodeArray10:
+	end "CW";
+__CountryCodeArray11:
+	end "AO";
+__CountryCodeArray12:
+	end "AQ";
+__CountryCodeArray13:
+	end "AR";
+__CountryCodeArray14:
+	end "AS";
+__CountryCodeArray15:
+	end "AT";
+__CountryCodeArray16:
+	end "AU";
+__CountryCodeArray17:
+	end "AW";
+__CountryCodeArray18:
+	end "AZ";
+__CountryCodeArray19:
+	end "BA";
+__CountryCodeArray20:
+	end "BB";
+__CountryCodeArray21:
+	end "BD";
+__CountryCodeArray22:
+	end "BE";
+__CountryCodeArray23:
+	end "BF";
+__CountryCodeArray24:
+	end "BG";
+__CountryCodeArray25:
+	end "BH";
+__CountryCodeArray26:
+	end "BI";
+__CountryCodeArray27:
+	end "BJ";
+__CountryCodeArray28:
+	end "BM";
+__CountryCodeArray29:
+	end "BN";
+__CountryCodeArray30:
+	end "BO";
+__CountryCodeArray31:
+	end "BR";
+__CountryCodeArray32:
+	end "BS";
+__CountryCodeArray33:
+	end "BT";
+__CountryCodeArray34:
+	end "BV";
+__CountryCodeArray35:
+	end "BW";
+__CountryCodeArray36:
+	end "BY";
+__CountryCodeArray37:
+	end "BZ";
+__CountryCodeArray38:
+	end "CA";
+__CountryCodeArray39:
+	end "CC";
+__CountryCodeArray40:
+	end "CD";
+__CountryCodeArray41:
+	end "CF";
+__CountryCodeArray42:
+	end "CG";
+__CountryCodeArray43:
+	end "CH";
+__CountryCodeArray44:
+	end "CI";
+__CountryCodeArray45:
+	end "CK";
+__CountryCodeArray46:
+	end "CL";
+__CountryCodeArray47:
+	end "CM";
+__CountryCodeArray48:
+	end "CN";
+__CountryCodeArray49:
+	end "CO";
+__CountryCodeArray50:
+	end "CR";
+__CountryCodeArray51:
+	end "CU";
+__CountryCodeArray52:
+	end "CV";
+__CountryCodeArray53:
+	end "CX";
+__CountryCodeArray54:
+	end "CY";
+__CountryCodeArray55:
+	end "CZ";
+__CountryCodeArray56:
+	end "DE";
+__CountryCodeArray57:
+	end "DJ";
+__CountryCodeArray58:
+	end "DK";
+__CountryCodeArray59:
+	end "DM";
+__CountryCodeArray60:
+	end "DO";
+__CountryCodeArray61:
+	end "DZ";
+__CountryCodeArray62:
+	end "EC";
+__CountryCodeArray63:
+	end "EE";
+__CountryCodeArray64:
+	end "EG";
+__CountryCodeArray65:
+	end "EH";
+__CountryCodeArray66:
+	end "ER";
+__CountryCodeArray67:
+	end "ES";
+__CountryCodeArray68:
+	end "ET";
+__CountryCodeArray69:
+	end "FI";
+__CountryCodeArray70:
+	end "FJ";
+__CountryCodeArray71:
+	end "FK";
+__CountryCodeArray72:
+	end "FM";
+__CountryCodeArray73:
+	end "FO";
+__CountryCodeArray74:
+	end "FR";
+__CountryCodeArray75:
+	end "SX";
+__CountryCodeArray76:
+	end "GA";
+__CountryCodeArray77:
+	end "GB";
+__CountryCodeArray78:
+	end "GD";
+__CountryCodeArray79:
+	end "GE";
+__CountryCodeArray80:
+	end "GF";
+__CountryCodeArray81:
+	end "GH";
+__CountryCodeArray82:
+	end "GI";
+__CountryCodeArray83:
+	end "GL";
+__CountryCodeArray84:
+	end "GM";
+__CountryCodeArray85:
+	end "GN";
+__CountryCodeArray86:
+	end "GP";
+__CountryCodeArray87:
+	end "GQ";
+__CountryCodeArray88:
+	end "GR";
+__CountryCodeArray89:
+	end "GS";
+__CountryCodeArray90:
+	end "GT";
+__CountryCodeArray91:
+	end "GU";
+__CountryCodeArray92:
+	end "GW";
+__CountryCodeArray93:
+	end "GY";
+__CountryCodeArray94:
+	end "HK";
+__CountryCodeArray95:
+	end "HM";
+__CountryCodeArray96:
+	end "HN";
+__CountryCodeArray97:
+	end "HR";
+__CountryCodeArray98:
+	end "HT";
+__CountryCodeArray99:
+	end "HU";
+__CountryCodeArray100:
+	end "ID";
+__CountryCodeArray101:
+	end "IE";
+__CountryCodeArray102:
+	end "IL";
+__CountryCodeArray103:
+	end "IN";
+__CountryCodeArray104:
+	end "IO";
+__CountryCodeArray105:
+	end "IQ";
+__CountryCodeArray106:
+	end "IR";
+__CountryCodeArray107:
+	end "IS";
+__CountryCodeArray108:
+	end "IT";
+__CountryCodeArray109:
+	end "JM";
+__CountryCodeArray110:
+	end "JO";
+__CountryCodeArray111:
+	end "JP";
+__CountryCodeArray112:
+	end "KE";
+__CountryCodeArray113:
+	end "KG";
+__CountryCodeArray114:
+	end "KH";
+__CountryCodeArray115:
+	end "KI";
+__CountryCodeArray116:
+	end "KM";
+__CountryCodeArray117:
+	end "KN";
+__CountryCodeArray118:
+	end "KP";
+__CountryCodeArray119:
+	end "KR";
+__CountryCodeArray120:
+	end "KW";
+__CountryCodeArray121:
+	end "KY";
+__CountryCodeArray122:
+	end "KZ";
+__CountryCodeArray123:
+	end "LA";
+__CountryCodeArray124:
+	end "LB";
+__CountryCodeArray125:
+	end "LC";
+__CountryCodeArray126:
+	end "LI";
+__CountryCodeArray127:
+	end "LK";
+__CountryCodeArray128:
+	end "LR";
+__CountryCodeArray129:
+	end "LS";
+__CountryCodeArray130:
+	end "LT";
+__CountryCodeArray131:
+	end "LU";
+__CountryCodeArray132:
+	end "LV";
+__CountryCodeArray133:
+	end "LY";
+__CountryCodeArray134:
+	end "MA";
+__CountryCodeArray135:
+	end "MC";
+__CountryCodeArray136:
+	end "MD";
+__CountryCodeArray137:
+	end "MG";
+__CountryCodeArray138:
+	end "MH";
+__CountryCodeArray139:
+	end "MK";
+__CountryCodeArray140:
+	end "ML";
+__CountryCodeArray141:
+	end "MM";
+__CountryCodeArray142:
+	end "MN";
+__CountryCodeArray143:
+	end "MO";
+__CountryCodeArray144:
+	end "MP";
+__CountryCodeArray145:
+	end "MQ";
+__CountryCodeArray146:
+	end "MR";
+__CountryCodeArray147:
+	end "MS";
+__CountryCodeArray148:
+	end "MT";
+__CountryCodeArray149:
+	end "MU";
+__CountryCodeArray150:
+	end "MV";
+__CountryCodeArray151:
+	end "MW";
+__CountryCodeArray152:
+	end "MX";
+__CountryCodeArray153:
+	end "MY";
+__CountryCodeArray154:
+	end "MZ";
+__CountryCodeArray155:
+	end "NA";
+__CountryCodeArray156:
+	end "NC";
+__CountryCodeArray157:
+	end "NE";
+__CountryCodeArray158:
+	end "NF";
+__CountryCodeArray159:
+	end "NG";
+__CountryCodeArray160:
+	end "NI";
+__CountryCodeArray161:
+	end "NL";
+__CountryCodeArray162:
+	end "NO";
+__CountryCodeArray163:
+	end "NP";
+__CountryCodeArray164:
+	end "NR";
+__CountryCodeArray165:
+	end "NU";
+__CountryCodeArray166:
+	end "NZ";
+__CountryCodeArray167:
+	end "OM";
+__CountryCodeArray168:
+	end "PA";
+__CountryCodeArray169:
+	end "PE";
+__CountryCodeArray170:
+	end "PF";
+__CountryCodeArray171:
+	end "PG";
+__CountryCodeArray172:
+	end "PH";
+__CountryCodeArray173:
+	end "PK";
+__CountryCodeArray174:
+	end "PL";
+__CountryCodeArray175:
+	end "PM";
+__CountryCodeArray176:
+	end "PN";
+__CountryCodeArray177:
+	end "PR";
+__CountryCodeArray178:
+	end "PS";
+__CountryCodeArray179:
+	end "PT";
+__CountryCodeArray180:
+	end "PW";
+__CountryCodeArray181:
+	end "PY";
+__CountryCodeArray182:
+	end "QA";
+__CountryCodeArray183:
+	end "RE";
+__CountryCodeArray184:
+	end "RO";
+__CountryCodeArray185:
+	end "RU";
+__CountryCodeArray186:
+	end "RW";
+__CountryCodeArray187:
+	end "SA";
+__CountryCodeArray188:
+	end "SB";
+__CountryCodeArray189:
+	end "SC";
+__CountryCodeArray190:
+	end "SD";
+__CountryCodeArray191:
+	end "SE";
+__CountryCodeArray192:
+	end "SG";
+__CountryCodeArray193:
+	end "SH";
+__CountryCodeArray194:
+	end "SI";
+__CountryCodeArray195:
+	end "SJ";
+__CountryCodeArray196:
+	end "SK";
+__CountryCodeArray197:
+	end "SL";
+__CountryCodeArray198:
+	end "SM";
+__CountryCodeArray199:
+	end "SN";
+__CountryCodeArray200:
+	end "SO";
+__CountryCodeArray201:
+	end "SR";
+__CountryCodeArray202:
+	end "ST";
+__CountryCodeArray203:
+	end "SV";
+__CountryCodeArray204:
+	end "SY";
+__CountryCodeArray205:
+	end "SZ";
+__CountryCodeArray206:
+	end "TC";
+__CountryCodeArray207:
+	end "TD";
+__CountryCodeArray208:
+	end "TF";
+__CountryCodeArray209:
+	end "TG";
+__CountryCodeArray210:
+	end "TH";
+__CountryCodeArray211:
+	end "TJ";
+__CountryCodeArray212:
+	end "TK";
+__CountryCodeArray213:
+	end "TM";
+__CountryCodeArray214:
+	end "TN";
+__CountryCodeArray215:
+	end "TO";
+__CountryCodeArray216:
+	end "TL";
+__CountryCodeArray217:
+	end "TR";
+__CountryCodeArray218:
+	end "TT";
+__CountryCodeArray219:
+	end "TV";
+__CountryCodeArray220:
+	end "TW";
+__CountryCodeArray221:
+	end "TZ";
+__CountryCodeArray222:
+	end "UA";
+__CountryCodeArray223:
+	end "UG";
+__CountryCodeArray224:
+	end "UM";
+__CountryCodeArray225:
+	end "US";
+__CountryCodeArray226:
+	end "UY";
+__CountryCodeArray227:
+	end "UZ";
+__CountryCodeArray228:
+	end "VA";
+__CountryCodeArray229:
+	end "VC";
+__CountryCodeArray230:
+	end "VE";
+__CountryCodeArray231:
+	end "VG";
+__CountryCodeArray232:
+	end "VI";
+__CountryCodeArray233:
+	end "VN";
+__CountryCodeArray234:
+	end "VU";
+__CountryCodeArray235:
+	end "WF";
+__CountryCodeArray236:
+	end "WS";
+__CountryCodeArray237:
+	end "YE";
+__CountryCodeArray238:
+	end "YT";
+__CountryCodeArray239:
+	end "RS";
+__CountryCodeArray240:
+	end "ZA";
+__CountryCodeArray241:
+	end "ZM";
+__CountryCodeArray242:
+	end "ME";
+__CountryCodeArray243:
+	end "ZW";
+__CountryCodeArray244:
+	end "A1";
+__CountryCodeArray245:
+	end "A2";
+__CountryCodeArray246:
+	end "O1";
+__CountryCodeArray247:
+	end "AX";
+__CountryCodeArray248:
+	end "GG";
+__CountryCodeArray249:
+	end "IM";
+__CountryCodeArray250:
+	end "JE";
+__CountryCodeArray251:
+	end "BL";
+__CountryCodeArray252:
+	end "MF";
+__CountryCodeArray253:
+	end "BQ";

@@ -27,7 +27,8 @@
  WEBSITE: 	http://www.x-null.net | www.mohaairborne.co.cc
  ================================================================
 */
-
+// All debug must be centralized and localized (i.e. available in multiple translations)
+// Same goes for all non-console text output the framework may produce.
 /********************************************************************************************************
 						I	N	I	T	I	A	L	I	Z	A	T	I	O	N
 ******************************************************************************************************* */
@@ -98,8 +99,8 @@ PrePrespawn:
 		waitthread InitializeSystem;
 		
 		/*TEMP*/
-		$System waitthread #DefineClass "Event" ($System.evPath + "mainhandler.scr"); 	$System.Event = $Event;
-		$System waitthread #DefineClass "Library" ($System.libPath + "libraries.scr"); 	$System.Library = $Library;
+		$System waitthread #DefineClass "Event" 	($System.filePath + "event/mainhandler.scr"); 	$System.Event = $Event;
+		$System waitthread #DefineClass "Library" 	($System.filePath + "lib/libraries.scr"); 		$System.Library = $Library;
 		/*TEMP*/
 	}
 end;
@@ -118,7 +119,6 @@ InitializeSystem:
 	game.Root.isRoot = 				true;
 	game.Root.parent = 				NIL;
 	game.Root.children[0] = 		NIL;
-	game.Root.subClasses[0] =		NIL;
 	
 	// 'System' specifics:
 	game.Root.fullPath = 			"reborn/framework/framework.scr";
@@ -131,29 +131,19 @@ InitializeSystem:
 	game.Root.revision	=			"15"
 	// Root-specific:
 	game.Root.loader = 				"reborn/reborn_loader.scr";
+	game.Root.cache = 				"reborn/framework/cache/";
 	
 	// System property size:
-	game.Root.pSize = 100;
+	game.Root.pSize = 36;
 	// System method size:
-	game.Root.mSize = 25;
+	game.Root.mSize = 0;
 	
-	// These settings can obviously be hacked to make them re-route functions, needing to copy the entire folder to make it work.
-	game.Root.cache = 				"reborn/framework/cache/";
-	game.Root.cmPath = 				"reborn/custom/";
-	game.Root.libPath = 			"reborn/framework/lib/";
-	game.Root.evPath = 				"reborn/framework/event/";
-	game.Root.dbPath = 				"reborn/framework/dev/debug/";
-	game.Root.entPath = 			"reborn/framework/map/ents/";
-	game.Root.hudPath = 			"reborn/framework/HUD/";
-	game.Root.svPath = 				"reborn/framework/server/";
-	game.Root.clPath = 				"reborn/framework/client/";
-	game.Root.devPath =	 			"reborn/framework/dev/";
-	game.Root.mPath = 				"reborn/framework/map/";
-	game.Root.gPath = 				"reborn/framework/game/";
-	game.Root.setPath = 			"reborn/framework/settings/";	
+	// Critital system function references:
+	// 
 	
 	// define crucial values
-	game.Root.PULSE = 				0.05;		//assuming server framerate is 20; need to use sv_framerate and if clientside patch arrives, also cg_framerate
+	game.Root.PULSE_HIGHPRIOR = 	0.001		// 1ms for high-frequency, fast looping without the risk of crashing the server.
+	game.Root.PULSE_MEDIUMPRIOR = 	0.05;		//assuming server framerate is 20; need to use sv_framerate and if clientside patch arrives, also cg_framerate
 	game.Root.PULSE_LOWPRIOR = 		1.0;		//speed for low priority loops.
 	game.Root.CAP_VAR = 			1024;
 	game.Root.CAP_HASHVAR = 		1024;
@@ -161,10 +151,9 @@ InitializeSystem:
 	game.Root.CAP_STRINGBUFFER = 	522234; 	//about half a MiByte, or 522 234 characters.
 	game.Root.CAP_RENDERED_ENTS = 	1024-1; 	//free edicts cap; should it be int(MAXCLIENTS) lower? To ensure a connecting player doesn't crash the server this way.
 	game.Root.CAP_INVISIBLE_ENTS = 	8192; 		//arbitrary user-defined cap on invisible, simple ents.. no one really knows what the real limit is
-	game.Root.renderedEntsCnt = 	0; 		//check mapregister or search (in background!) in bsp for complex entities and update mapregister with data
-											//waitthread $Map.GetMapBSPData(<mode:extract/count data> <flags: 1=world;2=info;4=renderedEnts;8=simpleEnts;16=allEnts;32=doors;64=windows;128=(path)nodes;256=spawnpoints;512=ladder info;1024=targetnamedEnts...> 
-											//[INT output:all info or just the origin] [STRING specific searchStr?]) 
-	game.Root.invisibleEntsCnt = 	1; 		//1 for $System by default: check mapregister or search bsp (in background!) for simple entities and update mapregister with data
+	game.Root.edictCounter = 	0; 				//check mapregister or search (in background!) in bsp for complex entities and update mapregister with data
+												//waitthread $Map.GetMapBSPData(<mode:extract/count data> <flags: 1=world;2=info;4=renderedEnts;8=simpleEnts;16=allEnts;32=doors;64=windows;128=(path)nodes;256=spawnpoints;512=ladder info;1024=targetnamedEnts...> 
+												//[INT output:all info or just the origin] [STRING specific searchStr?]) 
 end;
 
 /********************************************************************************************************
@@ -198,17 +187,18 @@ They will receive it as 'self' and should store it in a level variable.
 Seperate init thread for $System/root class.
 */
 /**
-Every function, public or private/internal, that registers/saves data or define/sets something like datastructs/variables/settings has the prefix # as function name.
-Each of these functions has to have a cached version with prefix #@. The cache version requires an addition scriptpath (of caller) argument. If no scriptpath is
-given, the __info thread of caller is called. If that is not found, abort the sequence. You can also overload it with cache-specific options. The data will be 
-initiated right now and saved in $LocalStorage to be written to appropriate file during intermission. What also happens during intermission is the commands, that
-called the caching function are traced in their respective scripts, are surgicaly removed (check ; first then \n). (OR USER NEED TO THOSE FUNCTIONS ONLY IF 
-$LocalStorage TURNS UP NOTHING.) That way, next round, no redundant cache request will occur and the data can be loaded from $LocalStorage at all times from then on.
+Every function, public or private/internal, that creates/relies on an (usually unrendered) entity (such as SimpleEntity, Listener & SimpleArchivedEntity) as functional datastructure 
+has the prefix # in the function name.
+Every function, public or private/internal, that registers/saves data or define/sets something like datastructs/variables/settings with cache update has the prefix @ as function name.
+The cache function requires an addition scriptpath (of caller) argument. If no scriptpath is given, the __info thread of caller is called. If that is not found, abort the sequence. 
+You can also overload it with cache-options object. The data will be initiated right now and saved in $LocalStorage to be written to appropriate file during intermission. 
+What also happens during intermission is the commands, that called the caching function are traced in their respective scripts, are surgicaly removed (check ; first then \n). 
+(OR USER NEED TO THOSE FUNCTIONS ONLY IF $LocalStorage TURNS UP NOTHING.) That way, next round, no redundant cache request will occur and the data can be loaded from $LocalStorage at all times from then on.
 
 Periods like Pre-Prespawn to Spawn and Intermission are the only times the framework can run post- and pre-processing sequences and update/self-organise itself during a map.
 */
 // only for custom classes...?
-#@DefineClass local.name local.path local.init local.scriptPath local.cacheFormat local.cacheFile:
+@DefineClass local.name local.path local.init local.scriptPath local.cacheFormat local.cacheFile:
 
 end local.result;
 
@@ -235,13 +225,6 @@ end local.result;
 	if !($(local.name)) {
 		local.class = local CreateListener;
 		local.class targetname local.name;
-		
-		// Add to root's subClasses array:
-		/// Check for duplicate classes...
-		game.Root.subClasses[game.Root.subClasses.size] = local.name;
-	
-		// Increment invisible/simple entities counter.
-		game.Root.iEntsCnt++;
 	
 		// Check if argument 'path' also contains a threadlabel specification.
 		if (typeof local.path == "const array") {
@@ -286,7 +269,7 @@ end local.result;
 		local.class.propertySize = 7;
 		
 		// TEMPORARY !!!!
-		local.class.fileMD5 = md5string local.class.fileName;
+		local.class.fileMD5 = md5file ("main/" + local.class.fullPath);
 		
 		// If necessary, this will automatically execute the class' initialization thread
 		// and finalize this class' creation sequence.
@@ -313,33 +296,13 @@ __SplitPath local.path:
 			for (local.j = 0; local.j <= local.i; local.j++) {
 				local.result[0] += string(local.path[local.j]);
 			}
-			break;
+			end local.result;
 		}
 	}
-end local.result;
-
-__GetFilename local.path:
-	local.result = "";
-	for (local.i = (local.path.size - 1); local.i >= 0; local.i--) {
-		if (local.path[local.i] == "/") {
-			for (local.j = local.i; local.j < local.path.size; local.j++) {
-				local.result += string(local.path[local.j]);
-			}
-			break;
-		}
-	}
-end local.result;
-
-__GetFilePath local.path:
-	local.result = "";
-	for (local.i = (local.path.size - 1); local.i >= 0; local.i--) {
-		if (local.path[local.i] == "/") {
-			for (local.j = 0; local.j <= local.i; local.j++) {
-				local.result += string(local.path[local.j]);
-			}
-			break;
-		}
-	}
+	
+	// Base directory?
+	local.result[0] = "/";
+	local.result[1] = local.path;
 end local.result;
 
 __LsRoot:
@@ -351,9 +314,7 @@ __LsRoot:
 		conprintf ("\t}\n");
 		conprintf ("\n\tgame.Root.subClasses\n");
 		conprintf ("\t{\n");
-		for (local.i = 0; local.i < $System.subClasses.size; local.i++) {
-			conprintf ("\t\t$" + $System.subClasses[local.i] + "\n");
-		}
+		waitthread __LsRoot2__ $System "\t\t$"
 		conprintf ("\t}\n");
 		conprintf "\n\n*~*~*~*~*~*~*~*~*~*~*~* $System CLASS TREE *~*~*~*~*~*~*~*~*~*~*\n\n"
 	}
@@ -368,5 +329,14 @@ __LsRoot__ local.currentClass local.prefix:
 		}
 	} else {
 		conprintf (local.prefix + local.currentClass.targetname + "\n");
+	}
+end;
+__LsRoot2__ local.currentClass local.prefix:
+	local.arraySize = local.currentClass.children.size;
+	conprintf (local.prefix + local.currentClass.targetname + /*"\t\t children=" + local.arraySize +*/"\n");
+	if (local.arraySize > 0) {
+		for (local.i = 0; local.i < local.arraySize; local.i++) {
+			waitthread __LsRoot2__ $(local.currentClass.children[local.i]) local.prefix;
+		}
 	}
 end;

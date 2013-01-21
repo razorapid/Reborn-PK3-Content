@@ -1,0 +1,113 @@
+/**
+ Medal of Honor: Allied Assault v1.12 REBORN  -  Morpheus Script
+ ================================================================
+ LIBRARY SCRIPTS; 							Script Framework BETA
+ ================================================================
+ BY Sor	
+ VERSION 1.0.02 (4/12/2012)
+ =-------------------------------------------------------------=		
+ Copyright (c) 2009-2014  Lenny Knockx
+ All rights reserved.
+ =-------------------------------------------------------------=
+ Permission to use, copy, modify, and/or distribute this software 
+ for any purpose with or without fee is hereby granted, provided 
+ that the above copyright notice and this permission notice appear
+ in all copies.
+ ---------------
+ THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL 
+ WARRANTIES WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED 
+ WARRANTIES OF MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL 
+ THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT, OR 
+ CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM 
+ LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, 
+ NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR 
+ IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+ =-------------------------------------------------------------=
+ CONTACT: 	http://www.x-null.net/forums/member.php?185-Sor
+ WEBSITE: 	http://www.x-null.net | www.mohaairborne.co.cc
+ ================================================================
+*/
+/** Later on, make sure all internal scripts use ABSOLUTE REFERENCES to execute other scripts/external threads! 
+	Then we can use an #include system whereby mods include libraries and components from the framework and
+	only those are loaded. (ModConfig??)
+	Implement this here. Subclasses are always automatically loaded and cannot be loaded seperately. Simply keep
+	all class definitions (this cleverly preserves all framework entity targetnames across the environment :)) but
+	do NOT INIT ;-) To 'include' or 'use' them, their initThread is simply executed.
+	
+	Since $Library get loaded in any case, why not add references to each library here? So we don't have to perform an 
+	operation anymore (i.e. ($System.libPath + "string.slib") but just: 
+	$Library.str
+	$Library.math
+	$Library.array
+	$Library.compile
+	$Library.decompile
+*/
+__init:
+	if (self && self == $Library) {
+		// Libraries are yet to be initialized.
+		self.initialized = 0;
+		
+		// This class contains 11 script libraries (so far)...
+		self.libraries = 11;
+		// Their path references being (private purposes..):
+		self.string = 		(self.filePath + "string.slib");
+		self.math = 		(self.filePath + "math.slib");
+		self.array = 		(self.filePath + "array.slib"); 
+		self.compile = 		(self.filePath + "compile.slib"); 
+		self.decompile =	(self.filePath + "decompile.slib");
+		self.common = 		(self.filePath + "common.slib");
+		self.file = 		(self.filePath + "file.slib");
+		self.ip = 			(self.filePath + "ip.slib");
+		
+		// This class contains 3 information libraries...
+		self.infoLibraries = 3;
+		// Their path references being (public purposes):
+		self.infoStr =		(self.filePath + "string.lib");
+		self.infoMath = 	(self.filePath + "math.lib");
+		self.infoCompile = 	(self.filePath + "compile.lib"); 
+		self.infoIP = 		(self.filePath + "ip.lib");
+		
+		// There are 3 properties in this class...
+		self.propertySize += 3;
+		
+		// Define library classes...
+		self waitthread DefineLibraries;
+		self.initialized = 1;
+	}
+end;
+
+__info:
+	local.inf["library"] = "libraries.scr";		//filename
+	local.inf["namespace"] = "Library";			//targetname of class this script is part of...
+	local.inf["title"] = "LIBRARY SCRIPTS";
+	local.inf["version"] = "1.0.02";
+	local.inf["lastmodified"] = "4/12/2012";
+	local.inf["authors"][0] = "Sor";
+end local.inf;
+
+DefineLibraries:
+	/*TEMP*/
+	//level waittill prespawn
+	
+	self waitthread $System.fullPath::#DefineClass "String" 	self.string; 	$Library.Str = $String;
+	self waitthread $System.fullPath::#DefineClass "Array" 		self.array; 	$Library.Array = $Array;
+	self waitthread $System.fullPath::#DefineClass "Compile" 	self.compile; 	$Library.Compile = $Compile;
+	self waitthread $System.fullPath::#DefineClass "Decompile" 	self.decompile; $Library.Decompile = $Decompile;
+	
+	// $Math & $Common are the only libraries which are always loaded. A lot of framework features will depend on it. 
+	/// Even though I'll be using Vector&Matrix libraries for the HUD system, they should be useable without 
+	/// a class definition, but they will depend on $Math for limit data, constants, functions...
+	self waitthread $System.fullPath::#DefineClass "Math" 		self.math; 		$Library.Math = $Math;
+	self waitthread $System.fullPath::#DefineClass "Common" 	self.common; 	$Library.Common = $Common;
+	
+	self waitthread $System.fullPath::#DefineClass "IP" 		self.ip;		$Library.IP = $IP;
+	/*TEMP*/
+	
+	level waittill spawn
+	
+	level waittill postthink
+	
+	level waittill playerspawn
+	
+	//waitthread $Map.Waittill_RoundStart;
+end;

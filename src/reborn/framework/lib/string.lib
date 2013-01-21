@@ -4,7 +4,7 @@
  STRING INFORMATION LIBRARY; 				Script Framework BETA 
  ================================================================
  BY Sor
- VERSION 1.2.05 (4/12/2012)
+ VERSION 1.2.21 (21/01/2013)
  =-------------------------------------------------------------=		
  Copyright (c) 2008-2014  Lenny Knockx
  All rights reserved.
@@ -31,8 +31,8 @@ __info:
 	local.inf["library"] = "string.lib";	//filename
 	local.inf["namespace"] = "Str";			//targetname of class this script is part of...
 	local.inf["title"] = "STRING INFORMATION LIBRARY";
-	local.inf["version"] = "1.2.05";
-	local.inf["lastmodified"] = "4/12/2012";
+	local.inf["version"] = "1.2.21";
+	local.inf["lastmodified"] = "21/01/2013";
 	local.inf["authors"][0] = "Sor";
 end local.inf;
 
@@ -41,201 +41,54 @@ end local.inf;
 /// ********************************************************* ///
 
 BadCharData:
-	local.hashArray = makeArray
-	"/"
-	"\\"
-	"?"
-	"%"
-	"*"
-	":"
-	"|"
-	"\""
-	">"
-	"<"
-	" "
-	endArray;
-end (waitthread $Array.fullPath::_HashToIdxArray local.hashArray);
+	local.constArray = "/"::"\\"::"?"::"%"::"*"::":"::"|"::"\""::">"::"<"::" ";
+end local.constArray;
 
 DecimalData:
-	local.hashArray = makeArray
-	"0"
-	"1"
-	"2"
-	"3"
-	"4"
-	"5"
-	"6"
-	"7"
-	"8"
-	"9"
-	endArray;
-end (waitthread $Array.fullPath::_HashToIdxArray local.hashArray);
+	local.constArray = "0"::"1"::"2"::"3"::"4"::"5"::"6"::"7"::"8"::"9";
+end local.constArray;
+
+BinaryData:
+	local.constArray = 	"0"::"1";
+end local.constArray;
+
+OctalData:
+	local.constArray = "0"::"1"::"2"::"3"::"4"::"5"::"6"::"7";
+end local.constArray;
+
+HexadecimalData:
+	local.constArray = "0"::"1"::"2"::"3"::"4"::"5"::"6"::"7"::"8"::"9" \
+						::"A"::"B"::"C"::"D"::"E"::"F"::"a"::"b"::"c"::"d" \
+						::"e"::"f";
+end local.constArray;
 
 SafeCharData:
-	local.hashArray = makeArray
-	"a"       
-	"b"       
-	"c"        
-	"d"       
-	"e"       
-	"f"        
-	"g"       
-	"h"       
-	"i"        
-	"j"        
-	"k"       
-	"l"        
-	"m"      
-	"n"       
-	"o"       
-	"p"       
-	"q"       
-	"r"        
-	"s"        
-	"t"        
-	"u"       
-	"v"       
-	"w"       
-	"x"       
-	"y"       
-	"z"  
-	"A"  	
-	"B"  
-	"C"   
-	"D"   
-	"E"   
-	"F"   
-	"G"   
-	"H"   
-	"I"    
-	"J"    
-	"K"   
-	"L"    
-	"M"  
-	"N"   
-	"O"   
-	"P"   
-	"Q"   
-	"R"    
-	"S"   
-	"T"   
-	"U"   	
-	"V"  
-	"W"  
-	"X"  
-	"Y"   
-	"Z" 
-	"0"
-	"1"
-	"2"
-	"3"
-	"4"
-	"5"
-	"6"
-	"7"
-	"8"
-	"9"
-	"."
-	"-"
-	"_"
-	";"
-	endArray;
-end (waitthread $Array.fullPath::_HashToIdxArray local.hashArray);
+	local.constArray = "a"::"b"::"c"::"d"::"e"::"f"::"g"::"h"::"i"::"j"::"k" \
+						::"l"::"m"::"n"::"o"::"p"::"q"::"r"::"s"::"t"::"u"::"v" \
+						::"w"::"x"::"y"::"z"::"A"::"B"::"C"::"D"::"E"::"F"::"G" \
+						::"H"::"I"::"J"::"K"::"L"::"M"::"N"::"O"::"P"::"Q"::"R" \
+						::"S"::"T"::"U"::"V"::"W"::"X"::"Y"::"Z"::"0"::"1"::"2" \
+						::"3"::"4"::"5"::"6"::"7"::"8"::"9"::"."::"-"::"_"::";";
+end local.constArray;
 
 LowerCaseData:
-	local.hashArray = makearray
-	"a"          
-	"b"          
-	"c"         
-	"d"         
-	"e"          
-	"f"          
-	"g"         
-	"h"         
-	"i"          
-	"j"          
-	"k"         
-	"l"         
-	"m"         
-	"n"   
-	"o"   
-	"p" 
-	"q" 
-	"r"
-	"s"
-	"t"
-	"u" 
-	"v" 
-	"w" 
-	"x" 
-	"y"
-	"z"
-	endarray
-end (waitthread $Array.fullPath::_HashToIdxArray local.hashArray);
+	local.constArray = "a"::"b"::"c"::"d"::"e"::"f"::"g"::"h"::"i"::"j"::"k" \
+						::"l"::"m"::"n"::"o"::"p"::"q"::"r"::"s"::"t"::"u"::"v" \
+						::"w"::"x"::"y"::"z";
+end local.constArray;
 
 UpperCaseData:
-	local.hashArray = makearray
-	"A"
-	"B"
-	"C"
-	"D"
-	"E"
-	"F"
-	"G"
-	"H"
-	"I"
-	"J"
-	"K"
-	"L"
-	"M"
-	"N"
-	"O"
-	"P"
-	"Q"
-	"R"
-	"S"
-	"T"
-	"U"
-	"V"
-	"W"
-	"X"
-	"Y"
-	"Z"
-	endArray
-end (waitthread $Array.fullPath::_HashToIdxArray local.hashArray);
+	local.constArray = "A"::"B"::"C"::"D"::"E"::"F"::"G"::"H"::"I"::"J"::"K" \
+						::"L"::"M"::"N"::"O"::"P"::"Q"::"R"::"S"::"T"::"U"::"V" \
+						::"W"::"X"::"Y"::"Z";
+end local.constArray;
 
 TitleExceptions:
-	local.hashArray = makeArray
-	"for"
-	"and"
-	"nor"
-	"but"
-	"or"
-	"yet"
-	"so"
-	"both"
-	"either"
-	"neither"
-	"because"
-	"if"
-	"after"
-	"when"
-	"although"
-	"while"
-	"of"
-	"to"
-	"in"
-	"on"
-	"with"
-	"as"
-	"by"
-	"at"
-	"from"
-	"the"
-	"a"
-	"an"
-	endArray;
-end (waitthread $Array.fullPath::_HashToIdxArray local.hashArray);
+	local.constArray = "the"::"a"::"an"::"for"::"and"::"from"::"nor"::"but" \
+						::"or"::"of"::"to"::"in"::"on"::"with"::"yet"::"so" \
+						::"as"::"by"::"at"::"if"::"when"::"while"::"because" \
+						::"after"::"both"::"either"::"neither"::"although";
+end local.constArray;
 
 
 /// ********************************************************* ///
@@ -243,256 +96,329 @@ end (waitthread $Array.fullPath::_HashToIdxArray local.hashArray);
 /// ********************************************************* ///
 
 NumericalMasks:
-	local.tmp["0"] = 1;
-	local.tmp["1"] = 1;
-	local.tmp["2"] = 1;
-	local.tmp["3"] = 1;
-	local.tmp["4"] = 1;
-	local.tmp["5"] = 1;
-	local.tmp["6"] = 1;
-	local.tmp["7"] = 1;
-	local.tmp["8"] = 1;
-	local.tmp["9"] = 1;
-	/* local.tmp["__info"] = "0"::"1"::"2"::"3"::"4"::"5"::"6"::"7"::"8"::"9" */;	
-end local.tmp
+	local.mask["0"] = 1;
+	local.mask["1"] = 1;
+	local.mask["2"] = 1;
+	local.mask["3"] = 1;
+	local.mask["4"] = 1;
+	local.mask["5"] = 1;
+	local.mask["6"] = 1;
+	local.mask["7"] = 1;
+	local.mask["8"] = 1;
+	local.mask["9"] = 1;
+	/* local.mask["__info"] = "0"::"1"::"2"::"3"::"4"::"5"::"6"::"7"::"8"::"9" */;	
+end local.mask
 
 DecimalDataMasks:
-	local.tmp["0"] = 0;
-	local.tmp["1"] = 1;
-	local.tmp["2"] = 2;
-	local.tmp["3"] = 3;
-	local.tmp["4"] = 4;
-	local.tmp["5"] = 5;
-	local.tmp["6"] = 6;
-	local.tmp["7"] = 7;
-	local.tmp["8"] = 8;
-	local.tmp["9"] = 9;
-	/* local.tmp["__info"] = "0"::"1"::"2"::"3"::"4"::"5"::"6"::"7"::"8"::"9" */;	
-end local.tmp;
+	local.mask["0"] = 0;
+	local.mask["1"] = 1;
+	local.mask["2"] = 2;
+	local.mask["3"] = 3;
+	local.mask["4"] = 4;
+	local.mask["5"] = 5;
+	local.mask["6"] = 6;
+	local.mask["7"] = 7;
+	local.mask["8"] = 8;
+	local.mask["9"] = 9;
+	/* local.mask["__info"] = "0"::"1"::"2"::"3"::"4"::"5"::"6"::"7"::"8"::"9"; */	
+end local.mask;
+
+BinaryDataMasks:
+	local.mask["0"] = 0;
+	local.mask["1"] = 1;
+	/* local.mask["__info"] = "0"::"1"; */
+end local.mask;
+
+OctalDataMasks:
+	local.mask["0"] = 0;
+	local.mask["1"] = 1;
+	local.mask["2"] = 2;
+	local.mask["3"] = 3;
+	local.mask["4"] = 4;
+	local.mask["5"] = 5;
+	local.mask["6"] = 6;
+	local.mask["7"] = 7;
+	/* local.mask["__info"] = "0"::"1"::"2"::"3"::"4"::"5"::"6"::"7"; */
+end local.mask;
+
+HexadecimalDataMasks:
+	local.mask["0"] = 0;
+	local.mask["1"] = 1;
+	local.mask["2"] = 2;
+	local.mask["3"] = 3;
+	local.mask["4"] = 4;
+	local.mask["5"] = 5;
+	local.mask["6"] = 6;
+	local.mask["7"] = 7;
+	local.mask["8"] = 8;
+	local.mask["9"] = 9;
+	local.mask["A"] = 10;
+	local.mask["B"] = 11;
+	local.mask["C"] = 12;
+	local.mask["D"] = 13;
+	local.mask["E"] = 14;
+	local.mask["F"] = 15;
+	local.mask["a"] = 10;
+	local.mask["b"] = 11;
+	local.mask["c"] = 12;
+	local.mask["d"] = 13;
+	local.mask["e"] = 14;
+	local.mask["f"] = 15;
+	/* local.mask["__info"] = "0"::"1"::"2"::"3"::"4"::"5"::"6"::"7"::"8"::"9"::"A"::"B"::"C"::"D"::"E"::"F"::"a"::"b"::"c"::"d"::"e"::"f"; */	
+end local.mask;
 
 LetterDataMasks:
-	local.tmp["a"] = 1;
-	local.tmp["b"] = 1;
-	local.tmp["c"] = 1;
-	local.tmp["d"] = 1;
-	local.tmp["e"] = 1;
-	local.tmp["f"] = 1;
-	local.tmp["g"] = 1;
-	local.tmp["h"] = 1;
-	local.tmp["i"] = 1;
-	local.tmp["j"] = 1;
-	local.tmp["k"] = 1;
-	local.tmp["l"] = 1;
-	local.tmp["m"] = 1;
-	local.tmp["n"] = 1;
-	local.tmp["o"] = 1;
-	local.tmp["p"] = 1;
-	local.tmp["q"] = 1;
-	local.tmp["r"] = 1;
-	local.tmp["s"] = 1;
-	local.tmp["t"] = 1;
-	local.tmp["u"] = 1;
-	local.tmp["v"] = 1;
-	local.tmp["w"] = 1;
-	local.tmp["x"] = 1;
-	local.tmp["y"] = 1;
-	local.tmp["z"] = 1;
-	local.tmp["A"] = 2;
-	local.tmp["B"] = 2;
-	local.tmp["C"] = 2;
-	local.tmp["D"] = 2;
-	local.tmp["E"] = 2;
-	local.tmp["F"] = 2;
-	local.tmp["G"] = 2;
-	local.tmp["H"] = 2;
-	local.tmp["I"] = 2;
-	local.tmp["J"] = 2;
-	local.tmp["K"] = 2;
-	local.tmp["L"] = 2;
-	local.tmp["M"] = 2;
-	local.tmp["N"] = 2;
-	local.tmp["O"] = 2;
-	local.tmp["P"] = 2;
-	local.tmp["Q"] = 2;
-	local.tmp["R"] = 2;
-	local.tmp["S"] = 2;
-	local.tmp["T"] = 2;
-	local.tmp["U"] = 2;
-	local.tmp["V"] = 2;
-	local.tmp["W"] = 2;
-	local.tmp["X"] = 2;
-	local.tmp["Y"] = 2;
-	local.tmp["Z"] = 2;
-	/* local.tmp["__info"] = "a"::"b"::"c"::"d"::"e"::"f"::"g"::"h"::"i"::"j"::"k"::"l"::"m"::"n"::"q"::"r"::"s"::"t"::"u"::"v"::"w"::"x"::"y"::"z"::"A"::"B"::"C"::"D"::"E"::"F"::"G"::"H"::"I"::"J"::"K"::"M"::"N"::"O"::"P"::"Q"::"R"::"S"::"T"::"U"::"V"::"W"::"X"::"Y"::"Z"; */
-end local.tmp;
+	local.mask["a"] = 1;
+	local.mask["b"] = 1;
+	local.mask["c"] = 1;
+	local.mask["d"] = 1;
+	local.mask["e"] = 1;
+	local.mask["f"] = 1;
+	local.mask["g"] = 1;
+	local.mask["h"] = 1;
+	local.mask["i"] = 1;
+	local.mask["j"] = 1;
+	local.mask["k"] = 1;
+	local.mask["l"] = 1;
+	local.mask["m"] = 1;
+	local.mask["n"] = 1;
+	local.mask["o"] = 1;
+	local.mask["p"] = 1;
+	local.mask["q"] = 1;
+	local.mask["r"] = 1;
+	local.mask["s"] = 1;
+	local.mask["t"] = 1;
+	local.mask["u"] = 1;
+	local.mask["v"] = 1;
+	local.mask["w"] = 1;
+	local.mask["x"] = 1;
+	local.mask["y"] = 1;
+	local.mask["z"] = 1;
+	local.mask["A"] = 2;
+	local.mask["B"] = 2;
+	local.mask["C"] = 2;
+	local.mask["D"] = 2;
+	local.mask["E"] = 2;
+	local.mask["F"] = 2;
+	local.mask["G"] = 2;
+	local.mask["H"] = 2;
+	local.mask["I"] = 2;
+	local.mask["J"] = 2;
+	local.mask["K"] = 2;
+	local.mask["L"] = 2;
+	local.mask["M"] = 2;
+	local.mask["N"] = 2;
+	local.mask["O"] = 2;
+	local.mask["P"] = 2;
+	local.mask["Q"] = 2;
+	local.mask["R"] = 2;
+	local.mask["S"] = 2;
+	local.mask["T"] = 2;
+	local.mask["U"] = 2;
+	local.mask["V"] = 2;
+	local.mask["W"] = 2;
+	local.mask["X"] = 2;
+	local.mask["Y"] = 2;
+	local.mask["Z"] = 2;
+	/* local.mask["__info"] = "a"::"b"::"c"::"d"::"e"::"f"::"g"::"h"::"i"::"j"::"k"::"l"::"m"::"n"::"q"::"r"::"s"::"t"::"u"::"v"::"w"::"x"::"y"::"z"::"A"::"B"::"C"::"D"::"E"::"F"::"G"::"H"::"I"::"J"::"K"::"M"::"N"::"O"::"P"::"Q"::"R"::"S"::"T"::"U"::"V"::"W"::"X"::"Y"::"Z"; */
+end local.mask;
 
-CharData local.selection:
+CharDataMasks local.selection:
 	// lowercase -> UPPERCASE
 	if ((local.selection == NIL) || (local.selection == 0)) {
-		local.tmp["a"] = "A";
-		local.tmp["b"] = "B";
-		local.tmp["c"] = "C";
-		local.tmp["d"] = "D";
-		local.tmp["e"] = "E";
-		local.tmp["f"] = "F";
-		local.tmp["g"] = "G";
-		local.tmp["h"] = "H";
-		local.tmp["i"] = "I";
-		local.tmp["j"] = "J";
-		local.tmp["k"] = "K";
-		local.tmp["l"] = "L";
-		local.tmp["m"] = "M";
-		local.tmp["n"] = "N";
-		local.tmp["o"] = "O";
-		local.tmp["p"] = "P";
-		local.tmp["q"] = "Q";
-		local.tmp["r"] = "R";
-		local.tmp["s"] = "S";
-		local.tmp["t"] = "T";
-		local.tmp["u"] = "U";
-		local.tmp["v"] = "V";
-		local.tmp["w"] = "W";
-		local.tmp["x"] = "X";
-		local.tmp["y"] = "Y";
-		local.tmp["z"] = "Z";
+		local.mask["a"] = "A";
+		local.mask["b"] = "B";
+		local.mask["c"] = "C";
+		local.mask["d"] = "D";
+		local.mask["e"] = "E";
+		local.mask["f"] = "F";
+		local.mask["g"] = "G";
+		local.mask["h"] = "H";
+		local.mask["i"] = "I";
+		local.mask["j"] = "J";
+		local.mask["k"] = "K";
+		local.mask["l"] = "L";
+		local.mask["m"] = "M";
+		local.mask["n"] = "N";
+		local.mask["o"] = "O";
+		local.mask["p"] = "P";
+		local.mask["q"] = "Q";
+		local.mask["r"] = "R";
+		local.mask["s"] = "S";
+		local.mask["t"] = "T";
+		local.mask["u"] = "U";
+		local.mask["v"] = "V";
+		local.mask["w"] = "W";
+		local.mask["x"] = "X";
+		local.mask["y"] = "Y";
+		local.mask["z"] = "Z";
 	}
 	// UPPERCASE -> lowercase
 	if ((local.selection == NIL) || (local.selection == 1)) {
-		local.tmp["A"] = "a";
-		local.tmp["B"] = "b";
-		local.tmp["C"] = "c";
-		local.tmp["D"] = "d";
-		local.tmp["E"] = "e";
-		local.tmp["F"] = "f";
-		local.tmp["G"] = "g";
-		local.tmp["H"] = "h";
-		local.tmp["I"] = "i";
-		local.tmp["J"] = "j";
-		local.tmp["K"] = "k";
-		local.tmp["L"] = "l";
-		local.tmp["M"] = "m";
-		local.tmp["N"] = "n";
-		local.tmp["O"] = "o";
-		local.tmp["P"] = "p";
-		local.tmp["Q"] = "q";
-		local.tmp["R"] = "r";
-		local.tmp["S"] = "s";
-		local.tmp["T"] = "t";
-		local.tmp["U"] = "u";
-		local.tmp["V"] = "v";
-		local.tmp["W"] = "w";
-		local.tmp["X"] = "x";
-		local.tmp["Y"] = "y";
-		local.tmp["Z"] = "z";
+		local.mask["A"] = "a";
+		local.mask["B"] = "b";
+		local.mask["C"] = "c";
+		local.mask["D"] = "d";
+		local.mask["E"] = "e";
+		local.mask["F"] = "f";
+		local.mask["G"] = "g";
+		local.mask["H"] = "h";
+		local.mask["I"] = "i";
+		local.mask["J"] = "j";
+		local.mask["K"] = "k";
+		local.mask["L"] = "l";
+		local.mask["M"] = "m";
+		local.mask["N"] = "n";
+		local.mask["O"] = "o";
+		local.mask["P"] = "p";
+		local.mask["Q"] = "q";
+		local.mask["R"] = "r";
+		local.mask["S"] = "s";
+		local.mask["T"] = "t";
+		local.mask["U"] = "u";
+		local.mask["V"] = "v";
+		local.mask["W"] = "w";
+		local.mask["X"] = "x";
+		local.mask["Y"] = "y";
+		local.mask["Z"] = "z";
 	}
-end local.tmp;
+end local.mask;
 
-ASCIIData:
-	local.tmp[2] = "STX";
-	local.tmp[3] = "ETX";
-	local.tmp[9] = "\t";
-	local.tmp[10] = "\n";
-	local.tmp[13] = "CR"
-	local.tmp[27] = "ESC";
+ASCIIDataMasks:
+	/// 'Non-printable' characters
+	/// http://www.asciitable.com/
 	
-	local.tmp[32] = " ";
-	local.tmp[33] = "!";
-	local.tmp[34] = "\"";
-	local.tmp[35] = "#";
-	local.tmp[36] = "$";
-	local.tmp[37] = "%";
-	local.tmp[38] = "&";
-	local.tmp[39] = "'";
-	local.tmp[40] = "(";
-	local.tmp[41] = ")";
-	local.tmp[42] = "*";
-	local.tmp[43] = "+";
-	local.tmp[44] = ",";
-	local.tmp[45] = "-";
-	local.tmp[46] = ".";
-	local.tmp[47] = "/";
-	local.tmp[48] = "0";
-	local.tmp[49] = "1";
-	local.tmp[50] = "2";
-	local.tmp[51] = "3";
-	local.tmp[52] = "4";
-	local.tmp[53] = "5";
-	local.tmp[54] = "6";
-	local.tmp[55] = "7";
-	local.tmp[56] = "8";
-	local.tmp[57] = "9";
-	local.tmp[58] = ":";
-	local.tmp[59] = ";";
-	local.tmp[60] = "<";
-	local.tmp[61] = "=";
-	local.tmp[62] = ">";
-	local.tmp[63] = "?";
+	//local.ascii[0] = 0; 	/**NULL character; can't use null character in script :p*/
+	local.ascii[1] = ; 	/**Start of Header*/
+	local.ascii[2] = ; 	/**Start of Text*/
+	local.ascii[3] = ; 	/**End of Text*/
+	local.ascii[4] = ; 	/**End of Transmission*/
+	local.ascii[5] = ; 	/**Enquiry*/
+	local.ascii[6] = ; 	/**Acknowledge*/
+	local.ascii[7] = ; 	/**Bell*/
+	local.ascii[8] = ;  	/**Backspace*/
+	local.ascii[9] = "\t";	/**Horizontal TAB*/
+	local.ascii[10] = "\n"; /**Line Feed/New Line*/
+	local.ascii[11] = ;	/**Vertical TAB; bizarrely, this prints the symbol for the male gender? :p*/
+	local.ascii[12] = ;	/**Form Feed/New page; bizarrely, this prints the symbol for the female gender? :p*/
+	local.ascii[13] = "\n"	/**Carriage Return; unfortunately, the escape sequence '\r' doesn't work in MoHAA.*/
+	local.ascii[14] = ;	/**Shift OUT; prints musical note? :p*/
+	local.ascii[15] = ;	/**Shift IN*/
+	local.ascii[16] = ;	/**Data Link Escape*/
+	local.ascii[17] = ;	/**Device Control 1*/
+	local.ascii[18] = ;	/**Device Control 2*/
+	local.ascii[19] = ;	/**Device Control 3*/
+	local.ascii[20] = ;	/**Device Control 4*/
+	local.ascii[21] = ;	/**Negative Acknowledgement*/
+	local.ascii[22] = ;	/**Synchronous Idle*/
+	local.ascii[23] = ;	/**End of Transmission Block*/
+	local.ascii[24] = ;	/**Cancel*/
+	local.ascii[25] = ;	/**End of Medium*/
+	local.ascii[26] = ;	/**Substitute*/
+	local.ascii[27] = ;	/**Escape*/
+	local.ascii[28] = ;	/**File Seperator*/
+	local.ascii[29] = ;	/**Group Seperator*/
+	local.ascii[30] = ;	/**Record Seperator*/
+	local.ascii[31] = ;	/**Unit Seperator*/
 	
-	local.tmp[64] = "@";
-	local.tmp[65] = "A";
-	local.tmp[66] = "B";
-	local.tmp[67] = "C";
-	local.tmp[68] = "D";
-	local.tmp[69] = "E";
-	local.tmp[70] = "F";
-	local.tmp[71] = "G";
-	local.tmp[72] = "H";
-	local.tmp[73] = "I";
-	local.tmp[74] = "J";
-	local.tmp[75] = "K";
-	local.tmp[76] = "L";
-	local.tmp[77] = "M";
-	local.tmp[78] = "N";
-	local.tmp[79] = "O";
-	local.tmp[80] = "P";
-	local.tmp[81] = "Q";
-	local.tmp[82] = "R";
-	local.tmp[83] = "S";
-	local.tmp[84] = "T";
-	local.tmp[85] = "U";
-	local.tmp[86] = "V";
-	local.tmp[87] = "W";
-	local.tmp[88] = "X";
-	local.tmp[89] = "Y";
-	local.tmp[90] = "Z";
-	local.tmp[91] = "[";
-	local.tmp[92] = "\\";
-	local.tmp[93] = "]";
-	local.tmp[94] = "^";
-	local.tmp[95] = "_";
+	local.ascii[32] = " ";
+	local.ascii[33] = "!";
+	local.ascii[34] = "\"";
+	local.ascii[35] = "#";
+	local.ascii[36] = "$";
+	local.ascii[37] = "%";
+	local.ascii[38] = "&";
+	local.ascii[39] = "'";
+	local.ascii[40] = "(";
+	local.ascii[41] = ")";
+	local.ascii[42] = "*";
+	local.ascii[43] = "+";
+	local.ascii[44] = ",";
+	local.ascii[45] = "-";
+	local.ascii[46] = ".";
+	local.ascii[47] = "/";
+	local.ascii[48] = "0";
+	local.ascii[49] = "1";
+	local.ascii[50] = "2";
+	local.ascii[51] = "3";
+	local.ascii[52] = "4";
+	local.ascii[53] = "5";
+	local.ascii[54] = "6";
+	local.ascii[55] = "7";
+	local.ascii[56] = "8";
+	local.ascii[57] = "9";
+	local.ascii[58] = ":";
+	local.ascii[59] = ";";
+	local.ascii[60] = "<";
+	local.ascii[61] = "=";
+	local.ascii[62] = ">";
+	local.ascii[63] = "?";
 	
-	local.tmp[96] = "`";
-	local.tmp[97] = "a";
-	local.tmp[98] = "b";
-	local.tmp[99] = "c";
-	local.tmp[100] = "d";
-	local.tmp[101] = "e";
-	local.tmp[102] = "f";
-	local.tmp[103] = "g";
-	local.tmp[104] = "h";
-	local.tmp[105] = "i";
-	local.tmp[106] = "j";
-	local.tmp[107] = "k";
-	local.tmp[108] = "l";
-	local.tmp[109] = "m";
-	local.tmp[110] = "n";
-	local.tmp[111] = "o";
-	local.tmp[112] = "p";
-	local.tmp[113] = "q";
-	local.tmp[114] = "r";
-	local.tmp[115] = "s";
-	local.tmp[116] = "t";
-	local.tmp[117] = "u";
-	local.tmp[118] = "v";
-	local.tmp[119] = "w";
-	local.tmp[120] = "x";
-	local.tmp[121] = "y";
-	local.tmp[122] = "z";
-	local.tmp[123] = "{";
-	local.tmp[124] = "|";
-	local.tmp[125] = "}";
-	local.tmp[126] = "~";
-end local.tmp;
+	local.ascii[64] = "@";
+	local.ascii[65] = "A";
+	local.ascii[66] = "B";
+	local.ascii[67] = "C";
+	local.ascii[68] = "D";
+	local.ascii[69] = "E";
+	local.ascii[70] = "F";
+	local.ascii[71] = "G";
+	local.ascii[72] = "H";
+	local.ascii[73] = "I";
+	local.ascii[74] = "J";
+	local.ascii[75] = "K";
+	local.ascii[76] = "L";
+	local.ascii[77] = "M";
+	local.ascii[78] = "N";
+	local.ascii[79] = "O";
+	local.ascii[80] = "P";
+	local.ascii[81] = "Q";
+	local.ascii[82] = "R";
+	local.ascii[83] = "S";
+	local.ascii[84] = "T";
+	local.ascii[85] = "U";
+	local.ascii[86] = "V";
+	local.ascii[87] = "W";
+	local.ascii[88] = "X";
+	local.ascii[89] = "Y";
+	local.ascii[90] = "Z";
+	local.ascii[91] = "[";
+	local.ascii[92] = "\\";
+	local.ascii[93] = "]";
+	local.ascii[94] = "^";
+	local.ascii[95] = "_";
+	local.ascii[96] = "`";
+	
+	local.ascii[97] = "a";
+	local.ascii[98] = "b";
+	local.ascii[99] = "c";
+	local.ascii[100] = "d";
+	local.ascii[101] = "e";
+	local.ascii[102] = "f";
+	local.ascii[103] = "g";
+	local.ascii[104] = "h";
+	local.ascii[105] = "i";
+	local.ascii[106] = "j";
+	local.ascii[107] = "k";
+	local.ascii[108] = "l";
+	local.ascii[109] = "m";
+	local.ascii[110] = "n";
+	local.ascii[111] = "o";
+	local.ascii[112] = "p";
+	local.ascii[113] = "q";
+	local.ascii[114] = "r";
+	local.ascii[115] = "s";
+	local.ascii[116] = "t";
+	local.ascii[117] = "u";
+	local.ascii[118] = "v";
+	local.ascii[119] = "w";
+	local.ascii[120] = "x";
+	local.ascii[121] = "y";
+	local.ascii[122] = "z";
+	local.ascii[123] = "{";
+	local.ascii[124] = "|";
+	local.ascii[125] = "}";
+	local.ascii[126] = "~";
+end local.ascii;
 
 
 /// ********************************************************* ///
@@ -530,6 +456,114 @@ IsDecimalData local.var:
 		break;
 		case "9":
 			local.result = "9";
+		break;
+		default:
+			local.result = 0;
+		break;
+	}
+end local.result;
+
+IsBinaryData local.var:
+	switch (local.var) {
+		case "0":
+			local.result = "0";
+		break;
+		case "1":
+			local.result = "1";
+		break;
+		default:
+			local.result = 0;
+		break;
+	}
+end local.result;
+
+IsOctalData local.var:
+	switch (local.var) {
+		case "0":
+			local.result = "0";
+		break;
+		case "1":
+			local.result = "1";
+		break;
+		case "2":
+			local.result = "2";
+		break;
+		case "3":
+			local.result = "3";
+		break;
+		case "4":
+			local.result = "4";
+		break;
+		case "5":
+			local.result = "5";
+		break;
+		case "6":
+			local.result = "6";
+		break;
+		case "7":
+			local.result = "7";
+		break;
+		default:
+			local.result = 0;
+		break;
+	}
+end local.result;
+
+IsHexadecimalData local.var:
+	switch (local.var) {
+		case "0":
+			local.result = "0";
+		break;
+		case "1":
+			local.result = "1";
+		break;
+		case "2":
+			local.result = "2";
+		break;
+		case "3":
+			local.result = "3";
+		break;
+		case "4":
+			local.result = "4";
+		break;
+		case "5":
+			local.result = "5";
+		break;
+		case "6":
+			local.result = "6";
+		break;
+		case "7":
+			local.result = "7";
+		break;
+		case "8":
+			local.result = "8";
+		break;
+		case "9":
+			local.result = "9";
+		break;
+		case "a":
+		case "A":
+			local.result = "A";
+		break;
+		case "b":
+		case "B":
+			local.result = "B";
+		break;
+		case "c":
+		case "C":
+			local.result = "C";
+		break;
+		case "d":
+		case "D":
+			local.result = "D";
+		break;
+		case "e":
+		case "E":
+			local.result = "E";
+		break;
+		case "f":
+		case "F":
+			local.result = "F";
 		break;
 		default:
 			local.result = 0;

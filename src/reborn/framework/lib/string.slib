@@ -4,7 +4,7 @@
  STRING FUNCTIONS LIBRARY; 					Script Framework BETA 
  ================================================================
  BY Sor	WITH THANKS TO Elgan
- VERSION 1.7.008 (10/12/2012)
+ VERSION 1.7.018 (23/12/2012)
  =-------------------------------------------------------------=		
  Copyright (c) 2008-2014  Lenny Knockx
  All rights reserved.
@@ -28,9 +28,9 @@
  ================================================================
 */
 /* Apply ASCII comparing everywhere?
-*/
+ */
 __init: 
-	if (self && self == $Str) {
+	if (self && self == $String) {
 		if (local.dev) {
 			local.lblPrefix = "_";
 		} else {
@@ -47,8 +47,10 @@ __init:
 		self.ReplaceStr = 			self.fullPath::(local.lblPrefix + "ReplaceStr");
 		self.Remove = 				self.fullPath::(local.lblPrefix + "Remove");
 		self.Replace = 				self.fullPath::(local.lblPrefix + "Replace");
+		self.Insert = 				self.fullPath::(local.lblPrefix + "Insert");
 		self.Concatenate = 			self.fullPath::(local.lblPrefix + "Concatenate");
 		self.Compare = 				self.fullPath::(local.lblPrefix + "Compare");
+		self.IsEqual = 				self.fullPath::(local.lblPrefix + "IsEqual");
 		self.ToUpper = 				self.fullPath::(local.lblPrefix + "ToUpper");
 		self.ToLower = 				self.fullPath::(local.lblPrefix + "ToLower");
 		self.Left = 				self.fullPath::(local.lblPrefix + "Left");
@@ -64,13 +66,17 @@ __init:
 		self.Cut = 					self.fullPath::(local.lblPrefix + "Cut");
 		self.SubStr = 				self.fullPath::(local.lblPrefix + "SubStr");
 		self.Transform =			self.fullPath::(local.lblPrefix + "Transform");
-		self.VerifyPath = 			self.fullPath::(local.lblPrefix + "VerifyPath");
 		self.ToInt = 				self.fullPath::(local.lblPrefix + "ToInt");
 		self.ToChar =				self.fullPath::(local.lblPrefix + "ToChar");
 		self.ToFloat = 				self.fullPath::(local.lblPrefix + "ToFloat");
 		self.ToBool = 				self.fullPath::(local.lblPrefix + "ToBool");
 		self.ToVector = 			self.fullPath::(local.lblPrefix + "ToVector");
 		self.ToArray = 				self.fullPath::(local.lblPrefix + "ToArray");
+		self.Trim = 				self.fullPath::(local.lblPrefix + "Trim");
+		self.TrimLeft = 			self.fullPath::(local.lblPrefix + "TrimLeft");
+		self.TrimRight = 			self.fullPath::(local.lblPrefix + "TrimRight");
+		self.ValidatePairs = 		self.fullPath::"ValidatePairs";
+		self.VerifyPath = 			self.fullPath::"VerifyPath";
 		self.NotConst =				self.fullPath::"NotConstant";
 		self.IsNumeric = 			self.fullPath::"IsNumeric";
 		self.IsFloat = 				self.fullPath::"IsFloat";
@@ -80,9 +86,6 @@ __init:
 		self.WhatIs = 				self.fullPath::"WhatIs";
 		self.ToTitle = 				self.fullPath::"ToTitle"
 		self.Reverse = 				self.fullPath::"Reverse";
-		self.Trim = 				self.fullPath::"Trim";
-		self.TrimLeft = 			self.fullPath::"TrimLeft";
-		self.TrimRight = 			self.fullPath::"TrimRight";
 		self.CharToInt = 			self.fullPath::"CharToInt";
 		self.IntToChar = 			self.fullPath::(local.lblPrefix + "IntToChar");
 		self.CookieCutter = 		self.fullPath::"CookieCutter";
@@ -95,19 +98,18 @@ __init:
 		self.DelTabs = 				self.fullPath::"DelTabs";
 		self.IsCharDataSafe = 		self.fullPath::"IsCharDataSafe";
 		self.MakeCharDataSafe = 	self.fullPath::"MakeCharDataSafe";
-		self.ValidatePairs = 		self.fullPath::"ValidatePairs";
 		
 		// Internal functions, but they are available for those who need them:
 		self.IsString = 			self.fullPath::"__IsString";
 		self.IsStringType = 		self.fullPath::"__IsStringType";
 
 		// Path to associated information library.
-		self.infoLib = 				(self.filePath + "string.lib");
+		self.info = 				$Library.infoStr;
 		// Maximum string size in buffer:
 		self.STRINGBUFFERSIZE = 	game.Root.CAP_STRINGBUFFER;
 		
-		// There are 58 methods registered in this function library.
-		self.methodSize += 58;	
+		// There are 60 methods registered in this function library.
+		self.methodSize += 60;	
 		// There are 2 properties registered in this function library.
 		self.propertySize += 2;
 		
@@ -120,8 +122,8 @@ __info:
 	local.inf["library"] = "string.slib";	//filename
 	local.inf["namespace"] = "Str";			//targetname of class this script is part of...
 	local.inf["title"] = "STRING FUNCTIONS LIBRARY";
-	local.inf["version"] = "1.7.008";
-	local.inf["lastmodified"] = "10/12/2012";
+	local.inf["version"] = "1.7.018";
+	local.inf["lastmodified"] = "23/12/2012";
 	local.inf["authors"][0] = "Sor";
 end local.inf;
 
@@ -147,7 +149,7 @@ __initChar:
 		self.ToUpper =				self.fullPath::CharToUpper;
 		
 		// Path to information library...
-		self.infoLib = $(self.parent).infoLib;
+		//self.info = 				$(self.parent).info;
 		
 		// There are 14 methods in this library...
 		self.methodSize += 14;
@@ -179,7 +181,7 @@ end local.result;
  =========================================================================================== */
 CharTypeToInt local.char:
 	if (local.char && typeof local.char == "char") {
-		if (waitthread $Str.infoLib::IsDecimalData (string local.char)) {
+		if (waitthread $Library.infoStr::IsDecimalData (string local.char)) {
 			local.result = (int (string local.char));
 		} else {
 			local.result = local.char;
@@ -198,7 +200,7 @@ end local.result;
  =========================================================================================== */
 CharToFloat local.char:
 	if (local.char && typeof local.char == "char") {
-		if (waitthread $Str.infoLib::IsDecimalData (string local.char)) {
+		if (waitthread $Library.infoStr::IsDecimalData (string local.char)) {
 			local.result = (float (string local.char));
 		} else {
 			local.result = local.char;
@@ -276,11 +278,12 @@ ToBool local.string:
 		switch (local.string) {
 			case "1":
 			case "true":
-				local.result = true;
+				local.result = $Bool.True;
 			break;
 			case "0":
+			case "0.0":
 			case "false":
-				local.result = false;
+				local.result = $Bool.False;
 			break;
 			default:
 				local.result = local.string;
@@ -323,10 +326,10 @@ ToVector local.string:
 			}
 			
 			if (local.str.size == 3) {
-				local.stringsSize = local.str.size;
+				// Create dummy vector so we can overwrite its values one by one.
 				local.result = ( 0.0 0.0 0.0 );
 				local.j = 0;
-				for (local.i = 0; local.i < local.stringsSize; local.i++) {
+				for (local.i = 0; local.i < 3; local.i++) {
 					if (waitthread IsNumeric local.str[local.i]) {
 						local.result[local.j] = (float local.str[local.i]);
 						local.j++;
@@ -351,7 +354,11 @@ end local.result;
 			*	NIL => error: uninitialized/inexistent string
  =========================================================================================== */
 ToArray local.array:
-end (waitthread $Decompile.Array local.array);
+	local.result = waitthread reborn/framework/lib/array.slib::Decompile local.array;
+	if (local.result == NIL) {
+		local.result = local.array;
+	}
+end local.result;
 
 /** ==========================================================================================
  WhatIs Function
@@ -440,7 +447,12 @@ end local.result;
 IsInteger local.string:
 	local.result = 0;
 	if (local.string && waitthread __IsStringType local.string) {
-		local.numMask = waitthread $Str.infoLib::NumericalMasks;
+		if (typeof local.string == "char") {
+			local.string = (string local.string);
+		}
+	
+		local.numMask = waitthread $Library.infoStr::NumericalMasks;
+		
 		if (local.string[0] == "-" || local.numMask[(string local.string[0])] == 1) {
 			local.strSize = local.string.size;
 			local.result = 1;
@@ -468,17 +480,20 @@ end local.result;
  =========================================================================================== */
 IsFloat local.string:
 	local.result = 0;
-	if (local.string && waitthread __IsStringType local.string) {
-		local.numMask = waitthread $Str.infoLib::NumericalMasks;
-		local.dots = 0;
-		local.strSize = local.string.size;
+	if (local.string && waitthread __IsString local.string) {
+	
+		local.numMask = waitthread $Library.infoStr::NumericalMasks;
 		local.result = 1;
-		for (local.i = 0; local.i < local.strSize; local.i++) {
+		
+		local.strSize = local.string.size;
+		local.start = 0;
+		if (local.string[0] == "-") {
+			local.start = 1;
+		} 
+		for (local.i = local.start; local.i < local.strSize; local.i++) {
 			if (local.numMask[(string local.string[local.i])] != 1) {
-				if (local.string[local.i] == "." && !local.dots) {
-					local.dots++;
-					continue;
-				} else if (local.string[local.i] == "-" && local.i == 0) {
+				if (local.string[local.i] == "." && !local.dot) {
+					local.dot = 1;
 					continue;
 				}
 				local.result = 0;
@@ -486,7 +501,7 @@ IsFloat local.string:
 			}
 		}
 		
-		if (local.result && local.dots != 1) {
+		if (local.result && local.dot != 1) {
 			local.result = 0;
 		}
 	} else if (local.string && typeof local.string == "float") {
@@ -500,7 +515,7 @@ end local.result;
  DESCR|: 	Determines whether a string consists only of a valid numerical representation and
 			thus determines whether that string can be successfully converted to an integer or
 			float type.
- INPUT|: 	<STRING string>
+ INPUT|: 	<STRING string> [OBJ-ARRAY numericMasks]
  OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
 			* 	3 => int or float
 			*	2 => stringified float
@@ -513,25 +528,27 @@ IsNumeric local.string:
 		if (typeof local.string == "char") {
 			local.string = (string local.string);
 		}
-
-		local.numMask = waitthread $Str.infoLib::NumericalMasks;
-		local.dots = 0;
-		local.strSize = local.string.size;
+		
+		local.numMask = waitthread $Library.infoStr::NumericalMasks;
 		local.result = 1;
-		for (local.i = 0; local.i < local.strSize; local.i++) {
+		
+		local.strSize = local.string.size;
+		local.start = 0;
+		if (local.string[0] == "-") {
+			local.start = 1;
+		} 
+		for (local.i = local.start; local.i < local.strSize; local.i++) {
 			if (local.numMask[(string local.string[local.i])] != 1) {
-				if (local.string[local.i] == "." && local.dots == 0) {
+				if (local.string[local.i] == "." && !local.dot) {
 					local.result = 2;
-					local.dots++;
-					continue;
-				} else if (local.string[local.i] == "-" && local.i == 0) {
+					local.dot = 1;
 					continue;
 				}
 				local.result = 0;
 				break;
 			}
 		}
-	} else if (local.string) {
+	} else {
 		local.type = typeof local.string;
 		if (local.type == "int" || local.type == "float") {
 			local.result = 3;
@@ -647,7 +664,7 @@ end local.result;
 							[1-X]	=> All fragmented strings
 			*	NIL => error: invalid input
  EXAMPLE|:	IN: 	
-			*	local.result = waitthread $Str.FormatSplit "[[1,2],3]" "[" "," NIL;
+			*	local.result = waitthread $String.FormatSplit "[[1,2],3]" "[" "," NIL;
 			OUT:
 			*	local.result[1] = "[1,2]"
 			*	local.result[2] = "3"
@@ -676,7 +693,7 @@ FormatSplit local.string local.pair local.seperator local.prefix:
 
 	/* Main Logic */
 	
-	local.endPair = waitthread $Compile.infoLib::__PairOther local.pair;
+	local.endPair = waitthread $Library.infoCompile::__PairOther local.pair;
 	local.j = 1;
 
 	// Extracts main pair's prefix to the 0th entry of our result.
@@ -739,7 +756,7 @@ Partition local.string local.partitionSize:
 		}
 		end;
 	}
-	if (local.partitionSize == NIL || local.partitionSize <= 0 || !(typeof local.partitionSize == "int") || local.partitionSize >= $Str.STRINGBUFFERSIZE) {
+	if (local.partitionSize == NIL || local.partitionSize <= 0 || !(typeof local.partitionSize == "int") || local.partitionSize >= $String.STRINGBUFFERSIZE) {
 		local.partitionSize = 1024;
 	}
 	
@@ -762,6 +779,59 @@ Partition local.string local.partitionSize:
 end local.result;
 
 /** ==========================================================================================
+ Insert Function
+ ---------------------------------------------------------------------------------------------
+ DESCR|: 	Inserts specified insertionString in specified string after the specified position.
+			Optionally, the specified insertion can also be inserted before the specified 
+			position.
+ INPUT|: 	<STRING string> <STRING insertion> <INT pos> [INT before]
+ OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
+			*	string => processed string
+			*	NIL => error: invalid input
+ =========================================================================================== */
+_Insert local.string local.insertStr local.pos local.before: goto internal33;
+Insert local.string local.insertStr local.pos local.before:
+	/* Error & Exception handling */
+	if ( !local.string || !(waitthread __IsString local.string)) {
+		if (level.DEBUG) {
+			conprintf "\n ~^~^~^~ FATAL_ERROR[lib/string.slib::Insert]: Specified string <arg1> is either inexistent or not a string type! ~^~^~^~ \n\n";
+		}
+		end;
+	} if ( !local.insertStr || !(waitthread __IsString local.insertStr)) {
+		if (level.DEBUG) {
+			conprintf "\n ~^~^~^~ FATAL_ERROR[lib/string.slib::Insert]: Specified insertString <arg2> is either inexistent or not a string type! ~^~^~^~ \n\n";
+		}
+		end;
+	} 
+	
+	internal33:
+	
+	if (!local.pos || typeof local.pos != "int") {
+		local.pos = 0;
+	}
+	
+	/*Main Logic*/
+	local.strSize = local.string.size;
+	local.result = "";
+	if (local.before) {
+		for (local.i = 0; local.i < local.strSize; local.i++) {
+			if (local.i == local.pos) {
+				local.result += local.insertStr;
+			}
+			local.result += local.string[local.i];
+		}
+	} else {
+		for (local.i = 0; local.i < local.strSize; local.i++) {
+			local.result += local.string[local.i];
+			
+			if (local.i == local.pos) {
+				local.result += local.insertStr;
+			}
+		}
+	}
+end local.result;
+
+/** ==========================================================================================
  In Function
  ---------------------------------------------------------------------------------------------
  DESCR|: 	Searches specified string for the string or char to be found. Outputs the starting 
@@ -775,7 +845,10 @@ end local.result;
 			*	0 => is the array size if nothing is found (same for both seek modes).
 			*	NIL => error: invalid input
  =========================================================================================== */
-_In local.string local.chkString local.startPos local.seekMode: 	local.strSize = local.string.size; local.chkStrSize = local.chkString.size; goto internal2;
+_In local.string local.chkString local.startPos local.seekMode: 
+	local.strSize = local.string.size;
+	local.chkStrSize = local.chkString.size;
+goto internal2;
 In local.string local.chkString local.startPos local.seekMode:
 	local.strSize = local.string.size; 
 	local.chkStrSize = local.chkString.size;
@@ -814,23 +887,20 @@ In local.string local.chkString local.startPos local.seekMode:
 	/* Main logic */
 	internal2:
 	
+	// Convert potential char type input to string type.
+	local.chkString = string(local.chkString);
+	
 	// Search loop preperations...
 	local.instance = 0;
 	local.result[1] = NIL;
 	
 	for (local.i = local.startPos; local.i < local.strSize; local.i++) {
-		// Check if we can find a char match...
-		local.check = 0;
-		if ((charToInt local.string[local.i]) == (charToInt local.chkString[0])) {
-			local.check = 1;
-		}
-		
 		// Bingo! Character match found...
-		if (local.check) {
+		if ((charToInt local.string[local.i]) == (charToInt local.chkString[0])) {
 			// More characters need to be searched. This projects our chkString onto the next characters in the specified string.
 			if (local.chkStrSize > 1) {
 				if (local.chkStrSize <= (local.strSize - (local.i + 1))) {
-					// Save the current position in the string so as to not entangle our for() loops.
+					// Save the next position in the string so as to not entangle our for() loops.
 					local.k = (local.i + 1);
 					for (local.j = 1; local.j < local.chkStrSize; local.j++) {
 						if ((charToInt local.string[local.k]) != (charToInt local.chkString[local.j])) {
@@ -908,7 +978,10 @@ end local.result;
 			*	0 => is the array size if nothing is found (same for both seek modes).
 			*	NIL => error: invalid input
  =========================================================================================== */
-_Search local.string local.chkString local.startPos local.seekMode local.caseInsensitive local.wildCard local.spacer: 	local.strSize = local.string.size; local.chkStrSize = local.chkString.size; goto internal3;
+_Search local.string local.chkString local.startPos local.seekMode local.caseInsensitive local.wildCard local.spacer: 	
+	local.strSize = local.string.size; 
+	local.chkStrSize = local.chkString.size; 
+goto internal3;
 Search local.string local.chkString local.startPos local.seekMode local.caseInsensitive local.wildCard local.spacer:
 	local.strSize = local.string.size; 
 	local.chkStrSize = local.chkString.size;
@@ -953,6 +1026,7 @@ Search local.string local.chkString local.startPos local.seekMode local.caseInse
 	
 	// Convert potential char type input to string type.
 	local.spacer = string local.spacer;
+	local.chkString = string local.chkString;
 	
 	// Search loop preperations...
 	local.instance = 0;
@@ -974,7 +1048,7 @@ Search local.string local.chkString local.startPos local.seekMode local.caseInse
 			// to some other functions here, simply because if we applied the same practice here, we'd have to backtrack at almost any turn.
 			if (local.chkStrSize > 1) {
 				if (local.chkStrSize <= (local.strSize - (local.i + 1))) {
-					// Save the current position in the string so as to not entangle our for() loops.
+					// Save the next position in the string so as to not entangle our for() loops.
 					local.k = (local.i + 1);
 					for (local.j = 1; local.j < local.chkStrSize; local.j++) {
 						// Wildcard is projected onto our project position in the specified string. 
@@ -1063,11 +1137,11 @@ VerifyPath local.path /*local.thorough*/:
 			local.result = 0;
 			if (waitthread IsCharDataSafe local.path 1) {
 				// Cuts path into directory path and the filename.
-				local.path = waitthread $System.fullPath::__SplitPath local.path;
-		
+				local.path = waitthread $Library.common::__SplitPath local.path;
+				
 				// Retrieve directory list of specified path.
 				local.list = flist local.path[0] "" 0;
-			
+
 				// Flist returns the input path if path was invalid, but if the path were valid,
 				// the command will always returns an array even if the specified directory was empty. 
 				if (typeof local.list == "array") {
@@ -1111,7 +1185,8 @@ end local.result;
 			pairs such as brackets. If something has to be between one pair character and 
 			another, it can be checked if that pair's infix character is set. If inline is
 			set to 1, then the order of the inputted pairs determines their inlined order.
-			This means that each pair must be defined inside the previously specified pair.
+			This means that each pair must be defined inside the previously specified pair
+			for the string to be valid.
  INPUT|: 	<STRING string> [INT inline] <STRING pair1> <STRING infix1> ... [STRING infix5]
  OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
 			*	1 => string complies to specified criteria.
@@ -1132,11 +1207,11 @@ ValidatePairs local.string local.inlined local.pair1 local.infix1 local.pair2 lo
 	// bracket that $Compile's PairOther function will return. The third entry represents the optional 
 	// 'infix' that, if set, must be between the open bracket of the specified pair and another specified bracket.
 	local.pairArray[0] = NIL;
-	local.pairArray = waitthread __ValidatePairs local.pairArray local.pair1 local.infix1;
-	local.pairArray = waitthread __ValidatePairs local.pairArray local.pair2 local.infix2;
-	local.pairArray = waitthread __ValidatePairs local.pairArray local.pair3 local.infix3;
-	local.pairArray = waitthread __ValidatePairs local.pairArray local.pair4 local.infix4;
-	local.pairArray = waitthread __ValidatePairs local.pairArray local.pair5 local.infix5;
+	waitthread __ValidatePairs local.pair1 local.infix1;
+	waitthread __ValidatePairs local.pair2 local.infix2;
+	waitthread __ValidatePairs local.pair3 local.infix3;
+	waitthread __ValidatePairs local.pair4 local.infix4;
+	waitthread __ValidatePairs local.pair5 local.infix5;
 	
 	if (local.pairArray.size <= 0) {
 		if (level.DEBUG) {
@@ -1273,16 +1348,19 @@ ValidatePairs local.string local.inlined local.pair1 local.infix1 local.pair2 lo
 	Brakes:
 end local.result;
 
-__ValidatePairs local.result local.pair local.infix:
+__ValidatePairs local.pair local.infix:
+	// Using pairArray horizontally for a change as it's a constant, expected variable in our caller's thread.
+	local.mainThread = parm.previousthread;
+	
 	if (local.pair && local.pair.size == 1 && (waitthread __IsStringType local.pair)) {
-		local.idx = local.result.size;
-		local.result[local.idx][0] = local.pair;
-		local.result[local.idx][1] = waitthread $Compile.infoLib::__PairOther local.pair;
+		local.idx = local.mainThread.pairArray.size;
+		local.mainThread.pairArray[local.idx][0] = local.pair;
+		local.mainThread.pairArray[local.idx][1] = waitthread $Library.infoCompile::__PairOther local.pair;
 		if (local.infix && (waitthread __IsStringType local.infix)) {
-			local.result[local.idx][2] = local.infix;
+			local.mainThread.pairArray[local.idx][2] = local.infix;
 		}
 	}
-end local.result;
+end;
 
 /** ==========================================================================================
  RemoveStr Function
@@ -1456,7 +1534,7 @@ end local.result;
 _Concatenate local.strings local.spacer: goto internal7;
 Concatenate local.strings local.spacer:
 	/* Error & Exception handling */
-	if ( !local.strings || local.strings.size <= 1 || !(waitthread $Array.IsUserArray local.strings)) {
+	if ( !local.strings || local.strings.size <= 1 || !(waitthread reborn/framework/lib/array.slib::IsUserArray local.strings)) {
 		if (level.DEBUG) {
 			conprintf "\n ~^~^~^~ FATAL_ERROR[lib/string.slib::Concatenate]: Invalid array of strings <arg1> specified!  ~^~^~^~ \n\n";
 		}
@@ -1483,7 +1561,7 @@ Concatenate local.strings local.spacer:
 	for (local.i = local.arraySizes[1]; local.i < local.arraySizes[2]; local.i++) {
 		local.chk += local.strings[local.i].size;
 	}
-	if (local.chk >= $Str.STRINGBUFFERSIZE) {
+	if (local.chk >= $String.STRINGBUFFERSIZE) {
 		if (level.DEBUG) {
 			conprintf ("\n ~^~^~^~ FATAL_ERROR[lib/string.slib::Concatenate]: The concatenated string will exceed the maximum string buffersize (" + local.chk + " chars)!!  ~^~^~^~ \n\n");
 		}
@@ -1500,15 +1578,17 @@ end local.result;
 /** ==========================================================================================
  Compare Function
  ---------------------------------------------------------------------------------------------
- DESCR|: 	Determines whether the first specified string equals the other specified string, 
+ DESCR|: 	Determines whether the first specified string is greater, equal or smaller than
+			the other specified string (i.e. as if you were to sort them alphabetically), 
 			on ASCII level. Optionally, letter casing can be ignored.
  INPUT|: 	<STRING string1> <STRING string2> [INT caseInsensitive]
  OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
-			*	1 => same
-			*	0 => not the same
+			*	1 => alphabetically higher than string2
+			*	0 => the same
+			* 	-1 => alphabetically lower than string2
 			*	NIL => error: invalid input
  =========================================================================================== */
-_Compare local.string1 local.string2 local.caseInsensitive: goto internal8;
+_Compare local.string1 local.string2 local.caseInsensitive: goto internal29;
 Compare local.string1 local.string2 local.caseInsensitive: 
 	/* Error & Exception handling */
 	if !(waitthread __IsString local.string1) {
@@ -1519,6 +1599,72 @@ Compare local.string1 local.string2 local.caseInsensitive:
 	} if !(waitthread __IsString local.string2) {
 		if (level.DEBUG) {
 			conprintf "\n ~^~^~^~ FATAL_ERROR[lib/string.slib::Compare]: Specified string <arg2> is not a string type! ~^~^~^~ \n\n";
+		}
+		end;
+	} 
+	
+	/* Main logic */
+	internal29:
+
+	local.strSize = local.string1.size;
+	local.str2Size = local.string2.size;
+
+	//Only bother in this situation
+	local.result = 0;
+	for (local.i = 0; local.i < local.strSize && local.i < local.str2Size; local.i++) {
+		local.char1 = charToInt(local.string1[local.i]);
+		local.char2 = charToInt(local.string2[local.i]);
+			
+		// Handle letter casing..
+		if (local.caseInsensitive) {
+			if (97 <= local.char1 && local.char1 < 123) {
+				local.char1 -= 32;
+			} if (97 <= local.char2 && local.char2 < 123) {
+				local.char2 -= 32;
+			}
+		}
+
+		if (local.char1 < local.char2) {
+			local.result = -1;
+			break;
+		} else if (local.char1 > local.char2) {
+			local.result = 1;
+			break;
+		}
+	}
+	
+	// Equal? Not so sure...
+	if (local.result == 0) {
+		if (local.strSize < local.str2Size) {
+			local.result = -1;
+		} else if (local.strSize > local.str2Size) {
+			local.result = 1;
+		}
+	}
+end local.result;
+
+/** ==========================================================================================
+ IsEqual Function
+ ---------------------------------------------------------------------------------------------
+ DESCR|: 	Determines whether the first specified string equals the other specified string, 
+			on ASCII level. Optionally, letter casing can be ignored.
+ INPUT|: 	<STRING string1> <STRING string2> [INT caseInsensitive]
+ OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
+			*	1 => same
+			*	0 => not the same
+			*	NIL => error: invalid input
+ =========================================================================================== */
+_IsEqual local.string1 local.string2 local.caseInsensitive: goto internal8;
+IsEqual local.string1 local.string2 local.caseInsensitive: 
+	/* Error & Exception handling */
+	if !(waitthread __IsString local.string1) {
+		if (level.DEBUG) {
+			conprintf "\n ~^~^~^~ FATAL_ERROR[lib/string.slib::IsEqual]: Specified string <arg1> is not a string type! ~^~^~^~ \n\n";
+		}
+		end;
+	} if !(waitthread __IsString local.string2) {
+		if (level.DEBUG) {
+			conprintf "\n ~^~^~^~ FATAL_ERROR[lib/string.slib::IsEqual]: Specified string <arg2> is not a string type! ~^~^~^~ \n\n";
 		}
 		end;
 	} 
@@ -1572,8 +1718,8 @@ ToTitle local.string:
 	
 	/* Main logic */
 	//load necessary data
-	local.lowerCase = waitthread $Str.infoLib::CharData 0;
-	local.exceptions = waitthread $Str.infoLib::TitleExceptions;
+	local.lowerCase = waitthread $Library.infoStr::CharDataMasks 0;
+	local.exceptions = waitthread $Library.infoStr::TitleExceptions;
 	
 	local.spacer = " ";
 	//get rid of interfering CAPS..
@@ -1622,8 +1768,8 @@ ToUpper local.string local.index:
 	}
 	if (local.index && !(typeof local.index == "int")) {
 		if (typeof local.index == "const array") {
-			if (waitthread $Array.IsHashArray local.index) {
-				local.index = waitthread $Array.fullPath::_HashToIdxArray local.index;
+			if (waitthread reborn/framework/lib/array.slib::IsHashArray local.index) {
+				local.index = waitthread reborn/framework/lib/array.slib::_HashToIdxArray local.index;
 			}
 		} else {
 			if (level.DEBUG) {
@@ -1632,7 +1778,7 @@ ToUpper local.string local.index:
 			end;
 		}
 		
-		if !(waitthread $Array.ConsistsOf local.index "int" 1) {
+		if !(waitthread reborn/framework/lib/array.slib::_ConsistsOf local.index "int" 1) {
 			if (level.DEBUG) {
 				conprintf "\n ~^~^~^~ FATAL_ERROR[lib/string.slib::ToLower]: Specified indexes (array) <arg2> does not homogeneously consist of integers! ~^~^~^~ \n\n";
 			}
@@ -1643,7 +1789,7 @@ ToUpper local.string local.index:
 	/* Main logic */
 	internal9:
 	
-	local.lowerCase = waitthread $Str.infoLib::CharData 0;
+	local.lowerCase = waitthread $Library.infoStr::CharDataMasks 0;
 	
 	// Indexes specified?
 	if (local.index != NIL) {
@@ -1707,8 +1853,8 @@ ToLower local.string local.index:
 	}
 	if (local.index && !(typeof local.index == "int")) {
 		if (typeof local.index == "const array") {
-			if (waitthread $Array.IsHashArray local.index) {
-				local.index = waitthread $Array.fullPath::_HashToIdxArray local.index;
+			if (waitthread reborn/framework/lib/array.slib::IsHashArray local.index) {
+				local.index = waitthread reborn/framework/lib/array.slib::_HashToIdxArray local.index;
 			}
 		} else {
 			if (level.DEBUG) {
@@ -1717,7 +1863,7 @@ ToLower local.string local.index:
 			end;
 		}
 		
-		if !(waitthread $Array.ConsistsOf local.index "int" 1) {
+		if !(waitthread reborn/framework/lib/array.slib::_ConsistsOf local.index "int" 1) {
 			if (level.DEBUG) {
 				conprintf "\n ~^~^~^~ FATAL_ERROR[lib/string.slib::ToLower]: Specified indexes (array) <arg2> does not homogeneously consist of integers! ~^~^~^~ \n\n";
 			}
@@ -1728,7 +1874,7 @@ ToLower local.string local.index:
 	/* Main logic */
 	internal10:
 	
-	local.upperCase = waitthread $Str.infoLib::CharData 1;
+	local.upperCase = waitthread $Library.infoStr::CharDataMasks 1;
 	
 	// Indexes specified?
 	if (local.index != NIL) {
@@ -1798,13 +1944,15 @@ end local.result;
 /** ==========================================================================================
  Trim Function
  ---------------------------------------------------------------------------------------------
- DESCR|: 	Removes trailing spaces from the specified string.
+ DESCR|: 	Removes trailing spaces from the specified string. Optionally, you can specify a
+			different character is to be trimmed.
  INPUT|: 	<STRING string>
  OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
 			*	string => processed string
 			*	NIL => error: invalid input
  =========================================================================================== */
-Trim local.string:
+_Trim local.string local.char: goto internal32;
+Trim local.string local.char:
 	/* Error & Exception handling */
 	if ( !local.string || !(waitthread __IsString local.string)) {
 		if (level.DEBUG) {
@@ -1813,18 +1961,24 @@ Trim local.string:
 		end;
 	} 
 
+	internal32: 
+	
 	/* Main logic */
+	if ( !local.char || !(waitthread __IsStringType local.char) || local.char.size > 1) {
+		local.char = " ";
+	} 
+	
 	// left side
 	local.strSize = local.string.size;
 	for (local.i = 0; local.i < local.strSize; local.i++) {
-		if (local.string[local.i] != " ") {
+		if (local.string[local.i] != local.char) {
 			local.startPos = local.i;
 			break;
 		}
 	}
 	// right side
 	for (local.i = (local.strSize - 1); local.i >= 0; local.i--) {
-		if (local.string[local.i] != " ") {
+		if (local.string[local.i] != local.char) {
 			local.endPos = local.i;
 			break;
 		}
@@ -1847,13 +2001,15 @@ end local.result;
 /** ==========================================================================================
  TrimLeft Function
  ---------------------------------------------------------------------------------------------
- DESCR|: 	Removes trailing spaces from left side of the specified string.
+ DESCR|: 	Removes trailing spaces from left side of the specified string. Optionally, you
+			can specify a different character is to be trimmed.
  INPUT|: 	<STRING string>
  OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
 			*	string => processed string
 			*	NIL => error: invalid input
  =========================================================================================== */
-TrimLeft local.string:
+_TrimLeft local.string local.char: goto internal30;
+TrimLeft local.string local.char:
 	/* Error & Exception handling */
 	if ( !local.string || !(waitthread __IsString local.string)) {
 		if (level.DEBUG) {
@@ -1861,11 +2017,17 @@ TrimLeft local.string:
 		}
 		end;
 	} 
+	
+	internal30: 
 
 	/* Main logic */
+	if ( !local.char || !(waitthread __IsStringType local.char) || local.char.size > 1) {
+		local.char = " ";
+	} 
+	
 	local.strSize = local.string.size;
 	for (local.i = 0; local.i < local.strSize; local.i++) {
-		if (local.string[local.i] != " ") {
+		if (local.string[local.i] != local.char) {
 			local.startPos = local.i;
 			break;
 		}
@@ -1883,13 +2045,15 @@ end local.result;
 /** ==========================================================================================
  TrimRight Function
  ---------------------------------------------------------------------------------------------
- DESCR|: 	Removes trailing spaces from right side of the specified string.
+ DESCR|: 	Removes trailing spaces from right side of the specified string. Optionally, you
+			can specify a different character is to be trimmed.
  INPUT|: 	<STRING string>
  OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
 			*	string => processed string
 			*	NIL => error: invalid input
  =========================================================================================== */
-TrimRight local.string:
+_TrimRight local.string local.char: goto internal31;
+TrimRight local.string local.char:
 	/* Error & Exception handling */
 	if ( !local.string || !(waitthread __IsString local.string)) {
 		if (level.DEBUG) {
@@ -1897,10 +2061,16 @@ TrimRight local.string:
 		}
 		end;
 	} 
-
+	
+	internal31: 
+	
 	/* Main logic */
+	if ( !local.char || !(waitthread __IsStringType local.char) || local.char.size > 1) {
+		local.char = " ";
+	} 
+
 	for (local.i = (local.string.size - 1); local.i >= 0; local.i--) {
-		if (local.string[local.i] != " ") {
+		if (local.string[local.i] != local.char) {
 			local.endPos = local.i;
 			break;
 		}
@@ -2311,9 +2481,16 @@ CutPos local.string local.startPos local.endPos local.spacer:
 		local.spacer = ""
 	}
 	
-	local.left = waitthread _LeftOf local.string local.startPos
-	local.right = waitthread _Right local.string (waitthread __ConvertPosToChar local.endPos local.string.size)
-end (local.left + local.spacer + local.right)
+	local.strSize = local.string.size;
+	local.left = "";
+	for (local.i = 0; local.i < local.startPos; local.i++) {
+		local.left += local.string[local.i];
+	}
+	local.right = "";
+	for (local.i = local.endPos; local.i < local.strSize; local.i++) {
+		local.right += local.string[local.i];
+	}
+end (local.left + local.spacer + local.right);
 
 /** ==========================================================================================
  SubString Function
@@ -2411,11 +2588,6 @@ Cut local.string local.pos local.char local.spacer:
 			conprintf "~^~^~^~ EXCEPTION[lib/string.slib::Cut]: Specified length (in characters) <arg3> is invalid! Parameter has defaulted. ~^~^~^~ \n";
 		}
 		local.char = 1;
-	} else if ( (local.pos + local.char) >= local.string.size) {
-		if (level.DEBUG > 1) {
-			conprintf "~^~^~^~ EXCEPTION[lib/string.slib::Cut]: Specified length (in characters) <arg2> is invalid! Adjusting to closest admissible range.. ~^~^~^~ \n";
-		}
-		local.char = (waitthread __ConvertPosToChar local.pos local.string.size);
 	}
 	
 	internal22:
@@ -2424,9 +2596,15 @@ Cut local.string local.pos local.char local.spacer:
 		local.spacer = ""
 	}
 	
-	local.endPos = local.pos + local.char
-	local.left = waitthread _LeftOf local.string local.pos;
-	local.right = waitthread _Right local.string (waitthread __ConvertPosToChar local.endPos local.string.size); 
+	local.strSize = local.string.size - 1;
+	local.left = "";
+	for (local.i = 0; local.i < local.pos; local.i++) {
+		local.left += local.string[local.i];
+	}
+	local.right = "";
+	for (local.i = (local.pos + local.char); local.i < local.strSize; local.i++) {
+		local.right += local.string[local.i];
+	}
 end (local.left + local.spacer + local.right); 
 
 /** ==========================================================================================
@@ -2552,10 +2730,10 @@ IntToChar local.array:
 			}
 			end;
 		}
-	} else if (waitthread $Array.IsUserArray local.array) {
-		if (waitthread $Array.ConsistsOf local.array "int" 1) {
+	} else if (waitthread reborn/framework/lib/array.slib::IsUserArray local.array) {
+		if (waitthread reborn/framework/lib/array.slib::_ConsistsOf local.array "int" 1) {
 			internal26:
-			local.arraySizes = waitthread $Array.fullPath::__AnalyzeArray local.array;
+			local.arraySizes = waitthread reborn/framework/lib/array.slib::__AnalyzeArray local.array;
 		} else {
 			if (level.DEBUG) {
 				conprintf ("\n ~^~^~^~ FATAL_ERROR[lib/string.slib::IntToChar]: invalid array <arg2>! Input should only contain integers lower than 127! ~^~^~^~\n\n");
@@ -2564,7 +2742,7 @@ IntToChar local.array:
 		}
 	}
 	
-	local.charData = waitthread $Str.infoLib::ASCIIData;
+	local.charData = waitthread $Library.infoStr::ASCIIDataMasks;
 	local.result = "";
 	for (local.i = local.arraySizes[1]; local.i < local.arraySizes[2]; local.i++) {
 		local.result += local.charData[local.array[local.i]];
@@ -2607,7 +2785,7 @@ Transform local.string local.charToReplace local.replacement  local.caseInsensit
 	local.mapping[(string local.charToReplace)] = (string local.replacement);
 	
 	if (local.caseInsensitive) {
-		local.charCase = waitthread $Str.infoLib::CharData 1
+		local.charCase = waitthread $Library.infoStr::CharDataMasks 1
 	}
 	
 	local.result = "";
@@ -2933,7 +3111,7 @@ IsCharDataSafe local.string local.type:
 		end;
 	}
 
-	local.blackList = waitthread $Str.infoLib::BadCharData;
+	local.blackList = waitthread $Library.infoStr::BadCharData;
 	
 	if (local.type) {
 		local.start = 2;
@@ -2972,7 +3150,7 @@ MakeCharDataSafe local.string local.type:
 		end;
 	}
 
-	local.blacklist = waitthread $Str.infoLib::BadCharData
+	local.blacklist = waitthread $Library.infoStr::BadCharData
 	
 	if (local.type) {
 		local.start = 2;
@@ -3016,7 +3194,7 @@ IsDigit local.char:
 	/*Main Logic*/
 	local.result = 0;
 	
-	if (waitthread $Str.infoLib::IsDecimalData (string local.char)) {
+	if (waitthread $Library.infoStr::IsDecimalData (string local.char)) {
 		local.result = 1;
 	}
 end local.result;
@@ -3043,7 +3221,7 @@ IsLetter local.char:
 	/*Main Logic*/
 	local.result = 0;
 	
-	if (waitthread $Str.infoLib::IsLetterData (string local.char)) {
+	if (waitthread $Library.infoStr::IsLetterData (string local.char)) {
 		local.result = 1;
 	}
 end local.result;
@@ -3070,7 +3248,7 @@ IsLetterOrDigit local.char:
 	/*Main Logic*/
 	local.result = 0;
 
-	if ((waitthread $Str.infoLib::IsLetterData (string local.char)) || (waitthread $Str.infoLib::IsDecimalData (string local.char))) {
+	if ((waitthread $Library.infoStr::IsLetterData (string local.char)) || (waitthread $Library.infoStr::IsDecimalData (string local.char))) {
 		local.result = 1;
 	}
 end local.result;
@@ -3124,7 +3302,7 @@ IsEscapeSeq local.char:
 	/*Main Logic*/
 	local.result = 0;
 
-	if (waitthread $Str.infoLib::IsEsc (string local.char)) {
+	if (waitthread $Library.infoStr::IsEsc (string local.char)) {
 		local.result = 1;
 	}
 end local.result;
@@ -3151,7 +3329,7 @@ IsPunctuation local.char:
 	/*Main Logic*/
 	local.result = 0;
 
-	if (waitthread $Str.infoLib::IsPunct (string local.char)) {
+	if (waitthread $Library.infoStr::IsPunct (string local.char)) {
 		local.result = 1;
 	}
 end local.result;
@@ -3178,7 +3356,7 @@ IsSymbol local.char:
 	/*Main Logic*/
 	local.result = 0;
 
-	if (waitthread $Str.infoLib::IsSymbol (string local.char)) {
+	if (waitthread $Library.infoStr::IsSymbol (string local.char)) {
 		local.result = 1;
 	}
 end local.result;
@@ -3205,7 +3383,7 @@ IsLower local.char:
 	/*Main Logic*/
 	local.result = 0;
 
-	if (waitthread $Str.infoLib::IsLower (string local.char)) {
+	if (waitthread $Library.infoStr::IsLower (string local.char)) {
 		local.result = 1;
 	}
 end local.result;
@@ -3232,7 +3410,7 @@ IsUpper local.char:
 	/*Main Logic*/
 	local.result = 0;
 
-	if (waitthread $Str.infoLib::IsUpper (string local.char)) {
+	if (waitthread $Library.infoStr::IsUpper (string local.char)) {
 		local.result = 1;
 	}
 end local.result;
@@ -3255,7 +3433,7 @@ CharToLower local.char:
 		end;
 	}
 	
-	local.tmp = (waitthread $Str.infoLib::CharData 1)[(string local.char)];
+	local.tmp = (waitthread $Library.infoStr::CharDataMasks 1)[(string local.char)];
 	if !(local.tmp) {
 		local.result = local.char;
 	} else {
@@ -3281,7 +3459,7 @@ CharToUpper local.char:
 		end;
 	}
 	
-	local.tmp = (waitthread $Str.infoLib::CharData 0)[(string local.char)];
+	local.tmp = (waitthread $Library.infoStr::CharDataMasks 0)[(string local.char)];
 	if !(local.tmp) {
 		local.result = local.char;
 	} else {

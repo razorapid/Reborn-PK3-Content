@@ -4,7 +4,7 @@
  DATASTRUCTURE FUNCTIONS LIBRARY; 			Script Framework BETA
  ================================================================
  BY Sor	
- VERSION 1.3.016 (10/12/2012)
+ VERSION 1.4.001 (26/12/2012)
  =-------------------------------------------------------------=		
  Copyright (c) 2009-2014  Lenny Knockx
  All rights reserved.
@@ -27,63 +27,31 @@
  WEBSITE: 	http://www.x-null.net | www.mohaairborne.co.cc
  ================================================================
 */
-/*
--> str to int/float for GetExtFreq & GetExtValue helper threads;
--> Need ObjectArray support for function "ConsistsOf"!
--> use __EntryExists!
-
-Reconcatenate	 (for dynamic arrays: entry gaps are closed; 2 methods: speedy but memory-costful (creating new array without gaps) or slower but memory-efficient (re-arranging the entries))
-Concatenate 	 (joins arrays via a few general schemes: criss-cross, first-last, last-first, sorted etc...)
-#AppendArrays 		(array2 is added (at the end of) array1; for object arrays, redirect to MergeObjArrays() function)
-ShuffleArray		(randomly shuffles entries in specified array)
-SortArray			(sort array: ascending or descending, type int/float or string; if multiple types are expected to be encountered, they will be sorted as specified amongst their type and them sorted according to 'int->float->string->object')
-BubbleSortArray		(sort up array according to maximum 5 criteria (read: 5 array hash columns or 5 one-dimensional equally-sized arrays) => 2 functions that prepare input for main function.)
-					(function1: <hasharray> <asc/desc> <column1> <column2> <column3> <column4> <column5> => importance by order of column ints)
-					(function2: <asc/desc> <array1> <array2> <array3> <array4> <array5> => importance by order of array input)
-					(=> the way it works is that important criteria that are both equal are sorted according to lesser important criteria, if those are equal then for even lesser etc...)
-					(how to perform in practice????????) (oh entries not equal in type are discarded from the end result.)
-ProcessArray => array (& optional 2nd array ;-))optional dimension, optional entries, arrayThread & varThread & bothThread => for helper thread.			
+/**	#ToInt
+	#ToStr
+	#ToFloat
+	#ToVector
+	#ToBool
+=> only cast array contents => going to need autocasting algorithm ($Compile.Autocast.ToStr/$Autocast.ToStr for example)
+	Take array var CAPS into account for Create, CreateHashTable and Concatenate?
 */
-
-/** For reference:
-	println local.o.size ==> prints -1 i.e. inexistent
-	local.o[0] = NIL;
-	println local.o.size; ==> prints 0 i.e. uninitialized
-	local.o[0] = NULL;
-	println local.o.size; ==> prints 1 i.e. apparently NOT empty?
-*/
-__EntryExists local.entry:
-end (local.entry.size > 0 && local.entry != NULL);
-
-// Then do Standard $Float & $Bool classes & functions...
 __init:
 	if (self && self == $Array) {
 		/// **TEMPORARILY DEPRECATED**
 		//parm.array = local CreateListener /**.start; .end;*/
-		if (local.dev) {
-			local.labelPrefix = "_";
-		} else {
-			local.labelPrefix = "";
-		}
 
-		self.Empty = 					self.fullPath::"Empty";
-		self.Type = 					self.fullPath::(local.labelPrefix + "Type");
-		self.ConsistsOf = 				self.fullPath::(local.labelPrefix + "ConsistsOf");
-		self.IsConsistent = 			self.fullPath::(local.labelPrefix + "IsConsistent");
-		self.IsConcatenated =			self.fullPath::(local.labelPrefix + "IsConcatenated");
-		self.IsMultiDimensional = 		self.fullPath::(local.labelPrefix + "IsMultiDimensional");
-		self.GetDimensions = 			self.fullPath::(local.labelPrefix + "GetDimensions");
-		self.Print = 					self.fullPath::(local.labelPrefix + "Print");
-		self.Compile = 					self.fullPath::(local.labelPrefix + "Compile");
-		self.Decompile = 				self.fullPath::(local.labelPrefix + "Decompile");
-		self.IsEntityArray = 			self.fullPath::(local.labelPrefix + "IsEntityArray");
-		self.IsObjectArray = 			self.fullPath::(local.labelPrefix + "IsObjectArray");
-		self.IsNrmArrayType = 			self.fullPath::(local.labelPrefix + "IsNormalArrayType");
-		self.IsIdxArrayType = 			self.fullPath::(local.labelPrefix + "IsIndexedArrayType");
-		self.IsHashArray = 				self.fullPath::(local.labelPrefix + "IsHashArray");
-		self.IsSystemArray = 			self.fullPath::(local.labelPrefix + "IsSystemArray");
-		self.IsUserArray = 				self.fullPath::(local.labelPrefix + "IsUserArray");
-		self.IsArrayType =				self.fullPath::(local.labelPrefix + "IsArrayType");
+		local.labelPrefix = "";
+
+		self.Empty = 					self.fullPath::("Empty");
+		self.Type = 					self.fullPath::("Type");
+		self.IsEntityArray = 			self.fullPath::("IsEntityArray");
+		self.IsObjectArray = 			self.fullPath::("IsObjectArray");
+		self.IsNrmArrayType = 			self.fullPath::("IsNormalArrayType");
+		self.IsIdxArrayType = 			self.fullPath::("IsIndexedArrayType");
+		self.IsHashArray = 				self.fullPath::("IsHashArray");
+		self.IsSystemArray = 			self.fullPath::("IsSystemArray");
+		self.IsUserArray = 				self.fullPath::("IsUserArray");
+		self.IsArrayType =				self.fullPath::("IsArrayType");
 		self.GetArrayIdx = 				self.fullPath::(local.labelPrefix + "GetArrayIdx");
 		self.GetLastIdx = 				self.fullPath::(local.labelPrefix + "GetLastIdx");
 		self.GetArraySizes = 			self.fullPath::(local.labelPrefix + "GetArraySizes");
@@ -97,39 +65,70 @@ __init:
 		self.GetVarFreqs = 				self.fullPath::(local.labelPrefix + "GetVarFreqs");
 		self.GetTypeFreq =		 		self.fullPath::(local.labelPrefix + "GetTypeFreq");
 		self.GetTypeFreqs = 			self.fullPath::(local.labelPrefix + "GetTypeFreqs");
+		self.ConsistsOf = 				self.fullPath::(local.labelPrefix + "ConsistsOf");
+		self.IndexOf = 					self.fullPath::(local.labelPrefix + "IndexOf");
+		self.IsConsistent = 			self.fullPath::(local.labelPrefix + "IsConsistent");
+		self.IsConcatenated =			self.fullPath::(local.labelPrefix + "IsConcatenated");
+		self.IsMultiDimensional = 		self.fullPath::(local.labelPrefix + "IsMultiDimensional");
+		self.GetDimensions = 			self.fullPath::(local.labelPrefix + "GetDimensions");
+		self.Print = 					self.fullPath::(local.labelPrefix + "Print");
+		self.QuickSort =				self.fullPath::(local.labelPrefix + "QuickSort");
+		self.Sort = 					self.fullPath::(local.labelPrefix + "Sort");
+		self.Shuffle = 					self.fullPath::(local.labelPrefix + "Shuffle");
+		self.Reconcatenate = 			self.fullPath::(local.labelPrefix + "Reconcatenate");
+		self.Concatenate = 				self.fullPath::(local.labelPrefix + "Concatenate");
+		self.Reverse = 					self.fullPath::(local.labelPrefix + "Reverse");
+		self.Partition = 				self.fullPath::(local.labelPrefix + "Partition");
+		self.Compile = 					self.fullPath::(local.labelPrefix + "Compile");
+		self.Decompile = 				self.fullPath::(local.labelPrefix + "Decompile");
 		self.HashToNrmArray = 			self.fullPath::(local.labelPrefix + "HashToNrmArray");
 		self.ToNrmArray = 				self.fullPath::(local.labelPrefix + "ToNrmArray");
 		self.HashToIdxArray = 			self.fullPath::(local.labelPrefix + "HashToIdxArray");
 		self.ToIdxArray = 				self.fullPath::(local.labelPrefix + "ToIdxArray");
 		self.HashToAnyArray = 			self.fullPath::(local.labelPrefix + "HashToAnyArray");
 		self.ToAnyArray = 				self.fullPath::(local.labelPrefix + "ToIdxArray");
+		self.Delete = 					self.fullPath::(local.labelPrefix + "Delete");
 		self.Create = 					self.fullPath::(local.labelPrefix + "Create");
-		self.CreateConst = 				self.fullPath::(local.labelPrefix + "CreateConst");
+		self.CreateConstant = 			self.fullPath::(local.labelPrefix + "CreateConstantArray");
+		self.CreateHashTable = 			self.fullPath::(local.labelPrefix + "CreateHashTable");
+		self.Overwrite = 				self.fullPath::(local.labelPrefix + "Overwrite");
+		self.RemoveElement = 			self.fullPath::(local.labelPrefix + "RemoveElement");
+		self.Remove = 					self.fullPath::(local.labelPrefix + "RemoveElement");
+		self.AddElement = 				self.fullPath::(local.labelPrefix + "AddElement");
+		self.Add = 						self.fullPath::(local.labelPrefix + "AddElement");
+		self.LIFO = 					self.fullPath::(local.labelPrefix + "LIFO");
+		self.LILO = 					self.fullPath::(local.labelPrefix + "LILO");
+		self.FILO = 					self.fullPath::(local.labelPrefix + "FILO");
+		self.FIFO = 					self.fullPath::(local.labelPrefix + "FIFO");
+		self.Disperse = 				self.fullPath::(local.labelPrefix + "Disperse");
 		self.Some = 					self.fullPath::(local.labelPrefix + "Some");
 		self.Every = 					self.fullPath::(local.labelPrefix + "Every");
 		self.CompareStruct = 			self.fullPath::(local.labelPrefix + "CompareStruct");
 		self.Compare = 					self.fullPath::(local.labelPrefix + "Compare");
 		self.MakeConsistent = 			self.fullPath::(local.labelPrefix + "MakeConsistent");
+		self.Process = 					self.fullPath::(local.labelPrefix + "Process");
 		self.Extract = 					self.fullPath::(local.labelPrefix + "Extract");
 		self.ExtractAll = 				self.fullPath::(local.labelPrefix + "ExtractAll");
-		self.To2DVec = 					self.fullPath::(local.labelPrefix + "To2DVec");			//to vector.func? Treat like casts, only check to continue; if error, return arg.. => less bullshit
-		self.To3DVec = 					self.fullPath::(local.labelPrefix + "To3DVec");			//
-		self.VecToConstArray = 			self.fullPath::(local.labelPrefix + "VecToConstArray"); //
-		self.Rename = 					self.fullPath::(local.labelPrefix + "Rename");
+		self.FuseWithObjectArray = 		self.fullPath::(local.labelPrefix + "FuseWithObjectArray");
+		self.CreateObjectArray = 		self.fullPath::(local.labelPrefix + "CreateObjectArray");
+		self.AddObject = 				self.fullPath::(local.labelPrefix + "AddObject");
+		self.RemoveObject = 			self.fullPath::(local.labelPrefix + "RemoveObject");
+		self.MergeObjectArrays = 		self.fullPath::(local.labelPrefix + "MergeObjectArrays");
+		//-----> to vector.slib? Treat like casts, only check to continue; if error, return arg.. => less bullshit <-----
+		self.To2DVec = 					self.fullPath::(local.labelPrefix + "To2DVec");	
+		self.To3DVec = 					self.fullPath::(local.labelPrefix + "To3DVec");	
+		self.VecToConstArray = 			self.fullPath::(local.labelPrefix + "VecToConstArray");
+		//-----> to entity.slib? redo rename & deletion (use while(entarray.size > 0){entarray[1] delete/targetname} !) <-----
+		self.Rename = 					self.fullPath::(local.labelPrefix + "Rename");			
 		self.GetName = 					self.fullPath::(local.labelPrefix + "GetName");
 		self.DeleteEnts = 				self.fullPath::(local.labelPrefix + "DeleteEnts");
-		self.FindEnt = 					self.fullPath::(local.labelPrefix + "FindEnt");
-		self.MergeWithObjectArray = 	self.fullPath::(local.labelPrefix + "MergeWithObjectArray");
-		self.CreateObjectArrayOf = 		self.fullPath::(local.labelPrefix + "CreateObjectArrayOf");
-		self.AddToObjectArray = 		self.fullPath::(local.labelPrefix + "AddToObjectArray");
-		self.RemoveFromObjectArray = 	self.fullPath::(local.labelPrefix + "RemoveFromObjectArray");
-		self.MergeObjectArrays = 		self.fullPath::(local.labelPrefix + "MergeObjectArrays");
+		self.FindEnt = 					self.fullPath::(local.labelPrefix + "FindEnt")
 	
 		// Class-specific properties and values:
 		self.seekRange = 1024;
 		
-		// There are 57 methods registered in this function library.
-		self.methodSize += 57;	
+		// There are 76 methods registered in this function library.
+		self.methodSize += 76;	
 		// There is 1 property registered in this function library.
 		self.propertySize += 1;
 	}
@@ -139,10 +138,1463 @@ __info:
 	local.inf["library"] = "lib/array.slib";	//filepath in reborn/framework/
 	local.inf["namespace"] = "Array";			//targetname of class this script is part of...	
 	local.inf["title"] = "DATASTRUCTURE FUNCTIONS LIBRARY";
-	local.inf["version"] = "1.3.016";
-	local.inf["lastmodified"] = "10/12/2012";
+	local.inf["version"] = "1.4.001";
+	local.inf["lastmodified"] = "26/12/2012";
 	local.inf["authors"][0] = "Sor"
 end local.inf;
+
+/** ==========================================================================================
+ Delete Function
+ ---------------------------------------------------------------------------------------------
+ DESCR|: 	Deletes specified array. If 'thorough' is set, the array is searched and all
+			entity elements are deleted prior to freeing the array's memory.
+ INPUT|: 	<ARRAY array> [INT thorough]
+ OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
+			*	array => processed array
+			*	NIL => error: uninitialized/invalid/inexistent array or nothing found.
+ =========================================================================================== */
+_Delete local.array local.thorough: goto internalCE;
+Delete local.array local.thorough:
+	internalCE:
+	// Remove lingering entities if necessary.
+	if (local.thorough) {
+		switch(waitthread Type local.array) {
+			case "const array":
+			case "hash array":
+			case "index array":
+			case "normal array":
+			case "Index array":
+				waitthread __Delete local.array;
+			break;
+			case "object array":
+				group.keyArray = local.array["__info"]; 
+				if !(waitthread __UpdateKeys local.array) {
+					end NIL;
+				}
+				waitthread __#Delete local.array;
+			
+				// Clear group vars..
+				group.keyArray = NIL;
+				group.keyArraySize = NIL;
+			break;
+			case "ent array":
+				while(local.array.size > 0) {
+					if (local.array[1] != NULL) {
+						local.array[1] immediateremove;
+					}
+				}
+			break;
+			case "vector":
+			case "string":
+			case "const string":
+			default:
+				local.array = NIL;
+			break;
+		}
+	} else if (waitthread IsEntityArray local.array) {
+		while(local.array.size > 0) {
+			if (local.array[1] != NULL) {
+				local.array[1] immediateremove;
+			}
+		}
+	}
+end NIL;
+__Delete local.array:
+	if (waitthread IsUserArray local.array) {
+		local.arraySizes = waitthread __AnalyzeArray local.array;
+		for (local.i = local.arraySizes[1]; local.i < local.arraySizes[2]; local.i++) {
+			waitthread __Delete local.array[local.i];
+		}
+	} else if (typeof local.array == "listener") {
+		local.array immediateremove;
+	}
+end NIL;
+__#Delete local.array:
+	if (waitthread IsUserArray local.array) {
+		for (local.i = 0; local.i < group.keyArraySize; local.i++) {
+			local.key = string(group.keyArray[local.i]); 
+			if (local.array[local.key].size > 0 && local.array[local.key] != NULL) {
+				waitthread __Delete local.array[local.key];
+			}
+		}
+	} else if (typeof local.array == "listener") {
+		local.array immediateremove;
+	}
+end NIL;
+
+
+/** ==========================================================================================
+ RemoveElement Function
+ ---------------------------------------------------------------------------------------------
+ DESCR|: 	Removes specified element from specified array's first dimension. Optionally, all
+			found instances of the specified element can be removed rather than the first found
+			element. 
+			Additionally, one can explicitly tell the function to skip the reconcatenation
+			process after the removal operation.
+ INPUT|: 	<ARRAY array> <TYPE element> [INT allInstances] [INT noReconcatenation]
+ OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
+			*	array => processed array
+			*	NIL => error: uninitialized/invalid/inexistent array or nothing found.
+ =========================================================================================== */
+_RemoveElement local.array local.element local.allInstances local.noReconcatenation: goto internalCC;
+RemoveElement local.array local.element local.allInstances local.noReconcatenation:
+	/*Error & Exception handling*/
+	if (local.array.size <= 0 || !(waitthread IsUserArray local.array)) {
+		if (level.DEBUG) {
+			conprintf "\n ~^~^~^~ FATAL_ERROR[lib/array.slib::RemoveElement]: specified array <arg1> is either uninitialized, inexistent or invalid. ~^~^~^~ \n\n";
+		}
+		end;
+	} if (local.element.size <= 0 || local.element == NULL) {
+		if (level.DEBUG) {
+			conprintf "\n ~^~^~^~ FATAL_ERROR[lib/array.slib::RemoveElement]: specified element to be removed <arg2> is either uninitialized or inexistent. ~^~^~^~ \n\n";
+		}
+		end;
+	}
+	
+	internalCC:
+	
+	/*Main Logic*/
+	switch(typeof local.array) {
+		case "vector":
+		case "const array":
+		case "array":
+			local.arraySizes = waitthread __AnalyzeArray local.array;
+			for (local.i = local.arraySizes[1]; local.i < local.arraySizes[2]; local.i++) {
+				if (local.array[local.i] != local.element) {
+					continue;
+				}
+				
+				if (typeof local.array[local.i] == "listener") {
+					local.array[local.i] immediateremove;
+				} 
+				local.array[local.i] = NIL;
+				
+				if !(local.allInstances) {
+					break;
+				}
+			}
+			
+			if !(local.noReconcatenation) {
+				// In-place version (fast and memory-efficient):
+				for (local.i = local.arraySizes[1]; local.i < local.arraySizes[2]; local.i++) {
+					if (local.array[local.i].size <= 0 || local.array[local.i] == NULL) {
+						// Get next non-empty element.
+						for (local.j = local.i + 1; local.j < local.arraySizes[2]; local.j++) {
+							if (local.array[local.j].size > 0 && local.array[local.j] != NULL) {
+								break;
+							}
+						}
+						// Switch positions...
+						if (local.j < local.arraySizes[2]) {
+							local.array[local.i] = local.array[local.j];
+							local.array[local.j] = NIL;
+						} else {
+							break;
+						}
+					} 
+				}
+			}
+		break;
+		default:
+			if (level.DEBUG) {
+				conprintf ("\n ~^~^~^~ ERROR[lib/array.slib::RemoveElement]: specified " + (typeof local.array) + "<arg1> is an unsupported array type. ~^~^~^~ \n\n");
+			}
+		break;
+	}
+end local.array;
+
+/** ==========================================================================================
+ FIFO Function
+ ---------------------------------------------------------------------------------------------
+ DESCR|: 	Adds specified element to specified array via the First-In-First-Out scheme, which
+			basically overwrites the specified array's first element with the specified element.
+			Optionally, one may choose to set reconcatenate to 1 so the array will be 
+			reconcatenated right after the operation (for dynamic arrays, mainly.)
+ INPUT|: 	<ARRAY array> <TYPE element> [INT reconcatenate]
+ OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
+			*	array => processed array
+			*	NIL => error: uninitialized/invalid/inexistent array or nothing found.
+ =========================================================================================== */
+_FIFO local.array local.element local.reconcatenate:
+	local.mode = "FIFO";
+goto internalCB;
+FIFO local.array local.element local.reconcatenate:
+	/*Error & Exception handling*/
+	if (local.array.size <= 0 || !(waitthread IsUserArray local.array) || (waitthread IsEntityArray local.array)) {
+		if (level.DEBUG) {
+			conprintf "\n ~^~^~^~ FATAL_ERROR[lib/array.slib::FIFO]: specified array <arg1> is either uninitialized, inexistent or invalid. ~^~^~^~ \n\n";
+		}
+		end;
+	} if ( local.element == NULL || local.element.size <= 0) {
+		if (level.DEBUG) {
+			conprintf "\n ~^~^~^~ FATAL_ERROR[lib/array.slib::FIFO]: specified element to be found <arg2> is either uninitialized, inexistent or invalid. ~^~^~^~ \n\n";
+		}
+		end;
+	}
+	
+	local.mode = "FIFO";
+goto internalCB;
+
+/** ==========================================================================================
+ FILO Function
+ ---------------------------------------------------------------------------------------------
+ DESCR|: 	Adds specified element to specified array via the First-In-Last-Out scheme, which
+			adds the specified element before the specified array's first element while 
+			discarding the specified array's last element.
+			Optionally, one may choose to set reconcatenate to 1 so the array will be 
+			reconcatenated right after the operation (for dynamic arrays, mainly.)
+ INPUT|: 	<ARRAY array> <TYPE element> [INT reconcatenate]
+ OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
+			*	array => processed array
+			*	NIL => error: uninitialized/invalid/inexistent array or nothing found.
+ =========================================================================================== */
+_FILO local.array local.element local.reconcatenate:
+	local.mode = "FILO";
+goto internalCB;
+FILO local.array local.element local.reconcatenate:
+	/*Error & Exception handling*/
+	if (local.array.size <= 0 || !(waitthread IsUserArray local.array) || (waitthread IsEntityArray local.array)) {
+		if (level.DEBUG) {
+			conprintf "\n ~^~^~^~ FATAL_ERROR[lib/array.slib::FILO]: specified array <arg1> is either uninitialized, inexistent or invalid. ~^~^~^~ \n\n";
+		}
+		end;
+	} if ( local.element == NULL || local.element.size <= 0) {
+		if (level.DEBUG) {
+			conprintf "\n ~^~^~^~ FATAL_ERROR[lib/array.slib::FILO]: specified element to be found <arg2> is either uninitialized, inexistent or invalid. ~^~^~^~ \n\n";
+		}
+		end;
+	}
+	
+	local.mode = "FILO";
+goto internalCB;
+
+/** ==========================================================================================
+ LILO Function
+ ---------------------------------------------------------------------------------------------
+ DESCR|: 	Adds specified element to specified array via the Last-In-Last-Out scheme, which
+			basically overwrites the specified array's last element with the specified element.
+			Optionally, one may choose to set reconcatenate to 1 so the array will be 
+			reconcatenated right after the operation (for dynamic arrays, mainly.)
+ INPUT|: 	<ARRAY array> <TYPE element> [INT reconcatenate]
+ OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
+			*	array => processed array
+			*	NIL => error: uninitialized/invalid/inexistent array or nothing found.
+ =========================================================================================== */
+_LILO local.array local.element local.reconcatenate:
+	local.mode = "LILO";
+goto internalCB;
+LILO local.array local.element local.reconcatenate:
+	/*Error & Exception handling*/
+	if (local.array.size <= 0 || !(waitthread IsUserArray local.array) || (waitthread IsEntityArray local.array)) {
+		if (level.DEBUG) {
+			conprintf "\n ~^~^~^~ FATAL_ERROR[lib/array.slib::LILO]: specified array <arg1> is either uninitialized, inexistent or invalid. ~^~^~^~ \n\n";
+		}
+		end;
+	} if ( local.element == NULL || local.element.size <= 0) {
+		if (level.DEBUG) {
+			conprintf "\n ~^~^~^~ FATAL_ERROR[lib/array.slib::LILO]: specified element to be found <arg2> is either uninitialized, inexistent or invalid. ~^~^~^~ \n\n";
+		}
+		end;
+	}
+	
+	local.mode = "LILO";
+goto internalCB;
+
+/** ==========================================================================================
+ LIFO Function
+ ---------------------------------------------------------------------------------------------
+ DESCR|: 	Adds specified element to specified array via the Last-In-First-Out scheme, which
+			adds the specified element after the specified array's last element while 
+			discarding the specified array's first element.
+			Optionally, one may choose to set reconcatenate to 1 so the array will be 
+			reconcatenated right after the operation (for dynamic arrays, mainly.)
+ INPUT|: 	<ARRAY array> <TYPE element> [INT reconcatenate]
+ OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
+			*	array => processed array
+			*	NIL => error: uninitialized/invalid/inexistent array or nothing found.
+ =========================================================================================== */
+_LIFO local.array local.element local.reconcatenate:
+	local.mode = "LIFO";
+goto internalCB;
+LIFO local.array local.element local.reconcatenate:
+	/*Error & Exception handling*/
+	if (local.array.size <= 0 || !(waitthread IsUserArray local.array) || (waitthread IsEntityArray local.array)) {
+		if (level.DEBUG) {
+			conprintf "\n ~^~^~^~ FATAL_ERROR[lib/array.slib::LIFO]: specified array <arg1> is either uninitialized, inexistent or invalid. ~^~^~^~ \n\n";
+		}
+		end;
+	} if ( local.element == NULL || local.element.size <= 0) {
+		if (level.DEBUG) {
+			conprintf "\n ~^~^~^~ FATAL_ERROR[lib/array.slib::LIFO]: specified element to be found <arg2> is either uninitialized, inexistent or invalid. ~^~^~^~ \n\n";
+		}
+		end;
+	}
+	
+	local.mode = "LIFO";
+goto internalCB;
+
+/** ==========================================================================================
+ AddElement Function
+ ---------------------------------------------------------------------------------------------
+ DESCR|: 	Add the specified variable as element to the specified array using various schemes.
+			If mode is not set or set to 'LAST', the specified element will be added after the  
+			last element. Else if mode is set to:
+			- 'FIRST': the specified element will be added before the first element.
+			- 'FILL' : the specified element will be inserted in the first empty element found
+					 in the specified array. If no empty elements were found, it is added
+					 after the last element.
+			- 'LIFO' : after the array's first element is discarded, the specified element is
+					 added after the last element.
+			- 'LILO' : the last element is overwritten by the specified element.
+			- 'FILO' : after the specified element is added before the first element, the last
+					 element is discarded.
+			- 'FIFO' : the first element is overwritten by the specified element.
+			To clarify, the starting index will under no circumstances change! :)
+			
+			Additionally, if 'reconcatenate' is set, the array will be re-concatenated after
+			the operation.
+ INPUT|: 	<ARRAY array> <TYPE element> [STRING mode] [INT reconcatenate]
+ OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
+			*	array => processed array
+			*	NIL => error: uninitialized/invalid/inexistent array or nothing found.
+ =========================================================================================== */
+_AddElement local.array local.element local.mode local.reconcatenate: goto internalCB;
+AddElement local.array local.element local.mode local.reconcatenate:
+	/*Error & Exception handling*/
+	if (local.array.size <= 0 || !(waitthread IsUserArray local.array) || (waitthread IsEntityArray local.array)) {
+		if (level.DEBUG) {
+			conprintf "\n ~^~^~^~ FATAL_ERROR[lib/array.slib::AddElement]: specified array <arg1> is either uninitialized, inexistent or invalid. ~^~^~^~ \n\n";
+		}
+		end;
+	} if ( local.element == NULL || local.element.size <= 0) {
+		if (level.DEBUG) {
+			conprintf "\n ~^~^~^~ FATAL_ERROR[lib/array.slib::AddElement]: specified element to be found <arg2> is either uninitialized, inexistent or invalid. ~^~^~^~ \n\n";
+		}
+		end;
+	}
+	
+	internalCB:
+	
+	/*Main Logic*/
+	switch (typeof local.array) {
+		case "array":
+			local.arraySizes = waitthread __AnalyzeArray local.array;
+			switch (local.mode) {
+				case "LILO":
+				case "LOLI":
+					// Remove last element, then add to last element; i.e. overwrite last element.
+					local.array[(local.arraySizes[2] - 1)] = local.element;
+				break;
+				case "LIFO":
+				case "FOLI":
+					// Remove first element (in-place);
+					for (local.i = local.arraySizes[1]; local.i < local.arraySizes[2]; local.i++) {
+						local.array[local.i] = local.array[(local.i + 1)];
+					}
+					// Add to last element;
+					local.array[(local.arraySizes[2] - 1)] = local.element;
+				break;
+				case "FILO":
+				case "LOFI":
+					// Add to first element (in-place) which because of the for() conditional 
+					// also removes the last element;
+					for (local.i = local.arraySizes[1]; local.i < local.arraySizes[2]; local.i++) {
+						local.temp = local.array[local.i];
+						local.array[local.i] = local.element;
+						local.element = local.temp;
+					}
+				break;
+				case "FIFO":
+				case "FOFI":
+					// Remove first element, then add first element; i.e. overwrite first element.
+					local.array[local.arraySizes[1]] = local.element;
+				break;
+				case "FILL":
+				case "fill":
+				case "Fill":
+					// Inserts specified element in the first found empty element in the specified array.
+					// Because of the for() condition, if no in-array empty elements are found, the 
+					// specified element is added at the end of the array.
+					for (local.i = local.arraySizes[1]; local.i <= local.arraySizes[2]; local.i++) {
+						if (local.array[local.i].size <= 0 || local.array[local.i] == NULL) {
+							local.array[local.i] = local.element;
+							break;
+						}
+					}
+				break;
+				case "FIRST":
+				case "first":
+				case "First":
+					// Add to first element (in-place) which because of the for() condition, moves
+					// the last element one index higher instead of overwriting it.
+					for (local.i = local.arraySizes[1]; local.i <= local.arraySizes[2]; local.i++) {
+						local.temp = local.array[local.i];
+						local.array[local.i] = local.element;
+						local.element = local.temp;
+					}
+				break;
+				case "LAST":
+				case "Last":
+				case "last":
+				default:
+					// Add to end of array.
+					local.array[local.arraySizes[2]] = local.element;
+				break;
+			}
+			if (local.reconcatenate) {
+				// In-place version (fast and memory-efficient):
+				for (local.i = local.arraySizes[1]; local.i <= local.arraySizes[2]; local.i++) {
+					if (local.array[local.i].size <= 0 || local.array[local.i] == NULL) {
+						// Get next non-empty element.
+						for (local.j = local.i + 1; local.j <= local.arraySizes[2]; local.j++) {
+							if (local.array[local.j].size > 0 && local.array[local.j] != NULL) {
+								break;
+							}
+						}
+						// Switch positions...
+						if (local.j <= local.arraySizes[2]) {
+							local.array[local.i] = local.array[local.j];
+							local.array[local.j] = NIL;
+						} else {
+							break;
+						}
+					} 
+				}
+			}
+		break;
+		case "string":
+		case "const array":
+		case "vector":
+		case "const string":
+		default:
+			if (level.DEBUG) {
+				conprintf ("\n ~^~^~^~ ERROR[lib/array.slib::AddElement]: specified " + local.type + "<arg1> is an unsupported array type. ~^~^~^~ \n\n");
+			}
+		break;
+	}
+end local.array;
+
+/** ==========================================================================================
+ IndexOf Function
+ ---------------------------------------------------------------------------------------------
+ DESCR|: 	Finds the first instance of a specified element and returns an array containing 
+			the index number(s) or 'absolute position(s)' per dimension in order ascending 
+			order.
+ INPUT|: 	<ARRAY array>
+ OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
+			*	array => 	[D] 	=> contains integer index or string index where D is its 
+									   corresponding dimension which always starts at 1.
+			 			Its size is 0 when no element has been found in the specified array.
+			*	NIL => error: uninitialized/invalid/inexistent array or nothing found.
+ =========================================================================================== */
+IndexOf local.array group.element:
+	/*Error & Exception handling*/
+	if (local.array.size <= 0 || !(waitthread IsUserArray local.array)) {
+		if (level.DEBUG) {
+			conprintf "\n ~^~^~^~ FATAL_ERROR[lib/array.slib::IndexOf]: specified array <arg1> is either uninitialized, inexistent or invalid. ~^~^~^~ \n\n";
+		}
+		end;
+	} if ( group.element == NULL || group.element.size <= 0) {
+		if (level.DEBUG) {
+			conprintf "\n ~^~^~^~ FATAL_ERROR[lib/array.slib::IndexOf]: specified element to be found <arg2> is either uninitialized, inexistent or invalid. ~^~^~^~ \n\n";
+		}
+		end;
+	}
+	
+	group.dimension = 0;
+	group.result[1] = NIL;
+	if (waitthread IsObjectArray local.array) {
+		group.keyArray = local.array["__info"]; 
+		if !(waitthread __UpdateKeys local.array) {
+			if (level.DEBUG) {
+				conprintf "\n ~^~^~^~ FATAL_ERROR[lib/array.slib::IndexOf]: attempting to process object array, but keyArray <group.arg> is either uninitialized, invalid or inexistent! ~^~^~^~ \n\n";
+			}
+			end;
+		}
+
+		waitthread __#IndexOf local.array;
+			
+		// Clear group vars..
+		group.keyArray = NIL;
+		group.keyArraySize = NIL;
+	} else {
+		waitthread __IndexOf local.array;
+	}
+	
+	local.result = group.result;
+	
+	// Clear group. vars..
+	group.startThread = NIL;
+	group.dimension = NIL;
+	group.result = NIL;
+end local.result;
+
+__IndexOf local.array:
+	if (waitthread IsUserArray local.array) {
+		if !(group.startThread) {
+			group.startThread = local;
+		}
+		
+		local.arraySizes = waitthread __AnalyzeArray local.array;
+		local.j = (group.result.size + 1);
+		for (local.i = local.arraySizes[1]; local.i < local.arraySizes[2]; local.i++) {
+			group.result[local.j] = local.i;
+			waitthread __IndexOf local.array[local.i];
+		}
+		
+		group.result[local.j] = NIL;
+	} else {
+		if (group.element == local.array) {
+			if (group.startThread) {
+				group.startThread end;
+			} else {
+				end;
+			}
+		}
+	}
+end;
+__#IndexOf local.array:
+	if (waitthread IsUserArray local.array) {
+		if !(group.startThread) {
+			group.startThread = local;
+		}
+		
+		local.j = (group.result.size + 1);
+		for (local.i = 0; local.i < group.keyArraySize; local.i++) {
+			local.key = string(group.keyArray[local.i]);
+
+			if (local.array[local.key].size > 0 && local.array[local.key] != NULL) {
+				group.result[local.j] = local.key;
+				waitthread __#IndexOf local.array[local.key];
+			}
+		}
+		
+		group.result[local.j] = NIL;
+	} else {
+		if (group.element == local.array) {
+			if (group.startThread) {
+				group.startThread end;
+			} else {
+				end;
+			}
+		}
+	}
+end;
+
+/** ==========================================================================================
+ Reverse Function
+ ---------------------------------------------------------------------------------------------
+ DESCR|: 	Quickly reverses the order of elements in the specified array such that the first
+			will be the last and the last will be the first.
+ INPUT|: 	<ARRAY array>
+ OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
+			*	array => reversed array
+			*	NIL => error: uninitialized/invalid/inexistent array or nothing found.
+ =========================================================================================== */
+Reverse local.array:
+	/*Error & Exception handling*/
+	if (local.array.size <= 0 || !(waitthread IsUserArray local.array)) {
+		if (level.DEBUG) {
+			conprintf "\n ~^~^~^~ FATAL_ERROR[lib/array.slib::Reverse]: specified array <arg1> is either uninitialized, inexistent or invalid. ~^~^~^~ \n\n";
+		}
+		end;
+	}
+	
+	/*Main Logic*/
+	switch (waitthread Type local.array) {
+		case "vector":
+		case "string":
+		case "const string":
+		case "const array":
+		case "hash array":
+		case "index array":
+		case "Index array":
+		case "normal array":
+		case "array":
+			local.arraySizes = waitthread __AnalyzeArray local.array;
+			local.j = local.arraySizes[2] - 1;
+			// In-place version:
+			for (local.i = local.arraySizes[1]; local.i < local.arraySizes[2]; local.i++) {
+				if (local.i < local.j) {
+					local.temp = local.array[local.i];
+					local.array[local.i] = local.array[local.j];
+					local.array[local.j] = local.temp;
+					local.temp = NIL;
+				} else {
+					break;
+				}
+				local.j--;
+			}
+		break;
+		case "ent array":
+			if (level.DEBUG) {
+				conprintf "\n ~^~^~^~ ERROR[lib/array.slib::Reverse]: specified entity array <arg1> is an unsupported array type and cannot be reversed. ~^~^~^~ \n\n";
+			}
+		case "object array":
+			if (level.DEBUG) {
+				conprintf "\n ~^~^~^~ ERROR[lib/array.slib::Reverse]: specified object array <arg1> is an unsupported array type and cannot be reversed. ~^~^~^~ \n\n";
+			}
+		break;
+		default:
+		break;
+	}
+end local.array;
+
+/** ==========================================================================================
+ Partition Function
+ ---------------------------------------------------------------------------------------------
+ DESCR|: 	Partitions/splits a specified array according to various schemes into multiple 
+			arrays. Each partitioned array has the same starting index as the initial one.
+ 
+			If the partitionMode is set to "/s", a modeArgument needs to be specified that
+			tells the function what size the partitions (arrays) must have. This mode is thus
+			partitioning according to size.
+			
+			If the partitionMode is set to "/t", then no modeArgument needs to be specified.
+			This will partition the array according to element/variable type. Thus the 
+			outputted partitions of variable size will contain but all the found elements
+			of a specific variable type in the specified array's first dimension.
+			
+			Lastly, if partitionMode is set to "/v", then no modeArgument needs to be 
+			specified. This mode will partition the array according to its elements. Thus 
+			the outputted partitions of variable size will contain nothing but all the 
+			found instances of a specific element in the specified array's first dimension.
+			
+			If you seek a special kind of multi-dimensional support, refer to $Array.Extract.
+ INPUT|: 	<ARRAY array>
+ OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
+			*	array => [1-X] => main array containing all partitions as seperate elements.
+						 [1-X] => [Y] => array partition (with Y being the element index based 
+										 on the starting index of the initial array.)
+			*	NIL => error: uninitialized/invalid/inexistent array or nothing found.
+ =========================================================================================== */
+_Partition local.array local.partitionMode local.modeArgument: goto internalCA;
+Partition local.array local.partitionMode local.modeArgument:
+	/*Error & Exception handling*/
+	if (local.array.size <= 0 || !(waitthread IsUserArray local.array) || (waitthread IsObjectArray local.array)) {
+		if (level.DEBUG) {
+			conprintf "\n ~^~^~^~ FATAL_ERROR[lib/array.slib::Partition]: specified array <arg1> is either uninitialized, inexistent or invalid. ~^~^~^~ \n\n";
+		}
+		end;
+	}
+	
+	internalCA:
+	
+	/*Main Logic*/
+	local.arraySizes = waitthread __AnalyzeArray local.array;
+	switch (local.partitionMode) {
+		case "s":
+		case "-s":
+		case "/s":
+			if (!local.modeArgument || typeof local.modeArgument != "int" || local.modeArgument >= local.array.size) {
+				if (level.DEBUG) {
+					conprintf "\n ~^~^~^~ FATAL_ERROR[lib/array.slib::Partition]: invalid partition size <arg3> specified! ~^~^~^~ \n\n";
+				}
+				break;
+			}
+			
+			local.index = local.arraySizes[1];
+			local.arrays = 1;
+			local.result[local.arrays][local.index] = NIL;
+			
+			for (local.i = local.arraySizes[1]; local.i < local.arraySizes[2]; local.i++) {
+				if (local.index >= local.modeArgument) {
+					local.arrays++;
+					local.index = local.arraySizes[1];
+				}
+				
+				local.result[local.arrays][local.index] = local.array[local.i];
+				local.index++;
+			}
+		break;
+		case "t":
+		case "-t":
+		case "/t":
+			// modeArg => ignore
+			local.index = local.arraySizes[1];
+			local.arrays = 1;
+			local.result[local.arrays][local.index] = NIL;
+			
+			for (local.i = local.arraySizes[1]; local.i < local.arraySizes[2]; local.i++) {
+				if (local.array[local.i].size > 0 && local.array[local.i] != NULL) {
+					local.filter = typeof local.array[local.i];
+					// Add first element...
+					local.result[local.arrays][local.index] = local.array[local.i];
+					local.index++;
+					
+					// Add all other equal variable types
+					for (local.j = local.i + 1; local.j < local.arraySizes[2]; local.j++) {
+						if (local.array[local.j].size > 0 && local.array[local.j] != NULL) {
+							if (local.filter == typeof local.array[local.j]) {
+								local.result[local.arrays][local.index] = local.array[local.j];
+								// Omit result from next queries.
+								local.array[local.j] = NIL;
+								
+								local.index++;
+							}
+						}
+					}
+					
+					local.arrays++;
+					local.index = local.arraySizes[1];
+				}
+			}
+		break;
+		case "v":
+		case "-v":
+		case "/v":
+			local.index = local.arraySizes[1];
+			local.arrays = 1;
+			local.result[local.arrays][local.index] = NIL;
+			
+			for (local.i = local.arraySizes[1]; local.i < local.arraySizes[2]; local.i++) {
+				if (local.array[local.i].size > 0 && local.array[local.i] != NULL) {
+					// Add first element...
+					local.result[local.arrays][local.index] = local.array[local.i];
+					local.index++;
+					
+					// Add all other equal variable types
+					for (local.j = local.i + 1; local.j < local.arraySizes[2]; local.j++) {
+						if (local.array[local.j].size > 0 && local.array[local.j] != NULL) {
+							if (local.array[local.i] == local.array[local.j]) {
+								local.result[local.arrays][local.index] = local.array[local.j];
+								// Omit result from next queries.
+								local.array[local.j] = NIL;
+								
+								local.index++;
+							}
+						}
+					}
+					
+					local.arrays++;
+					local.index = local.arraySizes[1];
+				}
+			}
+		break;
+		default:
+			if (level.DEBUG) {
+				conprintf "\n ~^~^~^~ FATAL_ERROR[lib/array.slib::Partition]: invalid partitionMode <arg2> specified! ~^~^~^~ \n\n";
+			}
+		break;
+	}
+end local.result;
+
+/** ==========================================================================================
+ Reconcatenate Function
+ ---------------------------------------------------------------------------------------------
+ DESCR|: 	Quickly reconcatenates (i.e. closes gaps, filters out empty elements) the specified 
+			array in place (via re-arrangement). This is especially useful for dynamic arrays,
+			where elements are often removed and added.
+ INPUT|: 	<ARRAY array>
+ OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
+			*	array => reconcatenated array
+			*	NIL => error: uninitialized/invalid/inexistent array or nothing found.
+ =========================================================================================== */
+_Reconcatenate local.array: goto internalBZ;
+Reconcatenate local.array:
+	/*Error & Exception handling*/
+	if (local.array.size <= 0 || !(waitthread IsUserArray local.array)) {
+		if (level.DEBUG) {
+			conprintf "\n ~^~^~^~ FATAL_ERROR[lib/array.slib::Reconcatenate]: specified array <arg1> is either uninitialized, inexistent or invalid. ~^~^~^~ \n\n";
+		}
+		end;
+	}
+	
+	internalBZ:
+	
+	/*Main Logic*/
+	local.type = waitthread Type local.array;
+	switch (local.type) {
+		case "const array":
+		case "hash array":
+		case "index array":
+		case "Index array":
+		case "normal array":
+		case "array":
+			local.arraySizes = waitthread __AnalyzeArray local.array;
+			
+			// In-place version (fast and memory-efficient):
+			for (local.i = local.arraySizes[1]; local.i < local.arraySizes[2]; local.i++) {
+				if (local.array[local.i].size <= 0 || local.array[local.i] == NULL) {
+					// Get next non-empty element.
+					for (local.j = local.i + 1; local.j < local.arraySizes[2]; local.j++) {
+						if (local.array[local.j].size > 0 && local.array[local.j] != NULL) {
+							break;
+						}
+					}
+					
+					// Switch positions...
+					if (local.j < local.arraySizes[2]) {
+						local.array[local.i] = local.array[local.j];
+						local.array[local.j] = NIL;
+					} else {
+						// Either the last element has been handled 
+						// or all empty elements have been moved 
+						// to the back of the array. In any case,
+						// we can end our algorithm prematurely now.
+						break;
+					}
+				} 
+			}
+		break;
+		default:
+			if (level.DEBUG) {
+				conprintf ("~^~^~^~ ERROR[lib/array.slib::Reconcatenate]: specified array <arg1> (" + local.type + ") is either an unsupported array type or is by default consistent. ~^~^~^~ \n");
+			}
+		break;
+	}
+end local.array;
+
+/** ==========================================================================================
+ Concatenate Function
+ ---------------------------------------------------------------------------------------------
+ DESCR|: 	Concatenates or joins at least two and at most twelve arrays into one big array 
+			(one after the other).
+ INPUT|: 	[INT index] <ARRAY array0> <ARRAY array1> [ARRAY array2-11]
+ OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
+			*	array => newly concatenated array
+			*	NIL => error: uninitialized/invalid/inexistent array or nothing found.
+ =========================================================================================== */
+_Concatenate local.index local.array0 local.array1 local.array2 local.array3 local.array4 local.array5 local.array6 local.array7 local.array8 local.array9 local.array10 local.array11: goto internalBY;
+Concatenate local.index local.array0 local.array1 local.array2 local.array3 local.array4 local.array5 local.array6 local.array7 local.array8 local.array9 local.array10 local.array11:
+	internalBY:
+
+	local.arrays[0] = NIL;
+	if (local.array0 && waitthread IsUserArray local.array0) {
+		local.arrays[local.arrays.size] = local.array0;
+		if (local.array1 && waitthread IsUserArray local.array1) {
+			local.arrays[local.arrays.size] = local.array1;
+			if (local.array2 && waitthread IsUserArray local.array2) {
+				local.arrays[local.arrays.size] = local.array2;
+				if (local.array3 && waitthread IsUserArray local.array3) {
+					local.arrays[local.arrays.size] = local.array3;
+					if (local.array4 && waitthread IsUserArray local.array4) {
+						local.arrays[local.arrays.size] = local.array4;
+						if (local.array5 && waitthread IsUserArray local.array5) {
+							local.arrays[local.arrays.size] = local.array5;
+							if (local.array6 && waitthread IsUserArray local.array6) {
+								local.arrays[local.arrays.size] = local.array6;
+								if (local.array7 && waitthread IsUserArray local.array7) {
+									local.arrays[local.arrays.size] = local.array7;
+									if (local.array8 && waitthread IsUserArray local.array8) {
+										local.arrays[local.arrays.size] = local.array8;
+										if (local.array9 && waitthread IsUserArray local.array9) {
+											local.arrays[local.arrays.size] = local.array9;
+											if (local.array10 && waitthread IsUserArray local.array10) {
+												local.arrays[local.arrays.size] = local.array10;
+												if (local.array11 && waitthread IsUserArray local.array11) {
+													local.arrays[local.arrays.size] = local.array11;
+													local.array11 = NIL;
+												}
+												local.array10 = NIL;
+											}
+											local.array9 = NIL;
+										}
+										local.array8 = NIL;
+									}
+									local.array7 = NIL;
+								}
+								local.array6 = NIL;
+							}
+							local.array5 = NIL;
+						}
+						local.array4 = NIL;
+					}
+					local.array3 = NIL;
+				}
+				local.array2 = NIL;
+			}
+			local.array1 = NIL;
+			local.array0 = NIL;
+		} else {
+			if (level.DEBUG) {
+				conprintf "\n ~^~^~^~ FATAL_ERROR[lib/array.slib::Concatenate]: not enough valid array(s) <arg2-13> specified! ~^~^~^~ \n\n"
+			}
+			end;
+		}
+	} else {
+		if (level.DEBUG) {
+			conprintf "\n ~^~^~^~ FATAL_ERROR[lib/array.slib::Concatenate]: no valid array(s) <arg2-13> specified! ~^~^~^~ \n\n"
+		}
+		end;
+	}
+
+	local.arraySize = local.arrays.size;
+	
+	if (!local.index || typeof local.index != "int") {
+		local.index = waitthread __ArrayStart local.arrays[0];
+	}
+
+	for (local.i = 0; local.i < local.arraySize; local.i++) {
+		local.arraySizes = waitthread __AnalyzeArray local.arrays[local.i];
+		
+		// Exclude object arrays...
+		if (local.arraySizes && local.arraySizes.size == 2) {
+			for (local.j = local.arraySizes[1]; local.j < local.arraySizes[2]; local.j++) {
+				if (local.arrays[local.i][local.j].size > 0 && local.arrays[local.i][local.j] != NULL) {
+					local.result[local.index] = local.arrays[local.i][local.j];
+					local.index++;
+				}
+			}
+		}
+	}
+end local.result;
+
+/** ==========================================================================================
+ Disperse Function
+ ---------------------------------------------------------------------------------------------
+ DESCR|: 	Evenly disperses the array elements of the specified (smaller) array into the 
+			specified (larger) array. The new array will either take the largest array's 
+			starting index or an optionally specified starting index.
+ INPUT|: 	<ARRAY array1> <ARRAY array2> [INT startIdx]
+ OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
+			*	array => newly organised array
+			*	NIL => error: uninitialized/invalid/inexistent array or nothing found.
+ =========================================================================================== */
+_Disperse local.array1 local.array2 local.index: goto internalBX;
+Disperse local.array1 local.array2 local.index:
+	/*Error & Exception handling*/
+	if (local.array1.size <= 0 || !(waitthread IsUserArray local.array1)) {
+		if (level.DEBUG) {
+			conprintf "\n ~^~^~^~ FATAL_ERROR[lib/array.slib::Disperse]: specified array1 <arg1> is either uninitialized, inexistent or invalid. ~^~^~^~ \n\n";
+		}
+		end;
+	} if (local.array2.size <= 0 || !(waitthread IsUserArray local.array2) || (waitthread IsObjectArray local.array2)) {
+		if (level.DEBUG) {
+			conprintf "\n ~^~^~^~ FATAL_ERROR[lib/array.slib::Disperse]: specified array2 <arg2> is either uninitialized, inexistent or invalid. ~^~^~^~ \n\n";
+		}
+		end;
+	}
+	
+	internalBX:
+	
+	/*Main Logic*/
+	local.type = waitthread Type local.array1;
+	switch (local.type) {
+		case "const array":
+		case "hash array":
+		case "index array":
+		case "normal array":
+		case "Index array":
+			if (local.array1.size <= local.array2.size) {
+				local.margin = int(local.array2.size / local.array1.size);
+				local.largerArray = local.array2;
+				local.smallerArray = local.array1;
+			} else if (local.array1.size > local.array2.size) {
+				local.margin = int(local.array1.size / local.array2.size);
+				local.largerArray = local.array1;
+				local.smallerArray = local.array2;
+			}
+	
+			local.largerArraySizes = waitthread __AnalyzeArray local.largerArray;
+			local.smallerArraySizes = waitthread __AnalyzeArray local.smallerArray;
+	
+			// Clear deprecated stuff...
+			local.array1 = NIL;
+			local.array2 = NIL;
+	
+			if (!local.index || typeof local.index != "int") {
+				local.index = local.largerArraySizes[1];
+			}
+	
+			local.i = local.smallerArraySizes[1];
+			local.m = 0;
+			for (local.j = local.largerArraySizes[1]; local.j < local.largerArraySizes[2]; local.j++) {
+				if (local.largerArray[local.j].size > 0 && local.largerArray[local.j] != NULL) {
+					local.result[local.index] = local.largerArray[local.j];
+					local.index++;
+					local.m++;
+					if (local.m >= local.margin) {
+						if (local.smallerArray[local.i].size > 0 && local.smallerArray[local.i] != NULL) {
+							local.result[local.index] = local.smallerArray[local.i];
+							local.index++;
+							local.i++;
+							local.m = 0;
+						}
+					}
+				}
+			}
+		break;
+		case "ent array":
+		case "object array":
+		default:
+			if (level.DEBUG) {
+				conprintf ("\n ~^~^~^~ FATAL_ERROR[lib/array.slib::Reconcatenate]: specified array 1 <arg1> (" + local.type + ") is either invalid or an unsupported array type. ~^~^~^~ \n\n");
+			}
+		break;
+	}
+end local.result;
+
+/** ==========================================================================================
+ CreateHashTable Function
+ ---------------------------------------------------------------------------------------------
+ DESCR|: 	Creates a hash table or hash array out of a maximum of 12 other arrays. The 
+			specified arrays will be treated as the columns (or 2nd dimension) while their 
+			values will be treated as rows (or 1st dimension) in the new hash table. 
+			If each inputted array happens to have the same length and consistency, a start index
+			may be defined to speed up the process.
+ INPUT|: 	[INT index] <ARRAY array0> <ARRAY array1> [ARRAY array2...11]
+ OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
+			*	array => new hash array
+			*	NIL => error: uninitialized/invalid/inexistent array or nothing found.
+ =========================================================================================== */
+_CreateHashTable local.index local.array0 local.array1 local.array2 local.array3 local.array4 local.array5 local.array6 local.array7 local.array8 local.array9 local.array10 local.array11: goto internalBW;
+CreateHashTable local.index local.array0 local.array1 local.array2 local.array3 local.array4 local.array5 local.array6 local.array7 local.array8 local.array9 local.array10 local.array11:
+	// Convert argument arrays to one manageable array.
+	internalBW:
+	
+	local.arrays[0] = NIL;
+	if (local.array0 && waitthread IsArrayType local.array0) {
+		local.arrays[local.arrays.size] = local.array0;
+		if (local.array1 && waitthread IsArrayType local.array1) {
+			local.arrays[local.arrays.size] = local.array1;
+			if (local.array2 && waitthread IsArrayType local.array2) {
+				local.arrays[local.arrays.size] = local.array2;
+				if (local.array3 && waitthread IsArrayType local.array3) {
+					local.arrays[local.arrays.size] = local.array3;
+					if (local.array4 && waitthread IsArrayType local.array4) {
+						local.arrays[local.arrays.size] = local.array4;
+						if (local.array5 && waitthread IsArrayType local.array5) {
+							local.arrays[local.arrays.size] = local.array5;
+							if (local.array6 && waitthread IsArrayType local.array6) {
+								local.arrays[local.arrays.size] = local.array6;
+								if (local.array7 && waitthread IsArrayType local.array7) {
+									local.arrays[local.arrays.size] = local.array7;
+									if (local.array8 && waitthread IsArrayType local.array8) {
+										local.arrays[local.arrays.size] = local.array8;
+										if (local.array9 && waitthread IsArrayType local.array9) {
+											local.arrays[local.arrays.size] = local.array9;
+											if (local.array10 && waitthread IsArrayType local.array10) {
+												local.arrays[local.arrays.size] = local.array10;
+												if (local.array11 && waitthread IsArrayType local.array11) {
+													local.arrays[local.arrays.size] = local.array11;
+													local.array11 = NIL;
+												}
+												local.array10 = NIL;
+											}
+											local.array9 = NIL;
+										}
+										local.array8 = NIL;
+									}
+									local.array7 = NIL;
+								}
+								local.array6 = NIL;
+							}
+							local.array5 = NIL;
+						}
+						local.array4 = NIL;
+					}
+					local.array3 = NIL;
+				}
+				local.array2 = NIL;
+			}
+			local.array1 = NIL;
+			local.array0 = NIL;
+		} else {
+			if (level.DEBUG) {
+				conprintf "\n ~^~^~^~ FATAL_ERROR[lib/array.slib::CreateHashTable]: not enough valid array(s) <arg1-13> specified! ~^~^~^~ \n\n"
+			}
+			end;
+		}
+	} else {
+		if (level.DEBUG) {
+			conprintf "\n ~^~^~^~ FATAL_ERROR[lib/array.slib::CreateHashTable]: no valid array(s) <arg1-13> specified! ~^~^~^~ \n\n"
+		}
+		end;
+	}
+	
+	/*Main Logic*/
+	if (!local.index || typeof local.index != "int") {
+		local.index = NIL;
+		local.rowSizes = waitthread __AnalyzeArray local.arrays[0];
+	} else {
+		local.rowSizes[1] = local.index;
+		local.index = NIL;
+		local.rowSizes[2] = local.rowSizes[1] + local.arrays[0].size;
+	}
+	local.columnSizes[1] = 0; 
+	local.columnSizes[2] = local.arrays.size;
+	
+	local.c = 1;
+	local.r = 1;
+	local.result[local.r] = NIL;
+
+	for (local.j = local.columnSizes[1]; local.j < local.columnSizes[2]; local.j++) {
+		for (local.i = local.rowSizes[1]; local.i < local.rowSizes[2]; local.i++) {
+			if (local.arrays[local.j][local.i] != NULL && local.arrays[local.j][local.i].size > 0) {
+				local.result[local.r][local.c] = local.arrays[local.j][local.i];
+				local.r++;
+			}
+		}
+		
+		local.r = 1;
+		local.c++;
+		
+		if !(local.index) {
+			local.rowSizes = waitthread __AnalyzeArray local.arrays[(local.j + 1)];
+		}
+	}
+end local.result;
+
+/** ==========================================================================================
+ Process Function
+ ---------------------------------------------------------------------------------------------
+ DESCR|: 	Processes a specified array with specified custom threads for variable elements
+			as well as array elements (in case of multi-dimensional arrays). A dimension
+			in which the elements can trigger the custom threads or ignore this option and
+		    process all dimensions.
+			
+			In case of object arrays, the variable thread need to provide input for the value
+			followed by the corresponding key string. The array thread needs to provide input
+			for the object array followed by another array which is a 0-indexed of all possible 
+			string keys that could be entries of the passed object array.
+		
+			In case of other arrays, the variable thread just needs to provide input for the
+			value. The arrayThread needs to provide input for the array following by its
+			start index integer and its end index integer (exclusive!). 
+ INPUT|: 	<ARRAY array> [INT dimension] <[ARRAY:STRING varThread path]> 
+			<[ARRAY:STRING arrayThread path]>
+ OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
+			*	array => processed array
+			*	NIL => error: uninitialized/invalid/inexistent array or nothing found.
+ =========================================================================================== */
+_Process local.array group.spDimension group.varThread group.arrayThread: goto internalBU;
+Process local.array group.spDimension group.varThread group.arrayThread:
+	/*Error & Exception handling*/
+	if (local.array.size <= 0 || !(waitthread IsArrayType local.array)) {
+		if (level.DEBUG) {
+			conprintf "\n ~^~^~^~ FATAL_ERROR[lib/array.slib::Process]: specified array <arg1> is either uninitialized, inexistent or invalid. ~^~^~^~ \n\n";
+		}
+		end;
+	} if ((!group.varThread || !(waitthread reborn/framework/lib/string.slib::VerifyPath group.varThread)) && (!group.arrayThread || !(waitthread reborn/framework/lib/string.slib::VerifyPath group.arrayThread))) {
+		if (level.DEBUG) {
+			conprintf "\n ~^~^~^~ FATAL_ERROR[lib/array.slib::Process]: Process thread(s) are either invalid or no process thread <arg2/3> has been specified. ~^~^~^~ \n\n";
+		}
+		end;
+	}
+	
+	internalBU:
+	
+	/*Main Logic*/
+	if (!group.spDimension && typeof group.spDimension != "int") {
+		group.spDimension = -1;
+	}
+
+	group.dimension = 0;
+	if (waitthread IsObjectArray local.array) {
+		group.keyArray = local.array["__info"]; 
+		if !(waitthread __UpdateKeys local.array) {
+			if (level.DEBUG) {
+				conprintf "\n ~^~^~^~ FATAL_ERROR[lib/array.slib::Process]: attempting to process object array, but keyArray <group.arg> is either uninitialized, invalid or inexistent! ~^~^~^~ \n\n";
+			}
+		}
+		
+		local.array = waitthread __#Process local.array;
+		
+		// Clear group vars..
+		group.keyArray = NIL;
+		group.keyArraySize = NIL;
+	} else {
+		local.array = waitthread __Process local.array;
+	}
+	
+	//Clear group vars..
+	group.dimension = NIL;
+	group.spDimension = NIL;
+end local.array;
+
+__Process local.array:
+	if (waitthread IsUserArray local.array) {
+		group.dimension++;
+		local.arraySizes = waitthread __AnalyzeArray local.array;
+		
+		// Do array thread..
+		if (group.arrayThread && (group.spDimension <= 0 || group.dimension == group.spDimension)) {
+			local.array = waitthread group.arrayThread local.array local.arraySizes[1] local.arraySizes[2];
+		}
+		
+		for (local.i = local.arraySizes[1]; local.i < local.arraySizes[2]; local.i++) {
+			if (local.array[local.i].size > 0 && local.array[local.i] != NULL) {
+				local.array[local.i] = waitthread __Process local.array[local.i];
+			}
+		}
+		group.dimension--;
+	} else {
+		// Do variable thread...
+		if (group.varThread && (group.spDimension <= 0 || group.dimension == group.spDimension)) {
+			local.array = waitthread group.varThread local.array;
+		}
+	}
+end local.array;
+__#Process local.array local.key:
+	if (waitthread IsUserArray local.array) {
+		group.dimension++;
+		
+		// Do array thread..
+		if (group.spDimension <= 0 || group.dimension == group.spDimension) {
+			local.array = waitthread group.arrayThread local.array group.keyArray;
+		}
+		
+		for (local.i = 0; local.i < group.keyArraySize; local.i++) {
+			local.key = string(group.keyArray[local.i]);
+			if (local.array[local.key].size > 0 && local.array[local.key] != NULL) {
+				local.array[local.key] = waitthread __#Process local.array[local.key] local.key;
+			}
+		}
+		group.dimension--;
+	} else {
+		// Do variable thread...
+		if (group.spDimension <= 0 || group.dimension == group.spDimension) {
+			local.array = waitthread group.varThread local.array local.key;
+		}
+	}
+end local.array;
+
+/** ==========================================================================================
+ Shuffle Function
+ ---------------------------------------------------------------------------------------------
+ DESCR|: 	Randomly shuffles the entries of the first dimension in the specified array.
+ INPUT|: 	<ARRAY toBeShuffledArray>
+ OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
+			*	array => shuffled array
+			*	NIL => error: uninitialized/invalid/inexistent array or nothing found.
+ =========================================================================================== */
+_Shuffle local.array: goto internalBT;
+Shuffle local.array:
+	/*Error & Exception handling*/
+	if (local.array.size <= 0 || !(waitthread IsUserArray local.array) || (waitthread IsObjectArray local.array)) {
+		if (level.DEBUG) {
+			conprintf "\n ~^~^~^~ FATAL_ERROR[lib/array.slib::Process]: specified array <arg1> is either uninitialized, inexistent or invalid. ~^~^~^~ \n\n";
+		}
+		end;
+	} 
+
+	internalBT:
+	
+	/*Main Logic*/
+	local.arraySizes = waitthread __AnalyzeArray local.array;
+	local.arrayLength = local.array.size;
+	
+	for (local.i = local.arraySizes[1]; local.i < local.arraySizes[2]; local.i++) {
+		local.swapIdx = randomint(local.arrayLength - local.i) + local.arraySizes[1];
+		local.help = local.array[local.i];
+		local.array[local.i] = local.array[local.swapIdx];
+		local.array[local.swapIdx] = local.help;
+	}
+end local.array;
+
+/** ==========================================================================================
+ Sort Function
+ ---------------------------------------------------------------------------------------------
+ DESCR|: 	Quickly sorts all or a specified dimension of a specified multi-dimensional number 
+			array or string array in either an ascending or descending order. An optional
+			compareThread path may be passed (cf. QuickSort function description).
+ INPUT|: 	<ARRAY toBeSortedArray> <INT/STRING mode> [INT: dimension] [STRING compareThread] 
+ OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
+			*	array => sorted multi-dimensional array
+			*	NIL => error: uninitialized/invalid/inexistent array or nothing found.
+ =========================================================================================== */
+_Sort local.array group.mode group.spDimension group.compareThread2: goto internalBR;
+Sort local.array group.mode group.spDimension group.compareThread2:
+	/*Error & Exception handling*/
+	if (local.array.size <= 0 || !(waitthread IsUserArray local.array)) {
+		if (level.DEBUG) {
+			conprintf "\n ~^~^~^~ FATAL_ERROR[lib/array.slib::Sort]: specified array <arg1> is either uninitialized, inexistent or invalid. ~^~^~^~ \n\n";
+		}
+		end;
+	}
+
+	internalBR:
+	
+	/*Main Logic*/
+	if (!group.spDimension && typeof group.spDimension != "int") {
+		group.spDimension = -1;
+	}
+	
+	if (typeof local.array == "const string") {
+		local.array = string(local.array);
+	}
+	group.dimension = 0;
+	local.result =  waitthread __Sort local.array
+	
+	// Clear group vars..
+	group.dimension = NIL;
+	group.mode = NIL;
+	group.compareThread2 = NIL;
+	group.spDimension = NIL;
+end local.result;
+
+__Sort local.array:
+	if (waitthread IsUserArray local.array) {
+		group.dimension++;
+		local.arraySizes = waitthread __AnalyzeArray local.array;
+		
+		/* Quicksort here*/
+		if ( !(waitthread IsMultiDimensional local.array 1) && group.spDimension <= 0 || group.dimension == group.spDimension) {
+			local.array = waitthread _QuickSort local.array group.mode local.arraySizes[1] local.arraySizes[2] group.compareThread2;
+		}
+		
+		for (local.i = local.arraySizes[1]; local.i < local.arraySizes[2]; local.i++) {
+			if (local.array[local.i].size > 0 && local.array[local.i] != NULL) {
+				local.array[local.i] = waitthread __Sort local.array[local.i];
+			}
+		}
+		group.dimension--;
+	}
+end local.array;
+
+/** ==========================================================================================
+ QuickSort Function
+ ---------------------------------------------------------------------------------------------
+ DESCR|: 	Quickly sorts a specified one-dimensional number array or string array in either 
+			an ascending or descending order. If a number array is to be sorted, setting mode
+			to 0 or 1 will sort in ascending order, 9 or 10 will sort it in descending order.
+			Concordantly, if a string array is to be sorted, setting mode to "a" or "A" will
+			sort the array in ascending order while "z" or "Z" will sort it in descending order.
+			
+			A compareThread path may be specified. In such a case, the custom compareThread 
+			will override the default comparison algorithm, allowing one to easily define 
+			the way the array will be ordered. 
+			
+			Consequently, this also means that one can use other element types than strings, 
+			floats and integers as well as other types of arrays. For example; hash arrays, 
+			or 'tables', arrays containing entities or entity structs ... can be efficiently
+			and effectively sorted with this function in any way if this compareThread 
+			argument is used wisely.
+			
+			Each compareThread must forsee input for the scanned variable (1st arg) and one
+			for the pivot (2nd arg) it is compared to. The function must output one of three 
+			values: -1 or 1 if the variable is smaller/greater/... than the pivot and, more 
+			importantly, it must return 0 or NIL if the variable is EQUAL TO the pivot.
+			
+ INPUT|: 	<ARRAY toBeSortedArray> <INT/STRING mode> [INT firstIdx] [INT lastIdx]
+			[STRING compareThread] 
+ OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
+			*	array => sorted array
+			*	NIL => error: uninitialized/invalid/inexistent array or nothing found.
+ =========================================================================================== */
+_QuickSort group.toBeSortedArray local.mode local.firstIdx local.lastIdx group.compareThread: goto internalBS;
+QuickSort group.toBeSortedArray local.mode local.firstIdx local.lastIdx group.compareThread:
+	/*Error & Exception handling*/
+	if (group.toBeSortedArray.size <= 0 || !(waitthread IsUserArray group.toBeSortedArray) /*|| (waitthread IsMultiDimensional group.toBeSortedArray 1)*/) {
+		if (level.DEBUG) {
+			conprintf "\n ~^~^~^~ FATAL_ERROR[lib/array.slib::QuickSort]: specified array <arg1> is either uninitialized, inexistent or invalid. ~^~^~^~ \n\n";
+		}
+		end;
+	}
+
+	internalBS:
+	
+	/*Main Logic*/
+	switch (string(local.mode)) {
+		case "/a":
+		case "/A":
+		case "a":
+		case "A":
+			group.compareThread = reborn/framework/lib/string.slib::_Compare;
+			group.lessCheckValue = -1;
+			group.moreCheckValue = 1;
+		break;
+		case "/0":
+		case "/1":
+		case "0":
+		case "1":
+			group.compareThread = "__CompareNum";
+			group.lessCheckValue = -1;
+			group.moreCheckValue = 1;
+		break;
+		case "/z":
+		case "/Z":
+		case "z":
+		case "Z":
+			group.compareThread = reborn/framework/lib/string.slib::_Compare;
+			group.lessCheckValue = 1;
+			group.moreCheckValue = -1;
+		break;
+		case "/9":
+		case "/10":
+		case "9":
+		case "10":
+			group.compareThread = "__CompareNum";
+			group.lessCheckValue = 1;
+			group.moreCheckValue = -1;
+		break;
+		default:
+			if (!group.compareThread || !(waitthread reborn/framework/lib/string.slib::VerifyPath group.compareThread)) {
+				if (level.DEBUG) {
+					conprintf "\n ~^~^~^~ FATAL_ERROR[lib/array.slib::QuickSort]: specified sorting mode/thread <arg2> is invalid! ~^~^~^~ \n\n";
+				}
+				end;
+			}
+			// Custom sorting...
+			group.lessCheckValue = -1;
+			group.moreCheckValue = 1;
+		break;
+	}
+	
+	if (typeof local.firstIdx != "int" || typeof local.lastIdx != "int") {
+		local.arraySizes = waitthread __AnalyzeArray group.toBeSortedArray;
+		local.firstIdx = local.arraySizes[1];
+		local.lastIdx = local.arraySizes[2] - 1;
+	}
+
+	// Applying all transformation on group. array so I don't have to copy the entire array
+	// each time the following QuickSort helper function is recursively called over and over.
+	waitthread __QuickSort local.firstIdx local.lastIdx;
+	
+	//Clear group vars..
+	group.lessCheckValue = NIL;
+	group.moreCheckValue = NIL;
+	group.compareThread = NIL;
+	thread __DeleteToBeSortedArray;
+end group.toBeSortedArray;
+
+__DeleteToBeSortedArray:
+	wait 0.01;
+	group.toBeSortedArray = NIL;
+end;
+
+__QuickSort local.firstIdx local.lastIdx:
+	local.pivot = int((local.firstIdx + local.lastIdx) / 2);
+	
+	local.left = local.firstIdx;
+	local.right = local.lastIdx;
+	
+	while !(local.left > local.right) {
+		while (waitthread group.compareThread group.toBeSortedArray[local.left] group.toBeSortedArray[local.pivot] == group.lessCheckValue) {
+			local.left++;
+		}
+		while (waitthread group.compareThread group.toBeSortedArray[local.right] group.toBeSortedArray[local.pivot] == group.moreCheckValue) {
+			local.right--;
+		}
+		// Swap entries in place
+		if (local.left <= local.right) {
+			local.tmp = group.toBeSortedArray[local.left];
+			group.toBeSortedArray[local.left] = group.toBeSortedArray[local.right];
+			group.toBeSortedArray[local.right] = local.tmp;
+			local.tmp = NIL;
+			
+			local.left++;
+			local.right--;
+		} 
+	}
+
+	// recursive calling
+	if (local.left < local.lastIdx) {
+		waitthread __QuickSort local.left local.lastIdx;
+	} if (local.firstIdx < local.right) {
+		waitthread __QuickSort local.firstIdx local.right;
+	}
+end;
+__CompareNum local.num local.piv:
+	if (typeof local.num == "int" || typeof local.num == "float") {
+		if (local.num < local.piv) {
+			local.result = -1;
+		} else if (local.num > local.piv) {
+			local.result = 1;
+		}
+	}
+end local.result;
 
 /** ==========================================================================================
  Decompile Function
@@ -154,20 +1606,15 @@ end local.inf;
 			*	array => decompiled string
 			*	NIL => error: uninitialized/invalid/inexistent array or nothing found.
  =========================================================================================== */
-// Few logical errors can occur if an invalid string passes through the validation.
-// Whether or not this is possible, remains the question. In the mean time we should
-// terminate all processes in media res, print an error message and return NIL when it
-// does occur so we'll know this function needs to be attended yet again.
-// If, in __Decompile, local.j isn't numerical, can we send the original string to __#Decompile?
-_Decompile local.string: goto internalBQ;
+_Decompile local.string: group.skip = 1; goto internalBQ;
 Decompile local.string:
 	/*Error & Exception handling*/
-	if (!local.string || !(waitthread $Str.IsString local.string)) {
+	if (!local.string || (typeof local.string != "const string" && typeof local.string != "string")) {
 		if (level.DEBUG) {
 			conprintf "\n ~^~^~^~ FATAL_ERROR[lib/decompile.slib::Array]: specified string <arg1> is either uninitialized, inexistent or invalid. ~^~^~^~ \n\n";
 		}
 		end;
-	} if !(waitthread $Str.ValidatePairs local.string 0 "[" ";" "<") {
+	} if !(waitthread reborn/framework/lib/string.slib::ValidatePairs local.string 0 "[" ":" "<") {
 		if (level.DEBUG) {
 			conprintf "\n ~^~^~^~ FATAL_ERROR[lib/decompile.slib::Array]: Illegal format detected! Specified string <arg1> is not a compiled array! ~^~^~^~ \n\n";
 		}
@@ -177,8 +1624,8 @@ Decompile local.string:
 	internalBQ:
 	
 	/*Main Logic*/
-	// The compiled array happens to be an object array. So w'll deal with it appropriately.
-	if (local.string[1] == ";") {
+	// The compiled array happens to be an object array. So we'll deal with it appropriately.
+	if (local.string[1] == ":") {
 		group.info[0] = NIL;
 		local.result = (waitthread __#Decompile local.string);
 
@@ -191,14 +1638,21 @@ Decompile local.string:
 	} else {
 		local.result = (waitthread __Decompile local.string);
 	}
+	
+	// Clear group. vars..
+	group.skip = NIL;
 end local.result;
 
 __Decompile local.string local.result:
 	/// Process array... 
 	if (local.string[0] == "[") {
+		if !(group.startThread) {
+			group.startThread = local;
+		}
+		
 		// Cut up string into appropriately sized blocks. The last parameter defines the end of the first pair's prefix 
 		// and as a consequence that prefix, which contains our start position, will be split off as well.
-		local.snippet = waitthread $Str.fullPath::_FormatSplit local.string "[" "`" ";";
+		local.snippet = waitthread reborn/framework/lib/string.slib::_FormatSplit local.string "[" "`" ":";
 
 		// Our pair's start position string has been extracted as well!
 		local.j = local.snippet[0];
@@ -206,12 +1660,23 @@ __Decompile local.string local.result:
 		
 		local.snipSize = local.snippet.size;
 		
-		// Check if start is numerical or not... If not, only use "start" and redirect all non-value types to the next dimension
-		if (waitthread $Str.IsNumeric local.j) {
-			local.j = (int local.j);
-		} /*else {
-			conprintf ("\nLOGICAL SCRIPTING ERROR::function(\"__Decompile\") local.j==" + local.j + "!\n\n");
-		}*/
+		// Check if start is numerical or not... 
+		if !(group.skip) {
+			if (waitthread reborn/framework/lib/string.slib::IsNumeric local.j) {
+				local.j = (int local.j);
+			} else {
+				if (level.DEBUG) {
+					conprintf ("\n FATAL_ERROR[lib/array.slib::Decompile]: unexpected decompile-time error has occurred. \n\n");
+				}
+			
+				// Terminate threadgroup.
+				if (group.startThread) {
+					group.startThread end;
+				} else {
+					end;
+				}
+			}
+		}
 		
 		for (local.i = 1; local.i <= local.snipSize; local.i++) {
 			switch (local.snippet[local.i][0]) {
@@ -233,7 +1698,7 @@ __Decompile local.string local.result:
 						local.value += local.snippet[local.i][local.k];
 					}
 					// Correctly cast the extracted value.
-					local.result[local.j] = waitthread (waitthread $Compile.infoLib::__CodeCast local.type) local.value;
+					local.result[local.j] = waitthread (waitthread $Library.infoCompile::__CodeCast local.type) local.value;
 					local.j++;
 				break;
 				default:
@@ -254,18 +1719,30 @@ __Decompile local.string local.result:
 		}
 
 		// Correctly cast the extracted value.
-		local.result = waitthread (waitthread $Compile.infoLib::__CodeCast local.type) local.value;
-	} /*else {
-		conprintf ("\nLOGICAL SCRIPTING ERROR::function(\"__Decompile\") local.string[0]==" + local.string[0] + "!\n\n");
-	}*/
+		local.result = waitthread (waitthread $Library.infoCompile::__CodeCast local.type) local.value;
+	} else {
+		if (level.DEBUG) {
+			conprintf ("\n FATAL_ERROR[lib/array.slib::Decompile]: unexpected decompile-time error has occurred. \n\n");
+		}
+		
+		// Terminate threadgroup.
+		if (group.startThread) {
+			group.startThread end;
+		} else {
+			end;
+		}
+	}
 end local.result;
 __#Decompile local.string local.result: 
 	if (local.string[0] == "[") {
-		local.snippet = waitthread $Str.fullPath::_FormatSplit local.string "[" "`" ";";
+		if !(group.startThread) {
+			group.startThread = local;
+		}
+		
+		local.snippet = waitthread reborn/framework/lib/string.slib::_FormatSplit local.string "[" "`" ":";
 
 		local.j = local.snippet[0];
 		local.snippet[0] = NIL;
-		
 		local.snipSize = local.snippet.size;
 
 		 if (local.snipSize == 1) {
@@ -293,7 +1770,7 @@ __#Decompile local.string local.result:
 						local.value += local.snippet[1][local.k];
 					}
 
-					local.result[local.j] = waitthread (waitthread $Compile.infoLib::__CodeCast local.type) local.value;
+					local.result[local.j] = waitthread (waitthread $Library.infoCompile::__CodeCast local.type) local.value;
 				break;
 				default:
 				break;
@@ -303,9 +1780,18 @@ __#Decompile local.string local.result:
 				local.result = waitthread __#Decompile local.snippet[local.i] local.result;
 			}
 		}
-	} /*else {
-		conprintf ("\nLOGICAL SCRIPTING ERROR::function(\"__#Decompile\") local.string[0]==" + local.string[0] + "!\n\n");
-	}*/
+	} else {
+		if (level.DEBUG) {
+			conprintf ("\n FATAL_ERROR[lib/array.slib::Decompile]: unexpected decompile-time error has occurred. \n\n");
+		}
+		
+		// Terminate threadgroup.
+		if (group.startThread) {
+			group.startThread end;
+		} else {
+			end;
+		}
+	}
 end local.result;
 
 /** ==========================================================================================
@@ -333,7 +1819,7 @@ end local.result;
 _Compile local.array: goto internalBP;
 Compile local.array:
 	/*Error & Exception handling*/
-	if ( !local.array || local.array.size <= 0 || !(waitthread IsArrayType local.array)) {
+	if (local.array.size <= 0 || !(waitthread IsArrayType local.array)) {
 		if (level.DEBUG) {
 			conprintf "\n ~^~^~^~ FATAL_ERROR[lib/compile.slib::Array]: array <arg1> is either inexistent, uninitialized or invalid! ~^~^~^~ \n\n";
 		}
@@ -350,7 +1836,7 @@ Compile local.array:
 		break;
 		case "string":
 		case "const string":
-			local.result = local.array;
+			local.result = ("<s>" + local.array);
 		break;
 		case "const array":
 		case "hash array":
@@ -360,7 +1846,7 @@ Compile local.array:
 		case "array":
 			group.result = "";
 			group.dimension = 0;
-			group.typeCodes = waitthread $Compile.infoLib::"__TypeCoding";
+			group.typeCodes = waitthread $Library.infoCompile::"__TypeCoding";
 			
 			waitthread __Compile local.array;
 			local.result = group.result;
@@ -379,7 +1865,7 @@ Compile local.array:
 			}
 			group.result = "[;";
 			group.dimension = 0;
-			group.typeCodes = waitthread $Compile.infoLib::"__TypeCoding";
+			group.typeCodes = waitthread $Library.infoCompile::"__TypeCoding";
 			
 			waitthread __#Compile local.array;
 			group.result += ("]");
@@ -406,22 +1892,22 @@ __Compile local.array:
 	if (waitthread IsUserArray local.array) {
 		group.dimension++;
 		local.arraySizes = waitthread __AnalyzeArray local.array;
-		if (local.arraySizes.size > 0) {
-			if (group.dimension != 1 && group.result[(group.result.size - 1)] != ";") {
+		//if (local.arraySizes.size > 0) {
+			if (group.dimension != 1 && group.result[(group.result.size - 1)] != ":") {
 				group.result += ("`");
 			}
-			group.result += ("[" + local.arraySizes[1] + ";");
+			group.result += ("[" + local.arraySizes[1] + ":");
 		
 			for (local.i = local.arraySizes[1]; local.i < local.arraySizes[2]; local.i++) {
-				if (local.array[local.i].size > 0) {
+				if (local.array[local.i].size > 0 && local.array[local.i] != NULL) {
 					waitthread __Compile local.array[local.i];
 				}
 			}
 			
 			group.result += ("]");
-		}
+		//}
 		group.dimension--;
-	} else if (local.array) {
+	} else {
 		local.type = typeof local.array;
 		
 		//if (local.type == "listener") {
@@ -429,8 +1915,8 @@ __Compile local.array:
 		//} else {
 			local.prefix = ("<" + group.typeCodes[(typeof local.array)] + ">")
 			
-			// If value not first entry in array, add ",".
-			if (group.result[(group.result.size - 1)] != ";") {
+			// If value not first element in array, add ",".
+			if (group.result[(group.result.size - 1)] != ":") {
 				local.prefix = ("`" + local.prefix); 
 			} 
 			
@@ -444,11 +1930,11 @@ __#Compile local.array local.key:
 		
 		for (local.i = 0; local.i < group.keyArraySize; local.i++) {
 			local.key = (string group.keyArray[local.i]);
-			if (local.array[local.key].size > 0) {
-				if (group.result[(group.result.size - 1)] != ";") {
+			if (local.array[local.key].size > 0 && local.array[local.key] != NULL) {
+				if (group.result[(group.result.size - 1)] != ":") {
 					group.result += ("`");
 				}
-				group.result += ("[" + local.key + ";");
+				group.result += ("[" + local.key + ":");
 				waitthread __#Compile local.array[local.key] local.key;
 				group.result += ("]");
 			}
@@ -463,8 +1949,8 @@ __#Compile local.array local.key:
 		//} else {
 			local.prefix = ("<" + group.typeCodes[(typeof local.array)] + ">")
 			
-			// If value not first entry in array, add ",".
-			if (group.result[(group.result.size - 1)] != ";") {
+			// If value not first element in array, add ",".
+			if (group.result[(group.result.size - 1)] != ":") {
 				local.prefix = ("," + local.prefix); 
 			} 
 			
@@ -474,15 +1960,418 @@ __#Compile local.array local.key:
 end;
 
 /** ==========================================================================================
- CreateConst Function
+ Overwrite Function
  ---------------------------------------------------------------------------------------------
- DESCR|: 	Creates a constant array out of specified set of maximum fourteen values/arguments.
- INPUT|: 	<ARRAY array> <TYPE arg0> [TYPE arg1...13]
+ DESCR|: 	Overwrites specified element(s) with specified replacement element(s) in all,
+			or optionally a specified, dimension(s) of the specified array according to 
+			various modes of input. 
+			If mode is set to:
+			- "/v" : this will interpret elementToReplace as a value or a constant array of 
+				1	 multiple values that need to be found and replaced.
+			- "/t" : this will interpret elementToReplace as a variable type or a constant
+				2	 array of multiple variable types that need to be found and replaced.
+			- "/i" : this will interpret elementToReplace as an array index or a constant 
+				3	 array of indexes that need to be found and their corresponding elements
+					 replaced.
+			- "/j" : this will interpret elementToReplace as an index sequence. This means
+				4	 that the index or constant array of sequential indexes are used to point
+					 to a single element and have that element replaced. All output of 
+					 $Array.IndexOf is directly compatible with this mode.
+					
+			If the specified replacementElement and the specified elementToReplace are 
+			both constant arrays of equal size, then SyncOverwrite mode is used, which means
+			that elements to be replaced will be replaced by the corresponding replacement 
+			element (concretely, indexes must be equal).
+			
+			If allInstances is set, then the algorithm will not stop searching after the first
+			overwrite. If inDimension is set then only elements of in the specified dimension
+			will be replaced.
+ INPUT|: 	<ARRAY array> <TYPE/ARRAY:TYPE element(s)ToReplace> <TYPE/ARRAY:TYPE replacementElement(s)>
+			<STRING/INT mode> [INT allInstances] [INT specificDimension]
+ OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
+			*	array => processed array
+			*	NIL => error: uninitialized/invalid/inexistent array or nothing found.
+ =========================================================================================== */
+_Overwrite local.array group.elementToReplace group.replacementElement local.mode group.allInstances group.inDimension: goto internalCD;
+Overwrite local.array group.elementToReplace group.replacementElement local.mode group.allInstances group.inDimension:
+	/*Error & Exception handling*/
+	if (local.array.size <= 0 || !(waitthread IsUserArray local.array) || (waitthread IsEntityArray local.array)) {
+		if (level.DEBUG) {
+			conprintf "\n ~^~^~^~ FATAL_ERROR[lib/array.slib::Overwrite]: specified array <arg1> is either uninitialized, inexistent or invalid. ~^~^~^~ \n\n";
+		}
+		end;
+	} if (group.replacementElement.size <= 0 || group.replacementElement == NULL) {
+		if (level.DEBUG) {
+			conprintf "\n ~^~^~^~ FATAL_ERROR[lib/array.slib::Overwrite]: specified element to write <arg2> is either uninitialized or inexistent. ~^~^~^~ \n\n";
+		}
+		end;
+	}
+	
+	internalCD:
+	
+	if !(group.inDimension) {
+		group.inDimension = -1;
+	} 
+	
+	/*Main Logic*/
+	group.dimension = 0;
+	switch (local.mode) {
+		case "v":
+		case "-v":
+		case "/v":
+		case 1:
+			local.thread = 1;
+		break;
+		case "t":
+		case "-t":
+		case "/t":
+		case 2:
+			local.thread = 2;
+		break;
+		case "i":
+		case "-i":
+		case "/i":
+		case 3:
+			local.thread = 3;
+		break;
+		case "j":
+		case "-j":
+		case "/j":
+		case 4:
+			local.thread = 4;
+		break;
+		default:
+			if (level.DEBUG) {
+				conprintf "\n ~^~^~^~ FATAL_ERROR[lib/array.slib::Overwrite]: specified mode <arg3> is either inexistent or invalid. ~^~^~^~ \n\n";
+			}
+		break;
+	}
+	
+	if (local.thread) {
+		if (group.elementToReplace.size <= 0 || group.elementToReplace == NULL) {
+			if (level.DEBUG) {
+				conprintf "\n ~^~^~^~ FATAL_ERROR[lib/array.slib::Overwrite]: specified values to be overwrite <arg4> is either uninitialized or inexistent. ~^~^~^~ \n\n";
+			}
+			end;
+		} else {
+			if !(waitthread IsIndexedArrayType group.elementToReplace) {
+				local.tmp = group.elementToReplace;
+				group.elementToReplace = NIL;
+				group.elementToReplace[1] = local.tmp;
+				local.tmp = NIL;
+			}
+		}
+		
+		// Synchronization for multiple overwrites.
+		if (waitthread IsIndexedArrayType group.replacementElement && group.elementToReplace.size == group.replacementElement.size) {
+			group.sync = 1;
+		}
+		
+		if (waitthread IsObjectArray local.array) {
+			group.keyArray = local.array["__info"]; 
+			if !(waitthread __UpdateKeys local.array) {
+				if (level.DEBUG) {
+					conprintf "\n ~^~^~^~ FATAL_ERROR[lib/array.slib::Overwrite]: attempting to process object array, but keyArray <group.arg> is either uninitialized, invalid or inexistent! ~^~^~^~ \n\n";
+				}
+				end;
+			}
+	
+			local.array = waitthread ("__#Overwrite" + local.thread) local.array;
+				
+			// Clear group. vars...
+			group.keyArray = NIL;
+			group.keyArraySize = NIL;
+		} else {
+
+			local.array = waitthread ("__Overwrite" + local.thread) local.array;
+		}
+	}
+	
+	// Clear group vars..
+	group.dimension = NIL;
+	group.allInstances = NIL;
+	group.inDimension = NIL;
+	group.elementToReplace = NIL;
+	group.replacementElement = NIL;
+	group.sync = NIL;
+	group.terminate = NIL;
+end local.array;
+__Overwrite1 local.array:
+	if (group.terminate) {
+		end local.array;
+	}
+	if (waitthread IsUserArray local.array) {
+		group.dimension++;
+		
+		local.arraySizes = waitthread __AnalyzeArray local.array;
+		for (local.i = local.arraySizes[1]; local.i < local.arraySizes[2]; local.i++) {
+			local.array[local.i] = waitthread __Overwrite1 local.array[local.i];
+		}
+		
+		group.dimension--;
+	} else if (group.inDimension <= 0 || group.inDimension == group.dimension) {
+		local.arraySize = group.elementToReplace.size;
+		if (group.sync) {
+			for (local.i = 1; local.i <= local.arraySize; local.i++) {
+				if (local.array == group.elementToReplace[local.i]) {
+					local.array = group.replacementElement[local.i];
+					if !(group.allInstances) {
+						group.terminate = 1;
+					}
+					break;
+				}
+			}
+		} else {
+			for (local.i = 1; local.i <= local.arraySize; local.i++) {
+				if (local.array == group.elementToReplace[local.i]) {
+					local.array = group.replacementElement;
+					if !(group.allInstances) {
+						group.terminate = 1;
+					}
+					break;
+				}
+			}
+		}
+	}
+end local.array;
+__#Overwrite1 local.array:
+	if (group.terminate) {
+		end local.array;
+	}
+	if (waitthread IsUserArray local.array) {
+		group.dimension++;
+		
+		for (local.i = 0; local.i < group.keyArraySize; local.i++) {
+			local.key = string(group.keyArray[local.i]);
+			if (local.array[local.key].size > 0 && local.array[local.key] != NULL) {
+				local.array[local.key] = waitthread __#Overwrite1 local.array[local.key];
+			}
+		}
+		
+		group.dimension--;
+	} else if (group.inDimension <= 0 || group.inDimension == group.dimension) {
+		local.arraySize = group.elementToReplace.size;
+		if (group.sync) {
+			for (local.i = 1; local.i <= local.arraySize; local.i++) {
+				if (local.array == group.elementToReplace[local.i]) {
+					local.array = group.replacementElement[local.i];
+					if !(group.allInstances) {
+						group.terminate = 1;
+					}
+					break;
+				}
+			}
+		} else {
+			for (local.i = 1; local.i <= local.arraySize; local.i++) {
+				if (local.array == group.elementToReplace[local.i]) {
+					local.array = group.replacementElement;
+					if !(group.allInstances) {
+						group.terminate = 1;
+					}
+					break;
+				}
+			}
+		}
+	}
+end local.array;
+__Overwrite2 local.array:
+	if (group.terminate) {
+		end local.array;
+	}
+
+	if (waitthread IsUserArray local.array) {
+		group.dimension++;
+
+		local.arraySizes = waitthread __AnalyzeArray local.array;
+		for (local.i = local.arraySizes[1]; local.i < local.arraySizes[2]; local.i++) {
+			local.array[local.i] = waitthread __Overwrite2 local.array[local.i];
+		}
+		
+		group.dimension--;
+	} else if (group.inDimension <= 0 || group.inDimension == group.dimension) {
+		local.arraySize = group.elementToReplace.size;
+		local.type = typeof local.array;
+		
+		if (group.sync) {
+			for (local.i = 1; local.i <= local.arraySize; local.i++) {
+				if (local.type == group.elementToReplace[local.i]) {
+					local.array = group.replacementElement[local.i];
+					if !(group.allInstances) {
+						group.terminate = 1;
+					}
+					break;
+				}
+			}
+		} else {
+			for (local.i = 1; local.i <= local.arraySize; local.i++) {
+				if (local.type == group.elementToReplace[local.i]) {
+					local.array = group.replacementElement;
+					if !(group.allInstances) {
+						group.terminate = 1;
+					}
+					break;
+				}
+			}
+		}
+	}
+end local.array;
+__#Overwrite2 local.array:
+	if (group.terminate) {
+		end local.array;
+	}
+
+	if (waitthread IsUserArray local.array) {
+		group.dimension++;
+
+		for (local.i = 0; local.i < group.keyArraySize; local.i++) {
+			local.key = string(group.keyArray[local.i]);
+			if (local.array[local.key].size > 0 && local.array[local.key] != NULL) {
+				local.array[local.key] = waitthread __#Overwrite1 local.array[local.key];
+			}
+		}
+		
+		group.dimension--;
+	} else if (group.inDimension <= 0 || group.inDimension == group.dimension) {
+		local.arraySize = group.elementToReplace.size;
+		local.type = typeof local.array;
+		
+		if (group.sync) {
+			for (local.i = 1; local.i <= local.arraySize; local.i++) {
+				if (local.type == group.elementToReplace[local.i]) {
+					local.array = group.replacementElement[local.i];
+					if !(group.allInstances) {
+						group.terminate = 1;
+					}
+					break;
+				}
+			}
+		} else {
+			for (local.i = 1; local.i <= local.arraySize; local.i++) {
+				if (local.type == group.elementToReplace[local.i]) {
+					local.array = group.replacementElement;
+					if !(group.allInstances) {
+						group.terminate = 1;
+					}
+					break;
+				}
+			}
+		}
+	}
+end local.array;
+__Overwrite3 local.array local.index:
+	if (group.terminate) {
+		end local.array;
+	}
+	if (waitthread IsUserArray local.array) {
+		group.dimension++;
+		
+		local.arraySizes = waitthread __AnalyzeArray local.array;
+		for (local.i = local.arraySizes[1]; local.i < local.arraySizes[2]; local.i++) {
+			local.array[local.i] = waitthread __Overwrite3 local.array[local.i] local.i;
+		}
+		
+		group.dimension--;
+	} else if (group.inDimension <= 0 || group.inDimension == group.dimension) {
+		local.arraySize = group.elementToReplace.size;
+		if (group.sync) {
+			for (local.i = 1; local.i <= local.arraySize; local.i++) {
+				if (local.index == group.elementToReplace[local.i]) {
+					local.array = group.replacementElement[local.i];
+					if !(group.allInstances) {
+						group.terminate = 1;
+					}
+					break;
+				}
+			}
+		} else {
+			for (local.i = 1; local.i <= local.arraySize; local.i++) {
+				if (local.index == group.elementToReplace[local.i]) {
+					local.array = group.replacementElement;
+					if !(group.allInstances) {
+						group.terminate = 1;
+					}
+					break;
+				}
+			}
+		}
+	}
+end local.array;
+__#Overwrite3 local.array local.index:
+	if (group.terminate) {
+		end local.array;
+	}
+	if (waitthread IsUserArray local.array) {
+		group.dimension++;
+		
+		for (local.i = 0; local.i < group.keyArraySize; local.i++) {
+			local.key = string(group.keyArray[local.i]);
+			if (local.array[local.key].size > 0 && local.array[local.key] != NULL) {
+				local.array[local.key] = waitthread __#Overwrite3 local.array[local.key] local.key;
+			}
+		}
+		
+		group.dimension--;
+	} else if (group.inDimension <= 0 || group.inDimension == group.dimension) {
+		local.arraySize = group.elementToReplace.size;
+
+		if (group.sync) {
+			for (local.i = 1; local.i <= local.arraySize; local.i++) {
+				if (local.index == group.elementToReplace[local.i]) {
+					local.array = group.replacementElement[local.i];
+					if !(group.allInstances) {
+						group.terminate = 1;
+					}
+					break;
+				}
+			}
+		} else {
+			for (local.i = 1; local.i <= local.arraySize; local.i++) {
+				if (local.index == group.elementToReplace[local.i]) {
+					local.array = group.replacementElement;
+					if !(group.allInstances) {
+						group.terminate = 1;
+					}
+					break;
+				}
+			}
+		}
+	}
+end local.array;
+__Overwrite4 local.array:
+	group.dimension++;
+	if (group.elementToReplace[group.dimension].size > 0 && group.elementToReplace[group.dimension] != NULL) {
+		if (group.dimension == group.elementToReplace.size) {
+			local.array[group.elementToReplace[group.dimension]] = group.replacementElement;
+		} else {
+			local.array[group.elementToReplace[group.dimension]] = waitthread __Overwrite4 local.array[group.elementToReplace[group.dimension]];
+		}
+	}
+	group.dimension--;
+end local.array;
+__#Overwrite4 local.array:
+	group.dimension++;
+	if (group.elementToReplace[group.dimension].size > 0 && group.elementToReplace[group.dimension] != NULL) {
+		if (group.dimension == group.elementToReplace.size) {
+			local.array[group.elementToReplace[group.dimension]] = group.replacementElement;
+		} else {
+			local.array[group.elementToReplace[group.dimension]] = waitthread __Overwrite4 local.array[group.elementToReplace[group.dimension]];
+		}
+	}
+	group.dimension--;
+end local.array;
+
+/** ==========================================================================================
+ CreateConstantArray Function
+ ---------------------------------------------------------------------------------------------
+ DESCR|: 	Creates a constant array out of specified set of maximum fifteen values/arguments.
+ INPUT|: 	<ARRAY array> <TYPE arg0> [TYPE arg1...14]
  OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
 			*	const array => processed array
 			*	NIL => error: uninitialized/invalid/inexistent array or nothing found.
  =========================================================================================== */
-CreateConst local.arg0 local.arg1 local.arg2 local.arg3 local.arg4 local.arg5 local.arg6 local.arg7 local.arg8 local.arg9 local.arg10 local.arg11 local.arg12 local.arg13:
+_CreateConstantArray local.arg0 local.arg1 local.arg2 local.arg3 local.arg4 local.arg5 local.arg6 local.arg7 local.arg8 local.arg9 local.arg10 local.arg11 local.arg12 local.arg13 local.arg14: goto internalBV;
+CreateConstantArray local.arg0 local.arg1 local.arg2 local.arg3 local.arg4 local.arg5 local.arg6 local.arg7 local.arg8 local.arg9 local.arg10 local.arg11 local.arg12 local.arg13 local.arg14:
+	internalBV:
 	if (local.arg0 && local.arg0.size > 0) {
 	
 		if (local.arg1 && local.arg1.size > 0) {
@@ -510,6 +2399,11 @@ CreateConst local.arg0 local.arg1 local.arg2 local.arg3 local.arg4 local.arg5 lo
 													if (local.arg12 && local.arg12.size > 0) {
 													
 														if (local.arg13 && local.arg13.size > 0) {
+														
+															if (local.arg14 && local.arg14.size > 0) {
+																local.result = local.arg0::local.arg1::local.arg2::local.arg3::local.arg4::local.arg5::local.arg6::local.arg7::local.arg8::local.arg9::local.arg10::local.arg11::local.arg12::local.arg13::local.arg14;
+																goto breakTo;			
+															}
 															local.result = local.arg0::local.arg1::local.arg2::local.arg3::local.arg4::local.arg5::local.arg6::local.arg7::local.arg8::local.arg9::local.arg10::local.arg11::local.arg12::local.arg13;
 															goto breakTo;																
 														}
@@ -552,7 +2446,7 @@ CreateConst local.arg0 local.arg1 local.arg2 local.arg3 local.arg4 local.arg5 lo
 		local.result[1] = local.arg0;
 	} else {
 		if (local.DEBUG) {
-			conprintf "\n ~^~^~^~ FATAL_ERROR[lib/decompile.slib::CreateConst]: no arguments specified! ~^~^~^~ \n\n";
+			conprintf "\n ~^~^~^~ FATAL_ERROR[lib/decompile.slib::CreateConstantArray]: no arguments specified! ~^~^~^~ \n\n";
 		}
 	}
 	
@@ -566,7 +2460,7 @@ end local.result;
 			can overwrite conflicts rather than ignoring them. Second array is used basis and
 			first object array is added to it. Switching argument positions can utilize the
 			implication that has.
- INPUT|: 	<ARRAY array> <STRING entry> <TYPE data> [INT overwrite]
+ INPUT|: 	<OBJ ARRAY array1> <OBJ ARRAY array2> [INT overwrite]
  OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
 			*	array => processed object array
 			*	NIL => error: uninitialized/invalid/inexistent array or nothing found.
@@ -600,7 +2494,7 @@ MergeObjectArrays local.objArray1 local.objArray2 local.overwrite:
 	
 		for (local.i = 0; local.i < group.keyArraySize; local.i++) {
 			local.key = group.keyArray[local.i];
-			if (local.objArray1[local.key].size > 0) {
+			if (local.objArray1[local.key].size > 0 && local.objArray1[local.key] != NULL) {
 				if (local.result[local.key].size <= 0 || local.overwrite) {
 					local.result[local.key] = local.objArray1[local.key];
 				}
@@ -633,21 +2527,21 @@ MergeObjectArrays local.objArray1 local.objArray2 local.overwrite:
 end local.result;
 
 /** ==========================================================================================
- AddToObjectArray Function
+ AddObject Function
  ---------------------------------------------------------------------------------------------
- DESCR|: 	Adds specified entry with specified datato specified object array (first dimension). 
-			Optionally, the function can forcefully overwrite the entry if it already existed.
- INPUT|: 	<ARRAY array> <STRING entry> <TYPE data> [INT overwrite]
+ DESCR|: 	Adds specified element with specified data to specified object array (first dimension). 
+			Optionally, the function can forcefully overwrite the element if it already existed.
+ INPUT|: 	<ARRAY array> <STRING element> <TYPE data> [INT overwrite]
  OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
 			*	array => processed object array
 			*	NIL => error: uninitialized/invalid/inexistent array or nothing found.
  =========================================================================================== */
-_AddToObjectArray local.objArray local.entry local.data local.overwrite: goto internalBN;
-AddToObjectArray local.objArray local.entry local.data local.overwrite:
+_AddObject local.objArray local.element local.data local.overwrite: goto internalBN;
+AddObject local.objArray local.element local.data local.overwrite:
 	/*Error & Exception handling*/
 	if ( !local.objArray || local.objArray.size <= 0 || !(waitthread IsObjectArray local.objArray)) {
 		if (level.DEBUG) {
-			conprintf "\n ~^~^~^~ FATAL_ERROR[lib/array.slib::AddToObjectArray]: array 'objects' <arg1> is either inexistent, uninitialized or invalid! ~^~^~^~ \n\n";
+			conprintf "\n ~^~^~^~ FATAL_ERROR[lib/array.slib::AddObject]: array 'objects' <arg1> is either inexistent, uninitialized or invalid! ~^~^~^~ \n\n";
 		}
 		end;
 	} 
@@ -655,61 +2549,61 @@ AddToObjectArray local.objArray local.entry local.data local.overwrite:
 	internalBN:
 	
 	/*Main Logic*/	
-	if (local.objArray[local.entry].size <= 0) {
-		local.objArray[local.entry] = local.data;
+	if (local.objArray[local.element].size <= 0) {
+		local.objArray[local.element] = local.data;
 
 		if (local.objArray["__info"].size <= 0) {
-			local.objArray["__info"][0] = local.entry;
+			local.objArray["__info"][0] = local.element;
 		} else {
 			// Update __info tag if necessary...
 			local.arraySize = local.objArray["__info"].size;
 			local.ok = 1;
 			for (local.i = 0; local.i < local.arraySize; local.i++) {
-				if (local.objArray["__info"][local.i] != local.entry) {
+				if (local.objArray["__info"][local.i] != local.element) {
 					continue;
 				}
 				local.ok = 0;
 			}
 			
 			if (local.ok) {
-				local.objArray["__info"][local.objArray["__info"].size] = local.entry;
+				local.objArray["__info"][local.objArray["__info"].size] = local.element;
 			}
 		}
 	} else if (local.overwrite) {
-		local.objArray[local.entry] = local.data;
+		local.objArray[local.element] = local.data;
 	} else {
 		if (level.DEBUG) {
-			conprintf ("\n ~^~^~^~ FATAL_ERROR[lib/array.slib::AddToObjectArray]: Failed to add specified entry \"" + local.entry + "\" because it was already defined in specified object array <arg1>! ~^~^~^~ \n\n");
+			conprintf ("\n ~^~^~^~ FATAL_ERROR[lib/array.slib::AddObject]: Failed to add specified element \"" + local.element + "\" because it was already defined in specified object array <arg1>! ~^~^~^~ \n\n");
 		}
 	}
 end local.objArray;
 
 /** ==========================================================================================
- RemoveFromObjectArray Function
+ RemoveObject Function
  ---------------------------------------------------------------------------------------------
- DESCR|: 	Removes specified entry from all dimensions of specified object array. Optionally, 
-			the function can remove the entry from a specified dimension only.
- INPUT|: 	<ARRAY array> <STRING entry> [INT inDimension]
+ DESCR|: 	Removes specified element from all dimensions of specified object array. Optionally, 
+			the function can remove the element from a specified dimension only.
+ INPUT|: 	<ARRAY array> <STRING element> [INT inDimension]
  OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
 			*	array => processed object array
 			*	NIL => error: uninitialized/invalid/inexistent array or nothing found.
  =========================================================================================== */
-_RemoveFromObjectArray local.objArray group.entry group.spDimension: goto internalBM;
-RemoveFromObjectArray local.objArray group.entry group.spDimension:
+_RemoveObject local.objArray group.element group.spDimension: goto internalBM;
+RemoveObject local.objArray group.element group.spDimension:
 	/*Error & Exception handling*/
 	if ( !local.objArray || local.objArray.size <= 0 || !(waitthread IsObjectArray local.objArray)) {
 		if (level.DEBUG) {
-			conprintf "\n ~^~^~^~ FATAL_ERROR[lib/array.slib::RemoveFromObjectArray]: array 'objects' <arg1> is either inexistent, uninitialized or invalid! ~^~^~^~ \n\n";
+			conprintf "\n ~^~^~^~ FATAL_ERROR[lib/array.slib::RemoveObject]: array 'objects' <arg1> is either inexistent, uninitialized or invalid! ~^~^~^~ \n\n";
 		}
 		end;
-	} if ( !group.entry || !(typeof group.entry == "const string") || !(typeof group.entry == "const string")) {
+	} if ( !group.element || (typeof group.element != "const string" && typeof group.element != "string")) {
 		if (level.DEBUG > 1) {
-			conprintf "\n ~^~^~^~ FATAL_ERROR[lib/array.slib::RemoveFromObjectArray]: entry string <arg2> is either uninitialized or invalid. ~^~^~^~ \n"
+			conprintf "\n ~^~^~^~ FATAL_ERROR[lib/array.slib::RemoveObject]: element string <arg2> is either uninitialized or invalid. ~^~^~^~ \n"
 		}
 		end;
-	} else if (group.entry == "__info") {
+	} else if (group.element == "__info") {
 		if (level.DEBUG > 1) {
-			conprintf "\n ~^~^~^~ FATAL_ERROR[lib/array.slib::RemoveFromObjectArray]: function is not allowed to remove the \"__info\" entry. ~^~^~^~ \n"
+			conprintf "\n ~^~^~^~ FATAL_ERROR[lib/array.slib::RemoveObject]: function is not allowed to remove the \"__info\" element. ~^~^~^~ \n"
 		}
 		end local.objArray;
 	}
@@ -721,11 +2615,11 @@ RemoveFromObjectArray local.objArray group.entry group.spDimension:
 		group.keyArray = local.objArray["__info"]; 
 		if !(waitthread __UpdateKeys local.objArray) {
 			if (level.DEBUG) {
-				conprintf "\n ~^~^~^~ FATAL_ERROR[lib/array.slib::RemoveFromObjectArray]: attempting to process object array, but keyArray <group.arg> is either uninitialized, invalid or inexistent! ~^~^~^~ \n\n";
+				conprintf "\n ~^~^~^~ FATAL_ERROR[lib/array.slib::RemoveObject]: attempting to process object array, but keyArray <group.arg> is either uninitialized, invalid or inexistent! ~^~^~^~ \n\n";
 			}
 		} else {
-			// Cannot pre-determine whether entry is even present in the array because the "__info" tag is too unreliable.
-			local.result = waitthread __#RemoveFromObjectArray local.objArray;
+			// Cannot pre-determine whether element is even present in the array because the "__info" tag is too unreliable.
+			local.result = waitthread __#RemoveObject local.objArray;
 			local.objArray = NIL;
 			local.result["__info"] = group.keyArray;
 		
@@ -733,13 +2627,13 @@ RemoveFromObjectArray local.objArray group.entry group.spDimension:
 				local.arraySize = local.result["__info"].size;
 				local.j = 0;
 				for (local.i = 0; local.i < local.arraySize; local.i++) {
-					if (local.result["__info"][local.i] == group.entry) {
-						// This entry is not to be included. Interestingly, this makes the following instruction
+					if (local.result["__info"][local.i] == group.element) {
+						// This element is not to be included. Interestingly, this makes the following instruction
 						// copy all entries from there till the end. Since that's, in this case, one less than 
 						// its original size, you'd expect a duplicate pair of values in the last and second-last
 						// index, right? Well since the last instruction in this loop will involve 
 						// local.result["__info"][local.arraySize + 1], which is doesn't exist so it's NIL, the
-						// last entry will be automatically wiped because of this, tidying everything up. :)
+						// last element will be automatically wiped because of this, tidying everything up. :)
 						local.j++;
 					}
 					local.result["__info"][local.i] = local.result["__info"][local.j];
@@ -748,8 +2642,8 @@ RemoveFromObjectArray local.objArray group.entry group.spDimension:
 			}
 		}
 	} else {
-		if (local.objArray[group.entry].size > 0) {
-			local.objArray[group.entry] = NIL;
+		if (local.objArray[group.element].size > 0) {
+			local.objArray[group.element] = NIL;
 		}
 		local.result = local.objArray;
 		local.objArray = NIL;
@@ -757,26 +2651,26 @@ RemoveFromObjectArray local.objArray group.entry group.spDimension:
 	
 	// Clear group vars..
 	group.dimension = NIL;
-	group.entry = NIL;
+	group.element = NIL;
 	group.spDimension = NIL;
 	group.keyArraySize = NIL
 	group.keyArray = NIL;
 end local.result;
 
-__#RemoveFromObjectArray local.array:
+__#RemoveObject local.array:
 	if (typeof local.array == "array" /*(waitthread IsObjectArray local.array)*/) {
 		group.dimension++
 
 		for (local.i = 0; local.i < group.keyArraySize; local.i++) {
 			local.key = string(group.keyArray[local.i]);
-			if (local.array[local.key].size > 0) {
+			if (local.array[local.key].size > 0 && local.array[local.key] != NULL) {
 				if (!group.spDimension || group.spDimension == group.dimension) {
-					if (local.key != group.entry) {
-						local.result[local.key] = waitthread __#RemoveFromObjectArray local.array[local.key];
+					if (local.key != group.element) {
+						local.result[local.key] = waitthread __#RemoveObject local.array[local.key];
 					}
 					continue;
 				} 
-				local.result[local.key] = waitthread __#RemoveFromObjectArray local.array[local.key];
+				local.result[local.key] = waitthread __#RemoveObject local.array[local.key];
 			}
 		}
 		group.dimension--;
@@ -786,7 +2680,7 @@ __#RemoveFromObjectArray local.array:
 end local.result;
 
 /** ==========================================================================================
- CreateObjectArrayOf Function
+ CreateObjectArray Function
  ---------------------------------------------------------------------------------------------
  DESCR|: 	Creates an object array out of a set constant strings and a set of values. Input
 			can be one array containing the strings and one containing the values. 
@@ -797,12 +2691,12 @@ end local.result;
 			*	array => processed object array
 			*	NIL => error: uninitialized/invalid/inexistent array or nothing found.
  =========================================================================================== */
-_CreateObjectArrayOf local.objects local.values: goto internalAA;
-CreateObjectArrayOf local.objects local.values:
+_CreateObjectArray local.objects local.values: goto internalAA;
+CreateObjectArray local.objects local.values:
 	/*Error & Exception handling*/
 	if ( !local.objects || local.objects.size <= 0 || !(waitthread IsUserArray local.objects)) {
 		if (level.DEBUG) {
-			conprintf "\n ~^~^~^~ FATAL_ERROR[lib/array.slib::CreateObjectArrayOf]: array 'objects' <arg1> is either inexistent, uninitialized or invalid! ~^~^~^~ \n\n";
+			conprintf "\n ~^~^~^~ FATAL_ERROR[lib/array.slib::CreateObjectArray]: array 'objects' <arg1> is either inexistent, uninitialized or invalid! ~^~^~^~ \n\n";
 		}
 		end;
 	}
@@ -820,7 +2714,7 @@ CreateObjectArrayOf local.objects local.values:
 	} else {
 		if ( !local.values || local.values.size <= 0 || !(waitthread IsUserArray local.values)) {
 			if (level.DEBUG) {
-				conprintf "\n ~^~^~^~ FATAL_ERROR[lib/array.slib::CreateObjectArrayOf]: array 'values' <arg2> is either inexistent, uninitialized or invalid! ~^~^~^~ \n\n";
+				conprintf "\n ~^~^~^~ FATAL_ERROR[lib/array.slib::CreateObjectArray]: array 'values' <arg2> is either inexistent, uninitialized or invalid! ~^~^~^~ \n\n";
 			}
 			end;
 		}
@@ -829,7 +2723,7 @@ CreateObjectArrayOf local.objects local.values:
 		local.valuesData = waitthread __ArrayStart local.values;
 		
 		for (local.i = local.objectsData[1]; local.i < local.objectsData[2]; local.i++) {
-			if ((waitthread $Str.IsString local.objects[local.i]) && local.values[local.valuesData].size > 0) {
+			if ((typeof local.objects[local.i] == "const string" || typeof local.objects[local.i] == "string") && local.values[local.valuesData].size > 0) {
 				local.result[local.objects[local.i]] = local.values[local.valuesData];
 			}
 			local.valuesData++;
@@ -844,7 +2738,7 @@ CreateObjectArrayOf local.objects local.values:
 end local.result;
 
 /** ==========================================================================================
- MergeWithObjectArray Function
+ FuseWithObjectArray Function
  ---------------------------------------------------------------------------------------------
  DESCR|: 	Adds specified object array to specified array. Overlapping may occur if specified
 			array already contains stringbox entries. Note that the .size of the new array
@@ -854,17 +2748,17 @@ end local.result;
 			*	array => processed hybrid array
 			*	NIL => error: uninitialized/invalid/inexistent array or nothing found.
  =========================================================================================== */
-_MergeWithObjectArray local.array local.objArray: goto internalAB;
-MergeWithObjectArray local.array local.objArray:
+_FuseWithObjectArray local.array local.objArray: goto internalAB;
+FuseWithObjectArray local.array local.objArray:
 	/*Error & Exception handling*/
-	if ( !local.array || local.array.size <= 0 || !(waitthread IsUserArray local.array)) {
+	if (local.array.size <= 0 || !(waitthread IsUserArray local.array)) {
 		if (level.DEBUG) {
-			conprintf "\n ~^~^~^~ FATAL_ERROR[lib/array.slib::MergeWithObjectArray]: array <arg1> is either inexistent, uninitialized or invalid! ~^~^~^~ \n\n";
+			conprintf "\n ~^~^~^~ FATAL_ERROR[lib/array.slib::FuseWithObjectArray]: array <arg1> is either inexistent, uninitialized or invalid! ~^~^~^~ \n\n";
 		}
 		end;
 	} if ( !local.objArray || local.objArray.size <= 0 || !(waitthread IsObjectArray local.objArray)) {
 		if (level.DEBUG) {
-			conprintf "\n ~^~^~^~ FATAL_ERROR[lib/array.slib::MergeWithObjectArray]: object array <arg2> is either inexistent, uninitialized or invalid! ~^~^~^~ \n\n";
+			conprintf "\n ~^~^~^~ FATAL_ERROR[lib/array.slib::FuseWithObjectArray]: object array <arg2> is either inexistent, uninitialized or invalid! ~^~^~^~ \n\n";
 		}
 		end;
 	}
@@ -894,7 +2788,7 @@ end local.result;
 _Extract local.array group.mode group.input: goto internalAC; 
 Extract local.array group.mode group.input:
 	/*Error & Exception Handling*/
-	if (!local.array || local.array.size <= 0 || !(waitthread IsArrayType local.array)) {
+	if (local.array.size <= 0 || !(waitthread IsArrayType local.array)) {
 		if (level.DEBUG) {
 			conprintf "\n ~^~^~^~ FATAL_ERROR[lib/array.slib::Extract]: array <arg1> is inexistent, uninitialized or invalid! ~^~^~^~ \n\n";
 		}
@@ -925,7 +2819,7 @@ Extract local.array group.mode group.input:
 		case "index array":
 			if (local.start == NIL) local.start = 1;
 		case "Index array":
-			if (local.start == NIL) local.start = (waitthread __AnalyzeData local.array)[1];
+			if (local.start == NIL) local.start = (waitthread __AnalyzeArray local.array)[1];
 		case "array":
 			group.result[1] = NIL;
 			waitthread __Extract local.array local.start;
@@ -965,7 +2859,7 @@ __Extract local.array local.start:
 		if (local.start == NIL) local.start = local.arrayData[1];
 		
 		for (local.i = local.start; local.i <= local.arrayData[2]; local.i++) {
-			if (local.array[local.i].size > 0) {
+			if (local.array[local.i].size > 0 && local.array[local.i] != NULL) {
 				waitthread __Extract local.array[local.i];
 			}
 		}
@@ -991,7 +2885,9 @@ __#Extract local.array:
 	if (waitthread IsUserArray local.array) {
 		for (local.i = 0; local.i < group.keyArraySize; local.i++) { 
 			local.key = (string group.keyArray[local.i]);
-			waitthread __#Extract local.array[local.key];
+			if (local.array[local.key] != NULL && local.array[local.key].size > 0) {
+				waitthread __#Extract local.array[local.key];
+			}
 		}
 	} else {
 		if (group.mode) {
@@ -1017,17 +2913,17 @@ end;
  ---------------------------------------------------------------------------------------------
  DESCR|: 	Extracts all variables from specified array and outputs and indexed array with all
 			the retrieved data. Optionally, one can extract only a specific dimension and an
-			optional entry in that dimension.
- INPUT|: 	<ARRAY array1> [INT dimension] [INT entry]
+			optional element in that dimension.
+ INPUT|: 	<ARRAY array1> [INT dimension] [INT element]
  OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
 			*	array => index array containing all specified array's data
 			*	NIL => error: uninitialized/invalid/inexistent array or nothing found.
  =========================================================================================== */
-_ExtractAll local.array local.dimension local.entry: 
-end (waitthread _ToAnyArray local.array 1 1 local.dimension local.entry);
+_ExtractAll local.array local.dimension local.element: 
+end (waitthread _ToAnyArray local.array 1 1 local.dimension local.element);
 
-ExtractAll local.array local.dimension local.entry:
-end (waitthread ToAnyArray local.array 1 1 local.dimension local.entry);
+ExtractAll local.array local.dimension local.element:
+end (waitthread ToAnyArray local.array 1 1 local.dimension local.element);
 
 /** ==========================================================================================
  Compare Function
@@ -1041,7 +2937,7 @@ end (waitthread ToAnyArray local.array 1 1 local.dimension local.entry);
 _Compare local.array local.chkArray: goto internalAD;
 Compare local.array local.chkArray:
 	/*Error & Exception Handling*/
-	if (!local.array || local.array.size <= 0 || !(waitthread IsUserArray local.array)) {
+	if (local.array.size <= 0 || !(waitthread IsUserArray local.array)) {
 		if (level.DEBUG) {
 			conprintf "\n ~^~^~^~ FATAL_ERROR[lib/array.slib::Compare]: array <arg1> is inexistent, uninitialized or invalid! ~^~^~^~ \n\n";
 		}
@@ -1149,7 +3045,7 @@ end;
 _CompareStruct local.array local.chkArray: goto internalAE;
 CompareStruct local.array local.chkArray:
 	/*Error & Exception Handling*/
-	if (!local.array || local.array.size <= 0 || !(waitthread IsUserArray local.array)) {
+	if (local.array.size <= 0 || !(waitthread IsUserArray local.array)) {
 		if (level.DEBUG) {
 			conprintf "\n ~^~^~^~ FATAL_ERROR[lib/array.slib::CompareStruct]: array <arg1> is inexistent, uninitialized or invalid! ~^~^~^~ \n\n";
 		}
@@ -1251,7 +3147,7 @@ end;
 _MakeConsistent local.array local.start: goto internalAF;
 MakeConsistent local.array local.start:
 	/*Error & Exception Handling*/
-	if ( !local.array || local.array.size <= 0 || !(waitthread IsArrayType local.array)) {
+	if (local.array.size <= 0 || !(waitthread IsArrayType local.array)) {
 		if (level.DEBUG) {
 			conprintf "\n ~^~^~^~ FATAL_ERROR[lib/array.slib::MakeConsistent]: array <arg1> is inexistent, uninitialized or invalid! ~^~^~^~ \n\n";
 		}
@@ -1302,7 +3198,7 @@ __MakeConsistent local.array:
 		
 		local.j = group.start;
 		for (local.i = local.arraySizes[1]; local.i < local.arraySizes[2]; local.i++) {
-			if (local.array[local.i] != NIL) {
+			if (local.array[local.i] != NULL && local.array[local.i].size > 0) {
 				local.result[local.j] = waitthread __MakeConsistent local.array[local.i];
 				local.j++;
 			}
@@ -1326,7 +3222,7 @@ end local.result;
 _Some local.array group.var group.type: goto internalAG;
 Some local.array group.var group.type:
 	/*Error & Exception Handling*/
-	if ( !local.array || local.array.size <= 0 || !(waitthread IsArrayType local.array)) {
+	if (local.array.size <= 0 || !(waitthread IsArrayType local.array)) {
 		if (level.DEBUG) {
 			conprintf "\n ~^~^~^~ FATAL_ERROR[lib/array.slib::Some]: array <arg1> is inexistent, uninitialized or invalid! ~^~^~^~ \n\n";
 		}
@@ -1350,38 +3246,34 @@ Some local.array group.var group.type:
 		case "string":
 		case "const string":
 			local.type = typeof group.var;
-			switch (local.type) {
-				case "char":
-					if (group.type == local.type) {
-						local.result = 1
-						break;
-					}
-					group.var = string(group.var);
-				case "string": 
-				case "const string":
-					if (group.type == local.type) {
-						local.result = 1
-						break;
-					} else if (group.var.size == 1) {
-						local.result = 0;
-						
-						for (local.i = 0; local.i < local.array.size; local.i++) {
-							if (local.array[local.i] == group.var[0]) {
-								local.result = 1;
-								break;
+			if (group.type == local.type) {
+				local.result = 1
+			} else {
+				switch (local.type) {
+					case "char":
+						group.var = string(group.var);
+					case "string": 
+					case "const string":
+						if (group.var.size == 1) {
+							local.result = 0;
+							for (local.i = 0; local.i < local.array.size; local.i++) {
+								if (local.array[local.i] == group.var[0]) {
+									local.result = 1;
+									break;
+								}
+							}
+						} else {
+							if (level.DEBUG) {
+								conprintf "\n ~^~^~^~ FATAL_ERROR[lib/array.slib::Some]: invalid element size for 'string array' var <arg2>! ~^~^~^~ \n\n";
 							}
 						}
-					} else {
+					break;
+					default:
 						if (level.DEBUG) {
-							conprintf "\n ~^~^~^~ FATAL_ERROR[lib/array.slib::Some]: invalid element size for 'string array' var <arg2>! ~^~^~^~ \n\n";
+							conprintf "\n ~^~^~^~ FATAL_ERROR[lib/array.slib::Some]: invalid element type for var <arg2> in string array <arg1>! ~^~^~^~ \n\n";
 						}
-					}
-				break;
-				default:
-					if (level.DEBUG) {
-						conprintf "\n ~^~^~^~ FATAL_ERROR[lib/array.slib::Some]: invalid element type for var <arg2> in string array <arg1>! ~^~^~^~ \n\n";
-					}
-				break;
+					break;
+				}
 			}
 		break;
 		case "vector":
@@ -1495,7 +3387,7 @@ end;
 _Every local.array group.var group.type: goto internalAH;
 Every local.array group.var group.type:
 	/*Error & Exception Handling*/
-	if ( !local.array || local.array.size <= 0 || !(waitthread IsArrayType local.array)) {
+	if (local.array.size <= 0 || !(waitthread IsArrayType local.array)) {
 		if (level.DEBUG) {
 			conprintf "\n ~^~^~^~ FATAL_ERROR[lib/array.slib::Every]: array <arg1> is inexistent, uninitialized or invalid! ~^~^~^~ \n\n";
 		}
@@ -1519,38 +3411,34 @@ Every local.array group.var group.type:
 		case "string":
 		case "const string":
 			local.type = typeof group.var;
-			switch (local.type) {
-				case "char":
-					if (group.type == local.type) {
-						local.result = 1
-						break;
-					}
-					group.var = string(group.var);
-				case "string": 
-				case "const string":
-					if (group.type == local.type) {
-						local.result = 1
-						break;
-					} else if (group.var.size == 1) {
-						local.result = 1;
-						
-						for (local.i = 0; local.i < local.array.size; local.i++) {
-							if (local.array[local.i] != group.var[0]) {
-								local.result = 0;
-								break;
+			if (group.type == local.type) {
+				local.result = 1
+			} else {
+				switch (local.type) {
+					case "char":
+						group.var = string(group.var);
+					case "string": 
+					case "const string":
+						if (group.var.size == 1) {
+							local.result = 1;
+							for (local.i = 0; local.i < local.array.size; local.i++) {
+								if (local.array[local.i] != group.var[0]) {
+									local.result = 0;
+									break;
+								}
+							}
+						} else {
+							if (level.DEBUG) {
+								conprintf "\n ~^~^~^~ FATAL_ERROR[lib/array.slib::Every]: invalid element size for 'string array' var <arg2>! ~^~^~^~ \n\n";
 							}
 						}
-					} else {
+					break;
+					default:
 						if (level.DEBUG) {
-							conprintf "\n ~^~^~^~ FATAL_ERROR[lib/array.slib::Every]: invalid element size for 'string array' var <arg2>! ~^~^~^~ \n\n";
+							conprintf "\n ~^~^~^~ FATAL_ERROR[lib/array.slib::Every]: invalid element type for var <arg2> in string array <arg1>! ~^~^~^~ \n\n";
 						}
-					}
-				break;
-				default:
-					if (level.DEBUG) {
-						conprintf "\n ~^~^~^~ FATAL_ERROR[lib/array.slib::Every]: invalid element type for var <arg2> in string array <arg1>! ~^~^~^~ \n\n";
-					}
-				break;
+					break;
+				}
 			}
 		break;
 		case "vector":
@@ -1668,7 +3556,7 @@ FindEnt local.entArray local.ent:
 			conprintf "\n ~^~^~^~ FATAL_ERROR[lib/array.slib::FindEnt]: entity array <arg1> is inexistent or uninitialized! ~^~^~^~ \n\n";
 		}
 		end;
-	} else if (waitthread $Str.IsString local.entArray) {
+	} else if (typeof local.entArray == "const string" || typeof local.entArray == "string") {
 		end (waitthread FindEnt $(local.entArray) local.ent);
 	} else if !(waitthread IsEntityArray local.entArray) {
 		if (level.DEBUG) {
@@ -1715,7 +3603,7 @@ DeleteEnts local.entArray local.ents:
 			conprintf "\n ~^~^~^~ FATAL_ERROR[lib/array.slib::DeleteEnts]: entity array <arg1> is inexistent or uninitialized! ~^~^~^~ \n\n";
 		}
 		end;
-	} else if (waitthread $Str.IsString local.entArray) {
+	} else if (typeof local.entArray == "const string" || typeof local.entArray == "string") {
 		end (waitthread DeleteEnts $(local.entArray) local.ents);
 	} else if !(waitthread IsEntityArray local.entArray) {
 		if (level.DEBUG) {
@@ -1813,12 +3701,12 @@ end (local.entArray[1].targetname);
 _Rename local.array local.tName: goto internalAL;
 Rename local.array local.tName:
 	/*Error & Exception Handling*/
-	if ( !local.array || local.array.size <= 0 || !(waitthread IsUserArray local.array)) {
+	if (local.array.size <= 0 || !(waitthread IsUserArray local.array)) {
 		if (level.DEBUG) {
 			conprintf "\n ~^~^~^~ FATAL_ERROR[lib/array.slib::Rename]: array <arg1> is inexistent or uninitialized! ~^~^~^~ \n\n";
 		}
 		end;
-	} if !(local.tName && (waitthread $Str.IsString local.tName)) {
+	} if !(local.tName && (typeof local.tName == "const string" || typeof local.tName == "string")) {
 		if (level.DEBUG) {
 			conprintf "\n ~^~^~^~ FATAL_ERROR[lib/array.slib::Rename]: target name <arg2> is inexistent! ~^~^~^~ \n\n";
 		}
@@ -1906,7 +3794,7 @@ GetTypeFreq local.array group.type group.inDimension:
 			conprintf "\n ~^~^~^~ FATAL_ERROR[lib/array.slib::GetTypeFreq]: type <arg2> is uninitialized, invalid or inexistent! ~^~^~^~ \n\n";
 		}
 		end;
-	} else if !(waitthread $Str.IsString group.type) {
+	} else if (typeof group.type != "const string" && typeof group.type != "string") {
 		group.type = typeof group.type;
 	} 
 	
@@ -1978,7 +3866,7 @@ __GetTypeFreq local.array:
 			}
 		} else {
 			for (local.i = local.arraySizes[1]; local.i < local.arraySizes[2]; local.i++) {
-				if (local.array[local.i].size > 0) {
+				if (local.array[local.i].size > 0 && local.array[local.i] != NULL) {
 					waitthread __GetTypeFreq local.array[local.i];
 				}
 			}
@@ -2002,7 +3890,9 @@ __#GetTypeFreq local.array:
 		group.dimension++;
 		for (local.i = 0; local.i < group.keyArraySize; local.i++) { 
 			local.key = (string group.keyArray[local.i]);
-			waitthread __#GetTypeFreq local.array[local.key];
+			if (local.array[local.key].size > 0 && local.array[local.key] != NULL) {
+				waitthread __#GetTypeFreq local.array[local.key];
+			}
 		}
 		group.dimension--;
 	} else {
@@ -2111,7 +4001,7 @@ __GetVarFreq local.array:
 			}
 		} else {
 			for (local.i = local.arraySizes[1]; local.i < local.arraySizes[2]; local.i++) {
-				if (local.array[local.i].size > 0) {
+				if (local.array[local.i].size > 0 && local.array[local.i] != NULL) {
 					waitthread __GetVarFreq local.array[local.i];
 				}
 			}
@@ -2128,7 +4018,9 @@ __#GetVarFreq local.array:
 		group.dimension++;
 		for (local.i = 0; local.i < group.keyArraySize; local.i++) { 
 			local.key = (string group.keyArray[local.i]);
-			waitthread __#GetVarFreq local.array[local.key];
+			if (local.array[local.key].size > 0 && local.array[local.key] != NULL) {
+				waitthread __#GetVarFreq local.array[local.key];
+			}
 		}
 		group.dimension--;
 	} else {
@@ -2157,8 +4049,8 @@ end;
 				* array =>	[1-X] =>[1] => found variable type
 									[2] => corresponding frequency in specified array.
 			* Else if output==1;
-				* array => [0] 	=> [1] -> minimum/first freqArray entry
-								   [2] -> maximum/last freqArray entry
+				* array => [0] 	=> [1] -> minimum/first freqArray element
+								   [2] -> maximum/last freqArray element
 						=> [X] 	=> [1-Y] -> X instances of following variabletypes found (freq)
 			*	NIL => error: uninitialized/invalid/inexistent array or nothing found.
  =========================================================================================== */
@@ -2216,7 +4108,7 @@ GetTypeFreqs local.array local.allDimensions local.output:
 					}
 				}
 			} else {
-				group.freqTable[0] = NIL;	//same entry for associated freq and var
+				group.freqTable[0] = NIL;	//same element for associated freq and var
 				group.typeTable[0] = NIL;
 				waitthread __GetTypeFreqs local.array local.start;
 				local.freqTable = group.freqTable;
@@ -2297,7 +4189,7 @@ __GetTypeFreqs local.array:
 		local.arraySizes = waitthread __AnalyzeArray local.array;
 		
 		for (local.i = local.arraySizes[1]; local.i < local.arraySizes[2]; local.i++) {
-			if (local.array[local.i].size > 0) {
+			if (local.array[local.i].size > 0 && local.array[local.i] != NULL) {
 				waitthread __GetTypeFreqs local.array[local.i];
 			}
 		}
@@ -2322,7 +4214,7 @@ __#GetTypeFreqs local.array local.start:
 		group.dimension++;
 		for (local.i = 0; local.i < group.keyArraySize; local.i++) { 
 			local.key = (string group.keyArray[local.i]);
-			if (local.array[local.key].size > 0) {
+			if (local.array[local.key].size > 0 && local.array[local.key] != NULL) {
 				waitthread __#GetTypeFreqs local.array[local.key];
 			}
 		}
@@ -2361,8 +4253,8 @@ end;
 				* array =>	[1-X] =>[1] => found variable
 									[2] => corresponding frequency in specified array.
 			* Else if output==1;
-				* array => [0] 	=> [1] -> minimum/first freqArray entry
-								   [2] -> maximum/last freqArray entry
+				* array => [0] 	=> [1] -> minimum/first freqArray element
+								   [2] -> maximum/last freqArray element
 						=> [X] 	=> [1-Y] -> X instances of following variables found (frequency)
 			*	NIL => error: uninitialized/invalid/inexistent array or nothing found.
  =========================================================================================== */
@@ -2419,7 +4311,7 @@ GetVarFreqs local.array local.allDimensions local.output:
 					}
 				}
 			} else {
-				// Same entry for associated freq and var.
+				// Same element for associated freq and var.
 				group.freqTable[0] = NIL;	
 				group.varTable[0] = NIL;
 				waitthread __GetVarFreqs local.array;
@@ -2497,7 +4389,7 @@ __GetVarFreqs local.array:
 		local.arraySizes = waitthread __AnalyzeArray local.array;
 
 		for (local.i = local.arraySizes[1]; local.i < local.arraySizes[2]; local.i++) {
-			if (local.array[local.i].size > 0) {
+			if (local.array[local.i].size > 0 && local.array[local.i] != NULL) {
 				waitthread __GetVarFreqs local.array[local.i];
 			}
 		}
@@ -2522,7 +4414,7 @@ __#GetVarFreqs local.array:
 		group.dimension++;
 		for (local.i = 0; local.i < group.keyArraySize; local.i++) { 
 			local.key = (string group.keyArray[local.i]);
-			if (local.array[local.key].size > 0) {
+			if (local.array[local.key].size > 0 && local.array[local.key] != NULL) {
 				waitthread __#GetVarFreqs local.array[local.key];
 			}
 		}
@@ -2648,7 +4540,7 @@ __IsConsistent local.array:
 		
 		local.numEntries = local.array.size
 		for (local.i = local.arraySizes[1]; local.i <= local.arraySizes[2]; local.i++) {
-			if (local.array[local.i] != NIL) {
+			if (local.array[local.i].size > 0 && local.array[local.i] != NULL) {
 				local.numEntries--;
 				waitthread __IsConsistent local.array[local.i];
 				continue;
@@ -3236,23 +5128,23 @@ end;
  ---------------------------------------------------------------------------------------------
  DESCR|: 	Converts specified indexedType hashArray into a one-dimension array of specified 
 			type (i.e. consistent with specified starting index). 
-			Optionally, the column or "dimensional entry" can be specified (default: 1).
+			Optionally, the column or "dimensional element" can be specified (default: 1).
  INPUT|: 	<ARRAY array> <INT start idx> [INT column]
  OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
 			*	array -> processed array
 			*	NIL => error: uninitialized/invalid/inexistent array
  =========================================================================================== */
-_HashToAnyArray local.array local.start local.entry: goto internalAX;
-HashToAnyArray local.array local.start local.entry:
+_HashToAnyArray local.array local.start local.element: goto internalAX;
+HashToAnyArray local.array local.start local.element:
 	/*Error & Exception Handling*/
 	if (local.array == NIL || local.array.size <= 0 || !(waitthread IsArrayType local.array)) {
 		if (level.DEBUG) {
-			conprintf "\n ~^~^~^~ FATAL_ERROR[lib/array.slib::HashToIdxArray]: array is uninitialized, invalid or inexistent! ~^~^~^~ \n\n";
+			conprintf "\n ~^~^~^~ FATAL_ERROR[lib/array.slib::HashToAnyArray]: array is uninitialized, invalid or inexistent! ~^~^~^~ \n\n";
 		}
 		end;
 	} if !(waitthread IsHashArray local.array) {
 		if (level.DEBUG) {
-			conprintf "\n ~^~^~^~ FATAL_ERROR[lib/array.slib::HashToIdxArray]: no conversion possible! ~^~^~^~ \n\n";
+			conprintf "\n ~^~^~^~ FATAL_ERROR[lib/array.slib::HashToAnyArray]: no conversion possible! ~^~^~^~ \n\n";
 		}
 		end;
 	} 
@@ -3260,15 +5152,15 @@ HashToAnyArray local.array local.start local.entry:
 	internalAX:
 	
 	/*Main Logic*/
-	if !(local.entry) {
-		local.entry = 1;
+	if !(local.element) {
+		local.element = 1;
 	} if (local.start == NIL) {
 		local.start = 1;
 	}
 	
 	local.arraySize = local.array.size;
 	for (local.i = 1; local.i <= local.arraySize; local.i++) {
-		local.result[local.i] = local.array[local.i][local.entry];
+		local.result[local.i] = local.array[local.i][local.element];
 	}
 end local.result;
 
@@ -3277,16 +5169,16 @@ end local.result;
  ---------------------------------------------------------------------------------------------
  DESCR|: 	Converts specified array into an array of specified type (i.e. consistent with 
 			specified starting index). 
-			Optionally a dimension and optional entry (i.e. in that dimension) can be specified
+			Optionally a dimension and optional element (i.e. in that dimension) can be specified
 			to be exclusively converted. If format mode is set, the conversion will format
 			the new array into one dimension (i.e. Column-major).
- INPUT|: 	<ARRAY array> <INT start idx> [INT format] [INT dimension] [INT entry]
+ INPUT|: 	<ARRAY array> <INT start idx> [INT format] [INT dimension] [INT element]
  OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
 			*	array -> processed array
 			*	NIL => error: uninitialized/invalid/inexistent array
  =========================================================================================== */
-_ToAnyArray local.array group.start group.format group.spDimensions group.entry: goto internalAY;
-ToAnyArray local.array group.start group.format group.spDimensions group.entry:
+_ToAnyArray local.array group.start group.format group.spDimensions group.element: goto internalAY;
+ToAnyArray local.array group.start group.format group.spDimensions group.element:
 	/*Error & Exception Handling*/
 	if (local.array == NIL || local.array.size <= 0 || !(waitthread IsArrayType local.array)) {
 		if (level.DEBUG) {
@@ -3324,17 +5216,17 @@ ToAnyArray local.array group.start group.format group.spDimensions group.entry:
 				}
 			break;
 			case "hash array": 
-				if !(group.entry) {
+				if !(group.element) {
 					if (group.spDimensions) {
-						group.entry = group.spDimensions;
+						group.element = group.spDimensions;
 					} else {
-						group.entry = 1;
+						group.element = 1;
 					}
 				}
 				local.arraySize = local.array.size;
 				local.j = group.start;
 				for (local.i = 1; local.i <= local.arraySize; local.i++) {
-					local.result[local.j] = local.array[local.i][group.entry];
+					local.result[local.j] = local.array[local.i][group.element];
 					local.j++;
 				}
 			break;
@@ -3412,7 +5304,7 @@ ToAnyArray local.array group.start group.format group.spDimensions group.entry:
 	}
 	
 	// Clear group. vars
-	group.entry = NIL;
+	group.element = NIL;
 	group.format = NIL;
 	group.spDimensions = NIL;
 	group.start = NIL;
@@ -3528,14 +5420,14 @@ end;
  HashToIdxArray Function
  ---------------------------------------------------------------------------------------------
  DESCR|: 	Converts specified indexedType hashArray into a one-dimension index-Type array. 
-			Optionally, the column or "dimensional entry" can be specified (default: 1).
+			Optionally, the column or "dimensional element" can be specified (default: 1).
  INPUT|: 	<ARRAY array> [INT column]
  OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
 			*	array -> processed array
 			*	NIL => error: uninitialized/invalid/inexistent array
  =========================================================================================== */
-_HashToIdxArray local.array local.entry: goto internalAZ;
-HashToIdxArray local.array local.entry:
+_HashToIdxArray local.array local.element: goto internalAZ;
+HashToIdxArray local.array local.element:
 	/*Error & Exception Handling*/
 	if (local.array == NIL || local.array.size <= 0 || !(waitthread IsArrayType local.array)) {
 		if (level.DEBUG) {
@@ -3552,13 +5444,13 @@ HashToIdxArray local.array local.entry:
 	internalAZ:
 	
 	/*Main Logic*/
-	if !(local.entry) {
-		local.entry = 1;
+	if !(local.element) {
+		local.element = 1;
 	}
 	
 	local.arraySize = local.array.size;
 	for (local.i = 1; local.i <= local.arraySize; local.i++) {
-		local.result[local.i] = local.array[local.i][local.entry];
+		local.result[local.i] = local.array[local.i][local.element];
 	}
 end local.result;
 
@@ -3566,32 +5458,32 @@ end local.result;
  ToIdxArray Function
  ---------------------------------------------------------------------------------------------
  DESCR|: 	Converts specified array into a indexed-Type array. Optionally a dimension and 
-			optional entry (i.e. in that dimension) can be specified to be exclusively converted.
+			optional element (i.e. in that dimension) can be specified to be exclusively converted.
 			If format mode is set, the conversion will format the new array into one dimension
 			(i.e. column-major).
- INPUT|: 	<ARRAY array> [INT format] [INT dimension] [INT entry]
+ INPUT|: 	<ARRAY array> [INT format] [INT dimension] [INT element]
  OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
 			*	array -> processed array
 			*	NIL => error: uninitialized/invalid/inexistent array
  =========================================================================================== */
-_ToIdxArray local.array group.format group.spDimensions group.entry:
-end (waitthread _ToAnyArray local.array 1 group.format group.spDimensions group.entry);
+_ToIdxArray local.array group.format group.spDimensions group.element:
+end (waitthread _ToAnyArray local.array 1 group.format group.spDimensions group.element);
  
-ToIdxArray local.array group.format group.spDimensions group.entry:
-end (waitthread ToAnyArray local.array 1 group.format group.spDimensions group.entry);
+ToIdxArray local.array group.format group.spDimensions group.element:
+end (waitthread ToAnyArray local.array 1 group.format group.spDimensions group.element);
 
 /** ==========================================================================================
  HashToNrmArray Function
  ---------------------------------------------------------------------------------------------
  DESCR|: 	Converts specified indexedType hashArray into a normalType array. Optionally,
-			the column or "dimensional entry" can be specified (default: 1).
+			the column or "dimensional element" can be specified (default: 1).
  INPUT|: 	<ARRAY array> [INT column]
  OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
 			*	array -> processed array
 			*	NIL => error: uninitialized/invalid/inexistent array
  =========================================================================================== */
-_HashToNrmArray local.array local.entry: goto internalBA;
-HashToNrmArray local.array local.entry:
+_HashToNrmArray local.array local.element: goto internalBA;
+HashToNrmArray local.array local.element:
 	/*Error & Exception Handling*/
 	if (local.array == NIL || local.array.size <= 0 || !(waitthread IsArrayType local.array)) {
 		if (level.DEBUG) {
@@ -3608,13 +5500,13 @@ HashToNrmArray local.array local.entry:
 	internalBA:
 	
 	/*Main Logic*/
-	if !(local.entry) {
-		local.entry = 1;
+	if !(local.element) {
+		local.element = 1;
 	}
 	
 	local.arraySize = local.array.size;
 	for (local.i = 1; local.i <= local.arraySize; local.i++) {
-		local.result[(local.i - 1)] = local.array[local.i][local.entry];
+		local.result[(local.i - 1)] = local.array[local.i][local.element];
 	}
 end local.result;
 
@@ -3622,19 +5514,19 @@ end local.result;
  ToNrmArray Function
  ---------------------------------------------------------------------------------------------
  DESCR|: 	Converts specified array into a normalType array. Optionally a dimension and 
-			optional entry (i.e. in that dimension) can be specified to be exclusively converted.
+			optional element (i.e. in that dimension) can be specified to be exclusively converted.
 			If format mode is set, the conversion will format the new array into one dimension
 			(i.e. column-major).
- INPUT|: 	<ARRAY array> [INT format] [INT dimension] [INT entry] 
+ INPUT|: 	<ARRAY array> [INT format] [INT dimension] [INT element] 
  OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
 			*	array -> processed array
 			*	NIL => error: uninitialized/invalid/inexistent array
  =========================================================================================== */
-_ToNrmArray local.array group.format group.spDimensions group.entry:
-end (waitthread _ToAnyArray local.array 0 group.format group.spDimensions group.entry);
+_ToNrmArray local.array group.format group.spDimensions group.element:
+end (waitthread _ToAnyArray local.array 0 group.format group.spDimensions group.element);
 
-ToNrmArray local.array group.format group.spDimensions group.entry:
-end (waitthread ToAnyArray local.array 0 group.format group.spDimensions group.entry);
+ToNrmArray local.array group.format group.spDimensions group.element:
+end (waitthread ToAnyArray local.array 0 group.format group.spDimensions group.element);
 
 /** ==========================================================================================
  IsMultiDimensional Function
@@ -3808,7 +5700,7 @@ __SeekDimensions local.array:
 		local.arraySizes = waitthread __AnalyzeArray local.array;
 		
 		for (local.i = local.arraySizes[1]; local.i < local.arraySizes[2]; local.i++) {
-			if (local.array[local.i].size > 0) {
+			if (local.array[local.i].size > 0 && local.array[local.i] != NULL) {
 				waitthread __SeekDimensions local.array[local.i];
 			}
 		}
@@ -3827,7 +5719,7 @@ __#SeekDimensions local.array:
 		group.dimension++;
 		for (local.i = 0; local.i < group.keyArraySize; local.i++) { 
 			local.key = (string group.keyArray[local.i]);
-			if (local.array[local.key].size > 0) {
+			if (local.array[local.key].size > 0 && local.array[local.key] != NULL) {
 				waitthread __#SeekDimensions local.array[local.key];
 			}
 		}
@@ -3854,7 +5746,7 @@ end;
 _Print local.array local.ignoreSysArray local.prefix: goto internalBD;
 Print local.array local.ignoreSysArray local.prefix:
 	/*Error & Exception Handling*/
-	if ( !local.array || local.array.size <= 0 || !(waitthread IsArrayType local.array)) {
+	if (local.array.size <= 0 || !(waitthread IsArrayType local.array)) {
 		if (level.DEBUG) {
 			conprintf "\n ~^~^~^~ FATAL_ERROR[lib/array.slib::Print]: array <arg1> is uninitialized, invalid or inexistent! ~^~^~^~ \n\n";
 		}
@@ -3888,7 +5780,7 @@ Print local.array local.ignoreSysArray local.prefix:
 	if !(local.prefix) {
 		local.prefix = "\tlocal.array";
 	} 
-	group.timeStamp = 0;
+	//group.timeStamp = 0;
 	//TEMP<
 	group.entries = 0; 
 	//>
@@ -3905,7 +5797,7 @@ Print local.array local.ignoreSysArray local.prefix:
 	//>
 	
 	//clear group. vars
-	group.timeStamp = NIL;
+	//group.timeStamp = NIL;
 	group.IsValidArray = NIL;
 	group.keyArray = NIL;
 	group.keyArraySize = NIL;
@@ -3916,7 +5808,7 @@ __Print local.array local.prefix:
 		local.arraySizes = waitthread __AnalyzeArray local.array;
 		
 		for (local.i = local.arraySizes[1]; local.i < local.arraySizes[2]; local.i++) { 
-			if (local.array[local.i].size > 0) {
+			if (local.array[local.i].size > 0 /*&& local.array[local.i] != NULL*/) {
 				if (local.i < 0) {
 					local.suffix = " ";
 				} else {
@@ -3926,34 +5818,39 @@ __Print local.array local.prefix:
 			}
 		}
 	} else {
-		// Flood protection
-		if (group.timeStamp > 256) {
-			waitframe;
-			group.timeStamp = 0;
-		}
-		group.timeStamp++;
 		conprintf (local.prefix + " = " + local.array + "\n");
+		
+		// Flood protection
+		//if (group.timeStamp > 256) {
+		//	waitframe;
+		//	group.timeStamp = 0;
+		//}
+		//group.timeStamp++;
+		wait 0.001;
 		//TEMP<
 		group.entries++;
 		//>
 	}
-end
+end;
 __#Print local.array local.prefix:
 	if (waitthread group.IsValidArray local.array) {
 		for (local.i = 0; local.i < group.keyArraySize; local.i++) { 
 			local.key = (string group.keyArray[local.i]);
-			if (local.array[local.key].size > 0) {
+			if (local.array[local.key].size > 0 /*&& local.array[local.key] != NULL*/) {
 				waitthread __#Print local.array[local.key] (local.prefix + ("[\"" + local.key + "\"]"));
 			}
 		}
 	} else {
-		//flood protection
-		if (group.timeStamp > 512) {
-			waitframe;
-			group.timeStamp = 0;
-		}
-		group.timeStamp++;
 		conprintf (local.prefix + " = " + local.array + "\n");
+		
+		// Flood protection
+		//if (group.timeStamp > 256) {
+		//	waitframe;
+		//	group.timeStamp = 0;
+		//}
+		//group.timeStamp++;
+		wait 0.001;
+
 		//TEMP<
 		group.entries++;
 		//>
@@ -3995,7 +5892,7 @@ end (local.vector[0]::local.vector[1]::local.vector[2]);
 _To3DVec local.array: goto internalBF;
 To3DVec local.array:
 	/*Error & Exception Handling*/
-	if (!local.array || local.array.size <= 0 || !(waitthread IsArrayType local.array)) {
+	if (local.array.size <= 0 || !(waitthread IsArrayType local.array)) {
 		if (level.DEBUG) {
 			conprintf "\n ~^~^~^~ FATAL_ERROR[lib/array.slib::To3DVec]: array <arg1> is uninitialized, invalid or inexistent! ~^~^~^~ \n\n";
 		}
@@ -4062,7 +5959,7 @@ end local.result;
 _To2DVec local.array: goto internalBG;
 To2DVec local.array:
 	/*Error & Exception Handling*/
-	if (!local.array || local.array.size <= 0 || !(waitthread IsArrayType local.array)) {
+	if (local.array.size <= 0 || !(waitthread IsArrayType local.array)) {
 		if (level.DEBUG) {
 			conprintf "\n ~^~^~^~ FATAL_ERROR[lib/array.slib::To2DVec]: array <arg1> is uninitialized, invalid or inexistent! ~^~^~^~ \n\n";
 		}
@@ -4123,7 +6020,7 @@ end local.result;
  ---------------------------------------------------------------------------------------------
  DESCR|: 	Creates array with specified length containg a specified value. It can optionally 
 			be multiple dimensions in depth and those new dimensions can optionally have a
-			length. NOTE: The aforementioned length applies to each entry of each extra 
+			length. NOTE: The aforementioned length applies to each element of each extra 
 			dimension/depth (i.e. exponentially) which can result into unintentionally
 			large arrays.
  INPUT|: 	<TYPE content> [INT start] [INT length] [INT dimensionDepth] [INT depthLength]
@@ -4583,7 +6480,7 @@ Type local.array:
 				if (waitthread IsEntityArray local.array) { 
 					local.result = "ent array";
 				} else {
-					group.arrayStart = waitthread __ArrayStart local.array local.array.size;
+					group.arrayStart = waitthread __ArrayStart local.array; //local.array.size;
 					if (group.arrayStart == 0) {
 						local.result = "normal array";
 					} else if (group.arrayStart == 1) {
@@ -4607,17 +6504,18 @@ end local.result;
  ---------------------------------------------------------------------------------------------
  DESCR|: 	Determines whether an array contains only values of specified type(s) or not.
 			Multiple types can be specified by using a constant array with ::-operators.
-			Optionally, one may specified a specific dimensions to search only.
- INPUT|: 	<ARRAY array> <STRING type> [INT dimensionToSearch]
+			Optionally, one can set ignore to 1 in order to ignore empty entries such as NIL.
+			Additionally, one may specified a specific dimension to search only.
+ INPUT|: 	<ARRAY array> <STRING type> [INT ignore] [INT dimensionToSearch]
  OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
 			*	1 => only specified type detected
 			*	0 => other types detected
 			*	NIL => error: uninitialized/invalid/inexistent array
  =========================================================================================== */
-_ConsistsOf local.array group.varType group.spDimensions: goto internalBL;
-ConsistsOf local.array group.varType group.spDimensions:
+_ConsistsOf local.array group.varType group.ignore group.spDimensions: goto internalBL;
+ConsistsOf local.array group.varType group.ignore group.spDimensions:
 	/*Error & Exception Handling*/
-	if (local.array == NIL || local.array.size <= 0 || !(waitthread IsArrayType local.array) || (waitthread IsObjectArray local.array)) {
+	if (local.array == NIL || local.array.size <= 0 || !(waitthread IsArrayType local.array) /*|| (waitthread IsObjectArray local.array)*/) {
 		if (level.DEBUG) {
 			conprintf "\n ~^~^~^~ FATAL_ERROR[lib/array.slib::ConsistsOf]: array <arg1> is uninitialized, invalid or inexistent! ~^~^~^~ \n\n";
 		}
@@ -4646,12 +6544,25 @@ ConsistsOf local.array group.varType group.spDimensions:
 	group.result = 0;
 	group.dimension = 0;
 	
-	waitthread __ConsistsOf local.array;
+	if (waitthread IsObjectArray local.array) {
+		group.keyArray = local.array["__info"]; 
+		if !(waitthread __UpdateKeys local.array) {
+			if (level.DEBUG) {
+				conprintf "\n ~^~^~^~ FATAL_ERROR[lib/array.slib::IndexOf]: attempting to process object array, but keyArray <group.arg> is either uninitialized, invalid or inexistent! ~^~^~^~ \n\n";
+			}
+		}
+		waitthread __#ConsistsOf local.array;
+	} else {
+		waitthread __ConsistsOf local.array;
+	}
 	
+	// Clear group. vars..
 	group.startThread = NIL;
 	group.spDimensions = NIL;
 	group.dimension = NIL;
 	group.varType = NIL;
+	group.ignore = NIL;
+	
 	local.result = group.result;
 	group.result = NIL;
 end local.result;
@@ -4662,12 +6573,12 @@ __ConsistsOf local.array:
 		group.dimension++;
 		local.arraySizes = waitthread __AnalyzeArray local.array;
 		
-		for (local.i = local.arraySizes[1]; local.i < local.arraySizes[2]; local.i++) { 
+		for (local.i = local.arraySizes[1]; local.i < local.arraySizes[2]; local.i++) {
 			waitthread __ConsistsOf local.array[local.i];
 		}
 		group.dimension--;
 	} else {
-		if (local.array != NIL) {
+		if (local.array != NIL && local.array != NULL) {
 			local.arraySize = group.varType.size;
 			
 			for (local.i = 1; local.i <= local.arraySize; local.i++) {
@@ -4683,7 +6594,54 @@ __ConsistsOf local.array:
 				}
 			}
 		} else {
-			group.result = 0;
+			if (group.ignore) {
+				group.result = 1;
+			} else {
+				group.result = 0;
+			}
+		}
+		
+		// Fullstop.
+		if !(group.result) {
+			//Like collapsing a house of cards, this will delete the initial thread that has triggered all other instances of this threadlabel.
+			//Since every thread is waiting for the other to end, terminating the first one will inevitably terminate the entire group of threads.
+			group.startThread end;
+		}
+	}
+end;
+__#ConsistsOf local.array:
+	if (group.spDimensions != group.dimension && (waitthread IsUserArray local.array)) {
+		if !(group.startThread) {group.startThread = local};
+		group.dimension++;
+		
+		for (local.i = 0; local.i < group.keyArraySize; local.i++) { 
+			local.key = string(group.keyArray[local.i]);
+			if (local.array[local.key].size > 0) {
+				waitthread __#ConsistsOf local.array[local.key];
+			}
+		}
+		group.dimension--;
+	} else {
+		if (local.array != NULL) {
+			local.arraySize = group.varType.size;
+			for (local.i = 1; local.i <= local.arraySize; local.i++) {
+				if (typeof local.array == group.varType[local.i]) {
+					if(group.spDimensions == group.dimension && !(waitthread IsUserArray local.array)) {
+						group.result = 1;
+					} else if (group.spDimensions < 0) {
+						group.result = 1;
+					}
+					break;
+				} else {
+					group.result = 0;
+				}
+			}
+		} else {
+			if (group.ignore) {
+				group.result = 1;
+			} else {
+				group.result = 0;
+			}
 		}
 		
 		// Fullstop.
@@ -4695,18 +6653,24 @@ __ConsistsOf local.array:
 	}
 end;
 
-__UpdateKeys local.array:
+__UpdateKeys local.array local.keyArray:
+	if (local.keyArray) {
+		println "huh?"
+		group.keyArray = local.keyArray;
+	}
+
 	if (group.keyArray) {
+
 		local.arraySizes = waitthread __AnalyzeArray group.keyArray;
 		local.keyArray[0] = NIL;
 		for (local.i = local.arraySizes[1]; local.i < local.arraySizes[2]; local.i++) {
-			// If we have an existing entry and it is a string:
-			if (group.keyArray[local.i] && waitthread $Str.IsString group.keyArray[local.i]) {
+			// If we have an existing element and it is a string:
+			if (group.keyArray[local.i] && (typeof group.keyArray[local.i] == "const string" || typeof group.keyArray[local.i] == "string")) {
 				local.key = group.keyArray[local.i];
-				
+
 				// Wildcard handling
 				if (local.key[(local.key.size - 1)] == "*") {
-					local.key = (waitthread $Str.SubString local.key 0 (local.key.size - 1));
+					local.key = (waitthread reborn/framework/lib/string.slib::_SubString local.key 0 (local.key.size - 1));
 					local.range = 10;
 					for (local.j = 0; local.j < local.range; local.j++) {
 						if (local.array[(local.key + local.j)] != NIL) {
@@ -4745,7 +6709,7 @@ end local.result;
 ///				it here to avoid redundance! :)
 /// ([1]=start)::([2]=end+1)
 __AnalyzeArray local.array:
-	// Function Type() is often called in internal thread before this function called. Since that
+	// Function Type() is often called in internal threads before this function called. Since that
 	// function already sought and found a starting index, I made it so that result will still be
 	// picked up (once, though,) by __AnalyzeArray, __ArrayStart & __ArraySize.
 	if (group.arrayStart != NIL) {
@@ -4762,11 +6726,11 @@ __AnalyzeArray local.array:
 			case "vector":
 			case "string":
 			case "const string":
-				local.result = 0::local.array.size;
+				local.result = 0::local.array.size; 		//last index = size - 1
 			break;
 			// Constant arrays (including hash arrays) always start at index 1.
 			case "const array":
-				local.result = 1::(local.array.size + 1);
+				local.result = 1::(local.array.size + 1); 	//last index = size
 			break;
 			// All other array types.
 			case "array":
@@ -4815,7 +6779,7 @@ __AnalyzeArray local.array:
 					
 						local.numEntries = NIL;
 						local.start = NIL;
-					
+
 						for (local.i = local.minRange; local.i <= local.range; local.i++) {
 							if (local.array[local.i].size <= 0) {
 								continue;
@@ -4864,7 +6828,7 @@ __ArraySize local.array local.start:
 						local.result = 1::(local.array.size + 1);
 					} 
 				} else {
-					local.range = local.array.size * 2;
+					local.range = local.array.size + int(local.array.size / 2);
 					if (local.start) {
 						local.minRange = local.start;
 					} else {
@@ -4942,7 +6906,7 @@ __ArrayStart local.array local.end:
 					if (local.end) {
 						local.range = local.end;
 					} else {
-						local.range = local.array.size * 2;
+						local.range = local.array.size + int(local.array.size / 2);
 					}
 					local.minRange = local.range * -1;
 					local.numEntries = local.array.size;
@@ -4990,32 +6954,3 @@ __ArrayStart local.array local.end:
 		}
 	}
 end local.result;
-
-/* possible functions? 26 left..
-updateLIFO -> remove last in
-addLIFO -> add entry to LIFO array
-LILO/LOLI	(LastINLastOUT/LastOUTLastIN)
-LIFO/FOLI	(LastINFirstOUT/FirstOUTLastIN)
-FILO/LOFI	(FirstINLastOUT/..)
-FIFO/FOFI	(FirstINFirstOUT)
-
-UpdateDynArray (for arrays with dynamic slots; i.e. reconcatenate & add)
-EmptyArray (makes size == 0, instead of -1)
-
-ConvToHashArray	(converts specified array to a hasharray)
-CreateHashArray (creates hash array out of given input: max 12 entries).
-
-#Add		(add specified input as entry to specified indexed or normal array; optional entry; cannot be const!) => provides same functionality as AddToObjArray.
-AddDyn		(add specified input as entry to specified dynamic array; check if not already in array; either close the gaps and add or add in a gap and then close up the remaining; cannot be const!)
-
-#OverrideByIdx			(Overrides all <{ARRAY:INT/INT} index(es)> in [INT dimension] with <VAR input>)
-#OverrideByValue 		(Overrides all entries with <VAR value> in [INT dimension] with <VAR input>)	
-
-#DeleteFromArray		(removes specified entry/slot from specified normal/indexed array; cannot be const!)
-DeleteFromDynArray  (removes specified entry/slot from specified dynamic array, immediately closes the gap)
-#DeleteArray
-
-#ToInt
-#ToStr
-#ToFloat
-*/

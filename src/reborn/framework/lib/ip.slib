@@ -1,0 +1,650 @@
+/**
+ Medal of Honor: Allied Assault v1.12 REBORN  -  Morpheus Script
+ ================================================================
+ INTERNET PROTOCOL LIBRARY; 				Script Framework BETA 
+ ================================================================
+ BY Sor
+ VERSION 1.0.44 (15/01/2013)
+ =-------------------------------------------------------------=		
+ Copyright (c) 2008-2014  Lenny Knockx
+ All rights reserved.
+ =-------------------------------------------------------------=
+ Permission to use, copy, modify, and/or distribute this software 
+ for any purpose with or without fee is hereby granted, provided 
+ that the above copyright notice and this permission notice appear
+ in all copies.
+ ---------------
+ THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL 
+ WARRANTIES WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED 
+ WARRANTIES OF MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL 
+ THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT, OR 
+ CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM 
+ LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, 
+ NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR 
+ IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+ =-------------------------------------------------------------=
+ CONTACT: 	http://www.x-null.net/forums/member.php?185-Sor
+ WEBSITE: 	http://www.x-null.net | www.mohaairborne.co.cc
+ ================================================================
+*/
+// Update when file.slib is (almost) finished and when client.slib is (almost) finished.
+// Move $IP.Print() to <IP-ent>.Print() instead? Memory? Or just delete the function?
+__init:
+	if (self && self == $IP) {
+		// Properties
+		self.DB2C_BEGIN = 16776960;
+		self.DB2C_STANDARD_LENGTH = 3;
+		self.DB2C_UNKNOWN_COUNTRY = 0; // array element index.
+		
+		// IP-to-Country information library:
+		self.info = 					$Library.infoIP;
+		// IP-to-Country database library:
+		self.bin = 						($System.filePath + "data/ip.bin");
+		
+		// Functions
+		self.Parse = 					self.fullPath::"ParseInternetProtocolAddress";
+		self.Print = 					self.fullPath::"Print";
+		self.GetCountry = 				self.fullPath::"GetCountry";
+		self.LookupCountry = 			self.fullPath::"LookupCountry";
+		self.LookupCountryCode = 		self.fullPath::"LookupCountryCode";
+		self.ToNumber = 				self.fullPath::"ToNumber";
+		self.ToIPv4Str = 				self.fullPath::"ToIPv4String";
+		self.IsValidIPv4Str = 			self.fullPath::"IsValidIPv4String";
+		self.IsPublicIPv4 = 			self.fullPath::"IsPublicIPv4";
+		
+		// There are 9 methods in this function library.
+		self.methodSize += 9;
+		
+		// There are 6 properties defined.
+		self.propertySize += 5;
+	}
+end;
+
+__info:
+	local.inf["library"] 		= "ip.slib";
+	local.inf["namespace"] 		= "IP";
+	local.inf["title"]			= "INTERNET PROTOCOL LIBRARY";
+	local.inf["version"] 		= "1.0.44";
+	local.inf["lastmodified"] 	= "15/01/2013";
+	local.inf["authors"][0] 	= "Sor";
+end local.inf;
+
+/** ==========================================================================================
+ GetCountry Function
+ ---------------------------------------------------------------------------------------------
+ DESCR|: 	Returns a string with the country name to which the player's IP address has been 
+			assigned to by IANA (the Internet Assigned Number Authority).
+ INPUT|: 	<PLAYER player>
+ OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
+			* 	1	=> Country name is to be found in <player>.userdata["Country"]
+					=> Country code is to be found in <player>.userdata["CountryCode"]
+			*	NIL => Input error or $IP class has not been initialized.
+ =========================================================================================== */
+GetCountry local.player:
+	if ($IP) {
+		// Check if player exists:
+		if ((typeof local.player) == "listener" && local.player.classname == "Player") {
+			// Check if data isn't already available:
+			if (local.player.userdata["Country"] || local.player.userdata["CountryCode"]) {
+				end;
+			} else {
+				// Obtain player IP number:
+				if ((typeof local.player.userdata["IP"]) == "listener" && local.player.userdata["IP"].objectID == "ip") {
+					local.ipNum = local.player.userdata["IP"].number;
+				} else {
+					local.ipNum = waitthread __ToNumber (getip local.player);
+				}
+				
+				// Get country id based on IP number.
+				local.id = waitthread __SeekCountry local.ipNum;
+				local.id -= $IP.DB2C_BEGIN;
+				
+				// Get country & country code by id from information library and set them as client data properties:
+				local.player.userdata["Country"] = waitthread $IP.info::("__CountryArray" + local.id);
+				local.player.userdata["CountryCode"] = waitthread $IP.info::("__CountryCodeArray" + local.id);
+				
+				local.result = 1;
+			}
+		} else {
+			if (level.DEBUG) {
+				conprintf ("\n ~^~^~^~ FATAL_ERROR[lib/ip.slib::GetCountry]: specified player <arg1> either does not exist or argument is of an invalid class or type! ~^~^~^~ \n\n");
+			}
+			local.result = 0;
+		}
+	} else {
+		if (level.DEBUG) {
+			conprintf ("\n ~^~^~^~ FATAL_ERROR[lib/ip.slib::GetCountry]: Cannot search country data for player while the $IP class has not been instantiated and initialized! ~^~^~^~ \n\n");
+		}
+		local.result = 0;
+	}
+end local.result;
+
+/** ==========================================================================================
+ LookupCountry Function
+ ---------------------------------------------------------------------------------------------
+ DESCR|: 	Returns a string with the country name to which the specified IP address has been 
+			assigned to by IANA (the Internet Assigned Number Authority).
+			This function takes either a valid IP string (with or without port) or an IP 
+			entity that has been created using $IP.Parse(), as argument.
+ INPUT|: 	<STRING/IP-ENT ip>
+ OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
+			* 	string	=> Country name
+						=> "N/A" will be returned in case of a private, reserved or unassigned 
+							public IP address.
+			*	NIL  	=> Input error or $IP class has not been initialized.
+ =========================================================================================== */
+LookupCountry local.ip:
+	if ($IP) {
+		if (local.ip) {
+			// Parse input
+			if ((typeof local.ip) == "listener" && local.ip.objectID == "ip") {
+				local.number = local.ip.number;
+			} else if ((typeof local.ip) == "const string" || (typeof local.ip) == "string") {
+				local.number = waitthread __ToNumber local.ip;
+			} 
+			
+			if !(local.number) {
+				if (level.DEBUG) {
+					conprintf ("\n ~^~^~^~ FATAL_ERROR[lib/ip.slib::LookupCountry]: specified IP string/object <arg1> is invalid! ~^~^~^~ \n\n");
+				}
+				end;
+			}
+
+			// Get country id based on IP number.
+			local.id = waitthread __SeekCountry local.number;
+
+			// Load country by id from information library:
+			local.country = waitthread $IP.info::("__CountryArray" + (local.id - $IP.DB2C_BEGIN));
+			
+			// DEPRECATED: Load country array and extract element with index 'id'.
+			//local.country = (waitthread $IP.info::__CountryArray)[(local.id - $IP.DB2C_BEGIN)];
+		} else {
+			if (level.DEBUG) {
+				conprintf ("\n ~^~^~^~ FATAL_ERROR[lib/ip.slib::LookupCountry]: specified IP string/object <arg1> is either inexistent or uninitialized! ~^~^~^~ \n\n");
+			}
+		}
+	} else {
+		if (level.DEBUG) {
+			conprintf ("\n ~^~^~^~ FATAL_ERROR[lib/ip.slib::LookupCountry]: Cannot search country data while the $IP class has not been instantiated and initialized! ~^~^~^~ \n\n");
+		}
+	}
+end local.country;
+
+/** ==========================================================================================
+ LookupCountryCode Function
+ ---------------------------------------------------------------------------------------------
+ DESCR|: 	Returns a string with the 2-letter country code of the country name to which the 
+			specified IP address has been assigned to by IANA (the Internet Assigned Number 
+			Authority).
+			This function takes either a valid IP string (with or without port) or an IP 
+			entity that has been created using $IP.Parse(), as argument.
+ INPUT|: 	<STRING/IP-ENT ip>
+ OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
+			* 	string	=> Country code
+						=> "--" will be returned in case of a private, reserved or unassigned 
+							public IP address.
+			*	NIL  	=> Input error or $IP class has not been initialized.
+ =========================================================================================== */
+LookupCountryCode local.ip:
+	if ($IP) {
+		if (local.ip) {
+			// Parse input
+			if ((typeof local.ip) == "listener" && local.ip.objectID == "ip") {
+				local.number = local.ip.number;
+			} else if ((typeof local.ip) == "const string" || (typeof local.ip) == "string") {
+				local.number = waitthread __ToNumber local.ip;
+			}
+			
+			if !(local.number) {
+				if (level.DEBUG) {
+					conprintf ("\n ~^~^~^~ FATAL_ERROR[lib/ip.slib::LookupCountry]: specified IP string/object <arg1> is invalid! ~^~^~^~ \n\n");
+				}
+				end;
+			}
+			
+			// Get country code id based on IP number.
+			local.id = waitthread __SeekCountry local.number;
+			
+			// Load country by id from information library:
+			local.countryCode = waitthread $IP.info::("__CountryCodeArray" + (local.id - $IP.DB2C_BEGIN));
+			
+			// DEPRECATED: Load country code array and extract element with index 'id'.
+			//local.countryCode = (waitthread $IP.info::__CountryCodeArray)[(local.id - $IP.DB2C_BEGIN)];
+		} else {
+			if (level.DEBUG) {
+				conprintf ("\n ~^~^~^~ FATAL_ERROR[lib/ip.slib::LookupCountryCode]: specified IP string/object <arg1> is either inexistent or uninitialized! ~^~^~^~ \n\n");
+			}
+		}
+	} else {
+		if (level.DEBUG) {
+			conprintf ("\n ~^~^~^~ FATAL_ERROR[lib/ip.slib::LookupCountryCode]: Cannot search country data while the $IP class has not been instantiated and initialized! ~^~^~^~ \n\n");
+		}
+	}
+end local.countryCode;
+
+/* Internal */
+__SeekCountry local.num:
+	/*TEMP*/
+	local.fileHandle = fopen ("main/" + $IP.bin) "rb";
+	level.totalfiles++;
+	if !(ferror local.fileHandle) {
+	/*TEMP*/
+		local.result = $IP.DB2C_UNKNOWN_COUNTRY;
+		local.x[0] = NIL;
+		local.offset = 0;
+		for (local.depth = 31; 0 <= local.depth; local.depth--) {
+			// fseek()
+			if (fseek local.fileHandle (2 * $IP.DB2C_STANDARD_LENGTH * local.offset) 0) {
+				conprintf("ERROR: fseek() failed??\n");
+				break;
+			}
+				
+			// Read the following 8 bytes from binary file.
+			for (local.i = 0; local.i < 8; local.i++) {
+				local.buf[local.i] = fgetc local.fileHandle;
+			}
+				
+			// Parse bytes.
+			for (local.i = 0; local.i < 2; local.i++) {
+				local.x[local.i] = 0;
+				for (local.j = 0; local.j < $IP.DB2C_STANDARD_LENGTH; local.j++) {
+					local.y = local.buf[((local.i * $IP.DB2C_STANDARD_LENGTH) + local.j)];
+					
+					/// Since we have no <<-operator (i.e. bitshift left), multiplying y by 2^n achieves the same.
+					local.x[local.i] += (local.y * int(pow 2 (local.j * 8)))
+				}
+			}
+				
+			/// (int (pow 2 local.depth)) does the same as (1 << local.depth)
+			if ((local.num & (int (pow 2 local.depth))) != 0) {
+				if ($IP.DB2C_BEGIN <= local.x[1]) {
+					local.result = local.x[1];
+					break;
+				}
+				local.offset = local.x[1];
+			} else {
+				if ($IP.DB2C_BEGIN <= local.x[0]) {
+					local.result = local.x[0];
+					break;
+				}
+				local.offset = local.x[0];
+			}
+		}
+	}
+	if (fclose local.fileHandle) {
+		conprintf("ERROR: cannot close file??\n");
+	}
+end local.result;
+
+/** ==========================================================================================
+ ParseInternetProtocolAddress Function
+ ---------------------------------------------------------------------------------------------
+ DESCR|: 	Parses specified IP string to IP-entity. It is a listener with all data extracted
+			from IP as properties.
+ INPUT|: 	<STRING ip>
+ OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
+			* 	entity	=> 	.string		=> original IP address (without port) as string
+							.octet[0-3] => the 4 octets (dotted-decimal notation) as integers
+							.port 		=> port as integer (default=0)
+							.number		=> integer of IP in decimal notation
+							.objectID	=> "ip" (for identification).
+			*	NIL  	=> error: uninitialized/inexistent/invalid input
+ =========================================================================================== */
+ParseInternetProtocolAddress local.ipStr:
+	if (!local.ipStr || ((typeof local.ipStr) != "const string" && (typeof local.ipStr) != "string")) {
+		if (level.DEBUG) {
+			conprintf ("\n ~^~^~^~ FATAL_ERROR[lib/ip.slib::ParseInternetProtocolAddress]: specified IP string <arg1> is either inexistent, uninitialized or invalid! ~^~^~^~ \n\n");
+		}
+		end;
+	}
+	
+	local.octet = waitthread __SplitIP local.ipStr;
+	if (local.octet.size == 4 || local.octet.size == 5) {
+		local.ok = 1;
+		local.ipStr = NIL;
+		
+		for (local.i = 0; local.i < local.octet.size; local.i++) {
+			if (waitthread reborn/framework/lib/string.slib::IsInteger local.octet[local.i]) {
+				local.octet[local.i] = int(local.octet[local.i]);
+				if (local.octet[local.i] < 0 && 256 <= local.octet[local.i]) {
+					if (local.i != 4) {
+						local.ok = 0;
+						break;
+					}
+				}
+			} else {
+				local.ok = 0;
+				break;
+			}
+		}
+		
+		if (local.ok) {
+			// Spawn IP-entity, which contains all the information and formats of the specified IP.
+			local.ip = spawn Listener; 
+			local.ip.objectID = "ip";
+			
+			// Original string representation (without port)
+			local.ip.string = (local.octet[0] + "." + local.octet[1] + "." + local.octet[2] + "." + local.octet[3]);
+			
+			// All octets in integer format
+			local.ip.octet[0] = local.octet[0];
+			local.ip.octet[1] = local.octet[1];
+			local.ip.octet[2] = local.octet[2];
+			local.ip.octet[3] = local.octet[3];
+			
+			// Port number
+			if (local.ip.octet.size < local.octet.size) {
+				local.ip.port = local.octet[4]
+			} else {
+				local.ip.port = 0;
+			}
+			
+			local.octet = NIL;
+			
+			// Generate IP number (only useful for bitwise operations):
+			local.ip.number = waitthread ToNumber local.ip;
+		}
+	}
+	if (level.DEBUG) { 
+		if !(local.ip) {
+			conprintf ("\n ~^~^~^~ FATAL_ERROR[lib/ip.slib::ParseInternetProtocolAddress]: specified IP string <arg1> is invalid! ~^~^~^~ \n\n");
+		}
+	}
+end local.ip;
+
+/** ==========================================================================================
+ Print Function
+ ---------------------------------------------------------------------------------------------
+ DESCR|: 	Prints all details extracted from specified IP-entity.
+ INPUT|: 	<IP-ENT ip>
+ OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
+			*	1	=> successful print in the console.
+			*	NIL => unsuccessful: uninitialized/inexistent/invalid input
+ =========================================================================================== */
+Print local.ip:
+	if (local.ip && (typeof local.ip) == "listener" && local.ip.objectID == "ip") {
+		conprintf ("<------------------------------------------------->\n");
+		conprintf ("IPv4: " + local.ip.string + "\n");
+		conprintf ("Number: " + local.ip.number + "\n");
+		conprintf ("Binary: ");
+		waitthread $Common.PrintBinaryString (waitthread $Common.IntToBinaryString local.ip.number) 2;
+		conprintf ("\n");
+		conprintf ("Octets: [ " + local.ip.octet[0] + ", " + local.ip.octet[1] + ", " + local.ip.octet[2] + ", " + local.ip.octet[3] + " ]\n");
+		if (local.ip.port) {
+			conprintf ("Port: " + local.ip.port + "\n");
+		}
+		conprintf ("<------------------------------------------------->\n");
+		local.result = 1;
+	} else {
+		if (level.DEBUG) {
+			conprintf ("\n ~^~^~^~ FATAL_ERROR[lib/ip.slib::Print]: specified IP-entity <arg1> is either inexistent or not an IP-entity generated by $IP.Parse()! ~^~^~^~ \n\n");
+		}
+	}
+end local.result;
+
+/** ==========================================================================================
+ ToIPv4String Function
+ ---------------------------------------------------------------------------------------------
+ DESCR|: 	Returns specified IP number/integer back to an IP address string.
+ INPUT|: 	<INT x>
+ OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
+			*	string	=> IP address
+			*	NIL 	=> error: uninitialized/inexistent/invalid input
+ =========================================================================================== */
+ToIPv4String local.int:
+	if (local.int.size > 0 && (typeof local.int) == "int") {
+		local.tmp[1] = 0;
+		// Convert integer to binary string representation.
+		local.bin = waitthread $Common.IntToBinaryString local.int;
+
+		// Convert byte per byte of the binary string to integers.
+		for (local.i = (local.bin.size - 1); 0 <= local.i; local.i--) {
+			if (local.bin[local.i] == "1") {
+				local.tmp[local.tmp.size] += int(pow 2 (7 - (local.i % 8)));
+			}
+			if !((local.i) % 8) {
+				local.tmp[(local.tmp.size + 1)] = 0;
+			}
+		}
+		
+		local.result = (local.tmp[4] + "." + local.tmp[3] + "." + local.tmp[2] + "." + local.tmp[1]);
+	}
+end local.result;
+
+/** ==========================================================================================
+ ToNumber Function
+ ---------------------------------------------------------------------------------------------
+ DESCR|: 	Converts specified IP address to decimal IP number. Because integers are signed
+			and there are 2^32 IP addresses, the integer may overflow and become negative. 
+			While this value seems useless, in binary it still represents the large, positive 
+			integer but the bits are just interpreted as signed. Therefore, all bitwise 
+			operations will still work as if it were an unsigned integer. 
+			
+			To know how much the integer has overflown, use (($Int.MAX_VALUE + int) + 1)!
+ INPUT|: 	<STRING ip>
+ OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
+			*	int	=> IP number
+			*	NIL => error: uninitialized/inexistent/invalid input
+ =========================================================================================== */
+__ToNumber local.ip: goto internal0;
+ToNumber local.ip:
+	if (local.ip) {
+		if ((typeof local.ip) == "listener" && local.ip.objectID == "ip") {
+			local.result = ((16777216 /*2^24*/ * local.ip.octet[0]) + (65536 /*2^16*/ * local.ip.octet[1]) + (256 /*2^8*/ * local.ip.octet[2]) + local.ip.octet[3]);
+		} else if ((typeof local.ip) == "const string" || (typeof local.ip) == "string") {
+		
+			internal0:
+			local.result = 0;
+			
+			// Split potential ip string
+			local.octet = waitthread __SplitIP local.ip;
+			if (local.octet.size == 4 || local.octet.size == 5) {
+				local.j = 3;
+				for (local.i = 0; local.i < 4; local.i++) {
+					// Check if each extracted octet (and potential port) is a valid representation of an integer:
+					if (waitthread reborn/framework/lib/string.slib::IsInteger local.octet[local.i]) {
+						local.octet[local.i] = int(local.octet[local.i]);
+					
+						// Check if octect is a byte (i.e. represents a value from 0 to 255);
+						if (local.octet[local.i] < 0 && 256 <= local.octet[local.i]) {
+							local.result = NIL;
+							break;
+						} else {
+							local.result += (int(pow 2 ((local.j - local.i) * 8)) * local.octet[local.i]);
+						}
+					} else {
+						local.result = NIL;
+						break;
+					}
+				}
+			} else {
+				local.result = NIL;
+			}
+		} 
+	}
+end local.result;
+
+/** ==========================================================================================
+ IsValidIPv4String Function
+ ---------------------------------------------------------------------------------------------
+ DESCR|: 	Determines whether a specified IP address string is valid in the sense that it has
+			four numeric octets in the range of [0, 255] and are seperated by three dots.
+			The result of this function should be unaffected if the specified IP address string 
+			contains a port specification (the colon notation only, though).
+ INPUT|: 	<STRING ip>
+ OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
+			*	1	=> IP address
+			*	0 	=> uninitialized/inexistent input or simply an invalid IP address.
+ =========================================================================================== */
+IsValidIPv4String local.ipStr:
+	if (local.ipStr && ((typeof local.ipStr) == "const string" || (typeof local.ipStr) == "string")) {
+		local.result = 1;
+	
+		// Split potential ip string
+		local.octet = waitthread __SplitIP local.ipStr;
+		if (local.octet.size == 4 || local.octet.size == 5) {
+			for (local.i = 0; local.i < local.octet.size; local.i++) {
+				// Check if each extracted octet (and potential port) is a valid representation of an integer:
+				if (waitthread reborn/framework/lib/string.slib::IsInteger local.octet[local.i]) {
+					local.octet[local.i] = int(local.octet[local.i]);
+					// Check if octect is a byte (i.e. represents a value from 0 to 255);
+					if (local.octet[local.i] < 0 && 256 <= local.octet[local.i]) {
+						if (local.i != 4) { // disregards potential port num
+							local.result = 0;
+							break;
+						}
+					}
+				} else {
+					local.result = 0;
+					break;
+				}
+			}
+		} else {
+			local.result = 0;
+		}
+	} else {
+		local.result = 0;
+	}
+end local.result;
+
+/** ==========================================================================================
+ IsPublicIPv4 Function
+ ---------------------------------------------------------------------------------------------
+ DESCR|: 	Determines whether a specified IP address string, which is deemed to be valid,
+			is a public IP address or not. 
+			Only public IP addresses are allowed to be used on the internet. All private, 
+			link-local and class D & E addresses are invalid by default.
+			This function takes either a valid IP string (with or without port) or an IP 
+			entity that has been created using $IP.Parse(), as argument.
+ INPUT|: 	<STRING/IP-ENT ip>
+ OUTPUT|: 	Internal errors are elucidated in the console if level.DEBUG is greater than 0;
+			*	1	=> IP address
+			*	0 	=> uninitialized/inexistent input or simply an invalid IP address.
+ =========================================================================================== */
+IsPublicIPv4 local.ip:
+	if (local.ip) {
+		if ((typeof local.ip) == "listener" && local.ip.objectID == "ip") {
+			local.result = local.ip waitthread __IsPublicIPv4;
+		} else if ((typeof local.ip) == "const string" || (typeof local.ip) == "string") {
+			local.result = 1;
+	
+			// Split potential ip string
+			local.octet = waitthread __SplitIP local.ip;
+		
+			switch (local.octet[0]) {
+				// Class A private addresses:
+				case "10":
+					local.result = 0;
+				break;
+				// Loopback/link-local addresses:
+				case "127":
+					if (local.octet[1] == "255" && local.octet[2] == "255" && local.octet[3] == "255") {
+						local.result = 0;
+					} else {
+						if (local.octet[1][(local.octet[1].size - 1)] == "0") {
+							if (local.octet[2][(local.octet[2].size - 1)] == "0") {
+								if (local.octet[3][(local.octet[3].size - 1)]  == "0" || local.octet[3][(local.octet[3].size - 1)]  == "1") {
+									local.result = 0;
+								}
+							}
+						}
+					}
+				break;
+				// APIPA
+				case "169":
+					if (local.octet[1] == "254") {
+						local.result = 0;
+					}
+				break;
+				// Class B private addresses
+				case "172":
+					local.oct2 = int(local.octet[1]);
+					if (16 <= local.oct2 && local.oct2 < 32) {
+						local.result = 0;
+					}
+				break;
+				// Class C private addresses
+				case "192":
+					if (local.octet[1] == "168") {
+						local.result = 0;
+					}
+				break;
+				//Class D & E addresses?
+				default:
+					if (224 <= int(local.octet[0])) {
+						local.result = 0;
+					}
+				break;
+			}
+		} else {
+			local.result = 0;
+		}
+	}
+end local.result;
+__IsPublicIPv4:
+	local.result = 1;
+
+	switch (self.octet[0]) {
+		// Class A private addresses:
+		case 10:
+			local.result = 0;
+		break;
+		// Loopback/link-local addresses:
+		case 127:
+			if (self.octet[1] == 255 && self.octet[2] == 255 && self.octet[3] == 255) {
+				local.result = 0;
+			} else {
+				if (self.octet[1] == 0) {
+					if (self.octet[2] == 0) {
+						if (self.octet[3] == 0 || self.octet[3] == 1) {
+							local.result = 0;
+						}
+					}
+				}
+			}
+		break;
+		// APIPA
+		case 169:
+			if (self.octet[1] == 254) {
+				local.result = 0;
+			}
+		break;
+		// Class B private addresses
+		case 172:
+			if (16 <= self.octet[1] && self.octet[1] < 32) {
+				local.result = 0;
+			}
+		break;
+		// Class C private addresses
+		case 192:
+			if (self.octet[1] == 168) {
+				local.result = 0;
+			}
+		break;
+		//Class D & E addresses?
+		default:
+			if (224 <= self.octet[0]) {
+				local.result = 0;
+			}
+		break;
+	}
+end local.result;
+
+/* Internal */
+__SplitIP local.ipStr:
+	local.strSize = local.ipStr.size;
+	local.oct = 0;
+	local.result[0] = "";
+	for (local.i = 0; local.i < local.strSize; local.i++) {
+		switch (local.ipStr[local.i]) {
+			case ".":
+			case ":":
+				local.oct++;
+				local.result[local.oct] = "";
+			break;
+			default:
+				local.result[local.oct] += local.ipStr[local.i];
+			break;
+		}
+	}
+end local.result;
